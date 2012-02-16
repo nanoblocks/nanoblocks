@@ -1,0 +1,110 @@
+/* Crazy arrowed button mode */
+
+/* TODO:
+   1. hover pointer
+   2. fix everything in Fx
+   3. adjust paddings
+   4. add more sizes
+*/
+
+.button_arrowed,
+.button_arrowed:active {
+    border-right: 0;
+    padding-right: 9px;
+    margin-right: 8px;
+    background-size: 100% 100%, 1px 100%, 0px 0px;
+    background-position: 0 0, 0 0, -1px -1px;
+    -webkit-border-radius: 3px 0 0 3px;
+       -moz-border-radius: 3px 0 0 3px;
+            border-radius: 3px 0 0 3px;
+    }
+    /* Crazy focus/active states */
+    .button_arrowed:before,
+    .button_arrowed:after {
+        left: -10px;
+        clip: rect(-99em, 99em, 99em, 10px);
+        -webkit-transform: rotate(180deg) translateX(-10px);
+           -moz-transform: rotate(180deg) translateX(-10px);
+             -o-transform: rotate(180deg) translateX(-10px);
+                transform: rotate(180deg) translateX(-10px);
+    }
+    .button_arrowed:active:before {
+        -webkit-box-shadow: inset 0 -1px 4px rgba(0,0,0,.4);
+           -moz-box-shadow: inset 0 -1px 4px rgba(0,0,0,.4);
+                box-shadow: inset 0 -1px 4px rgba(0,0,0,.4);
+        }
+    .button__arrow {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 100%;
+        width: 13px;
+        height: 13px;
+        margin: 0 0 0 -1px;
+        clip: rect(-99em, 99em, 99em, 1px);
+        }
+
+    .button__arrow:before {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: -50%;
+        width: 100%;
+        height: 100%;
+        padding: 1px 1px 0 0;
+        border-top: 1px solid rgba(192,192,192,.6);
+        border-right: 1px solid rgba(48,48,48,.5);
+        border-color: transparent;
+
+        background: -webkit-linear-gradient(-45deg,rgba(255,255,255,.9),rgba(184,184,184,.66)),
+                    -webkit-linear-gradient(-45deg,rgba(192,192,192,.6),rgba(192,192,192,.6)),
+                    -webkit-linear-gradient(-45deg,rgba(48,48,48,.5),rgba(48,48,48,.5)) 100% 0;
+        background:    -moz-linear-gradient(-45deg,rgba(255,255,255,.9),rgba(184,184,184,.66)),
+                       -moz-linear-gradient(-45deg,rgba(192,192,192,.6),rgba(192,192,192,.6)),
+                       -moz-linear-gradient(-45deg,rgba(48,48,48,.5),rgba(48,48,48,.5)) 100% 0;
+        background:      -o-linear-gradient(-45deg,rgba(255,255,255,.9),rgba(184,184,184,.66)),
+                         -o-linear-gradient(-45deg,rgba(192,192,192,.6),rgba(192,192,192,.6)),
+                         -o-linear-gradient(-45deg,rgba(48,48,48,.5),rgba(48,48,48,.5)) 100% 0;
+        background:         linear-gradient(-45deg,rgba(255,255,255,.9),rgba(184,184,184,.66)),
+                            linear-gradient(-45deg,rgba(192,192,192,.6),rgba(192,192,192,.6)),
+                            linear-gradient(-45deg,rgba(48,48,48,.5),rgba(48,48,48,.5)) 100% 0;
+
+        background-origin: padding-box, border-box, border-box;
+        background-repeat: no-repeat;
+        background-size: 100% 100%, 100% 2px, 2px 100%;
+
+        -webkit-transform: scale(0.65, 1.04) rotate(45deg);
+           -moz-transform: scale(0.65, 1.04) rotate(45deg);
+             -o-transform: scale(0.65, 1.04) rotate(45deg);
+                transform: scale(0.65, 1.04) rotate(45deg);
+        }
+        .button_arrowed:focus>.button__arrow:before {
+            -webkit-box-shadow: 0 0 2px 0 rgba(255,229,131,.6), 0 0 2px 0 rgba(255,229,131,.6);
+               -moz-box-shadow: 0 0 2px 0 rgba(255,229,131,.6), 0 0 2px 0 rgba(255,229,131,.6);
+                    box-shadow: 0 0 2px 0 rgba(255,229,131,.6), 0 0 2px 0 rgba(255,229,131,.6);
+            }
+        .button_arrowed:active>.button__arrow:before {
+            background-image: -webkit-linear-gradient(-45deg,rgba(216,216,216,.66),rgba(251,251,251,.8)),
+                              -webkit-linear-gradient(-45deg,rgba(91,91,91,.6),rgba(91,91,91,.6)),
+                              -webkit-linear-gradient(-45deg,rgba(109,109,109,.4),rgba(109,109,109,.4));
+            background-image:    -moz-linear-gradient(-45deg,rgba(216,216,216,.66),rgba(251,251,251,.8)),
+                                 -moz-linear-gradient(-45deg,rgba(91,91,91,.6),rgba(91,91,91,.6)),
+                                 -moz-linear-gradient(-45deg,rgba(109,109,109,.4),rgba(109,109,109,.4));
+            background-image:      -o-linear-gradient(-45deg,rgba(216,216,216,.66),rgba(251,251,251,.8)),
+                                   -o-linear-gradient(-45deg,rgba(91,91,91,.6),rgba(91,91,91,.6)),
+                                   -o-linear-gradient(-45deg,rgba(109,109,109,.4),rgba(109,109,109,.4));
+            background-image:         linear-gradient(-45deg,rgba(216,216,216,.66),rgba(251,251,251,.8)),
+                                      linear-gradient(-45deg,rgba(91,91,91,.6),rgba(91,91,91,.6)),
+                                      linear-gradient(-45deg,rgba(109,109,109,.4),rgba(109,109,109,.4));
+            background-position: 0 0, 0 0, 100% 0;
+            }
+        .button_arrowed:active>.button__arrow:before {
+            -webkit-box-shadow: inset 0 1px 4px rgba(0,0,0,.4);
+               -moz-box-shadow: inset 0 1px 4px rgba(0,0,0,.4);
+                    box-shadow: inset 0 1px 4px rgba(0,0,0,.4);
+            }
+        .button_arrowed:focus:active>.button__arrow:before {
+            -webkit-box-shadow: inset 1px 1px 4px rgba(0,0,0,.2), 0 0 2px 0 rgba(255,229,131,.6), 0 0 2px 0 rgba(255,229,131,.6);
+               -moz-box-shadow: inset 1px 1px 4px rgba(0,0,0,.2), 0 0 2px 0 rgba(255,229,131,.6), 0 0 2px 0 rgba(255,229,131,.6);
+                    box-shadow: inset 1px 1px 4px rgba(0,0,0,.2), 0 0 2px 0 rgba(255,229,131,.6), 0 0 2px 0 rgba(255,229,131,.6);
+            }

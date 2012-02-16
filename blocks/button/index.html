@@ -8,23 +8,77 @@
 <body>
 
     <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Просто кнопка</th>
+                <th>Просто ссылка</th>
+                <th>Кнопка-стрелка</th>
+                <th>Ссылка-стрелка</th>
+            </tr>
+        </thead>
         <tbody>
             <tr>
-                <th>Кнопка кнопкой:</th>
+                <th>Маленькая</th>
                 <td>
-                    <button type="button" class="button" tabindex="1">Готово</button>
+                    <button type="button" class="button button_size_s" tabindex="1">Найти</button>
+                </td>
+                <td>
+                    <a class="button button_size_s" href="#" tabindex="2">Найти</a>
+                </td>
+                <td>
+                    <a class="button button_size_s button_arrowed" href="#" tabindex="3">
+                        Найти
+                        <span class="button__arrow"></span>
+                    </a>
+                </td>
+                <td>
+                    <button type="button" class="button button_size_s button_arrowed" href="#" tabindex="4">
+                        Найти
+                        <span class="button__arrow"></span>
+                    </button>
                 </td>
             </tr>
             <tr>
-                <th>Кнопка инпутом:</th>
+                <th>Средняя</th>
                 <td>
-                    <input type="button" class="button" tabindex="2" value="Готово" />
+                    <button type="button" class="button">Найти</button>
+                </td>
+                <td>
+                    <a class="button" href="#">Найти</a>
+                </td>
+                <td>
+                    <a class="button button_arrowed" href="#">
+                        Найти
+                        <span class="button__arrow"></span>
+                    </a>
+                </td>
+                <td>
+                    <button type="button" class="button button_arrowed" href="#">
+                        Найти
+                        <span class="button__arrow"></span>
+                    </button>
                 </td>
             </tr>
             <tr>
-                <th>Кнопка ссылкой:</th>
+                <th>Большая</th>
                 <td>
-                    <a class="button" href="#" tabindex="3">Готово</a>
+                    <button type="button" class="button button_size_l">Найти</button>
+                </td>
+                <td>
+                    <a class="button button_size_l" href="#">Найти</a>
+                </td>
+                <td>
+                    <a class="button button_size_l button_arrowed" href="#">
+                        Найти
+                        <span class="button__arrow"></span>
+                    </a>
+                </td>
+                <td>
+                    <button type="button" class="button button_size_l button_arrowed" href="#">
+                        Найти
+                        <span class="button__arrow"></span>
+                    </button>
                 </td>
             </tr>
         </tbody>

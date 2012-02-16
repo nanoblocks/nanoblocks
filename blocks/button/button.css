@@ -2,11 +2,13 @@
 .button {
     font: 13px/1.2 "Helvetica Neue", Arial, sans-serif;
 
+    position: relative;
+
     display: inline-block;
     overflow: visible; /* IE padding fix */
     vertical-align: middle; /* Is there a better value? */
 
-    padding: 1px 8px;
+    padding: 2px 10px;
     margin: -3px 0 0;
 
     border: 1px solid;
@@ -47,6 +49,20 @@
 
     border-radius: 3px;
     }
+    /* Pseudo-elements to better state styling */
+    .button:before,
+    .button:after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        -webkit-border-radius: 2px;
+           -moz-border-radius: 2px;
+                border-radius: 2px;
+        }
+
 .button:hover {
     border-color: rgba(150,150,150,.4) transparent rgba(49,49,49,.5);
     background-image:
@@ -83,7 +99,7 @@
       linear-gradient(to bottom,rgba(150,150,150,.4),rgba(49,49,49,.5));
     }
 .button:active {
-    padding: 2px 8px 0;
+    padding: 3px 10px 1px;
 
     border-color: rgba(91,91,91,.6) transparent rgba(109,109,109,.4);
     background-image:
@@ -102,7 +118,8 @@
       linear-gradient(to bottom,rgba(216,216,216,.66),rgba(251,251,251,.8)),
       linear-gradient(to bottom,rgba(91,91,91,.6),rgba(109,109,109,.4)),
       linear-gradient(to bottom,rgba(91,91,91,.6),rgba(109,109,109,.4));
-
+    }
+.button:active:before {
     -webkit-box-shadow: inset 0 1px 4px rgba(0,0,0,.4);
        -moz-box-shadow: inset 0 1px 4px rgba(0,0,0,.4);
             box-shadow: inset 0 1px 4px rgba(0,0,0,.4);
@@ -112,19 +129,15 @@
 /* However another bug appears (persistent active) */
 input.button:active:hover,
 button.button:active:hover, x:-o-prefocus {
-    padding: 1px 9px 1px 7px;
+    padding: 2px 11px 2px 9px;
     }
 .button:focus {
     outline: none;
-
+}
+.button:focus:after {
     -webkit-box-shadow: 0 0 3px 1px rgba(255,229,131,.8);
        -moz-box-shadow: 0 0 3px 1px rgba(255,229,131,.8);
             box-shadow: 0 0 3px 1px rgba(255,229,131,.8);
-    }
-.button:focus:active {
-    -webkit-box-shadow: inset 0 1px 4px rgba(0,0,0,.4), 0 0 3px 1px rgba(255,229,131,.8);
-       -moz-box-shadow: inset 0 1px 4px rgba(0,0,0,.4), 0 0 3px 1px rgba(255,229,131,.8);
-            box-shadow: inset 0 1px 4px rgba(0,0,0,.4), 0 0 3px 1px rgba(255,229,131,.8);
     }
 
 /* Fixing mozilla's inner paddings */
