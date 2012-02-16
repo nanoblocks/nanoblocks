@@ -1,0 +1,65 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Ссылки</title>
+    <link rel="stylesheet" href="../s/all.css">
+</head>
+<body>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Просто ссылка:</th>
+                <td>
+                    <a href="http://clubs.ya.ru/ui/" class="link">блог о разработке интерфейсов</a>
+                </td>
+            </tr>
+            <tr>
+                <th>Псевдоссылка:</th>
+                <td>
+                    <a href="#hello" class="link link_wrapper link_pseudo">
+                        <span class="link__inner">#hello</span>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <th>Псевдоссылка в кавычках:</th>
+                <td>
+                    <a href="#hello" class="link link_wrapper link_pseudo">
+                        «<span class="link__inner">привет</span>»
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <th>Ссылка со стрелочкой:</th>
+                <td>
+                    <a href="http://clubs.ya.ru/ui/replies.xml?item_no=89" class="link link_wrapper">
+                        ←
+                        <span class="link__inner">назад к статье</span>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <th>Ссылка с иконкой в начале:</th>
+                <td>
+                    <a href="http://ya.ru/" class="link link_wrapper">
+                        <img class="ico" src="http://favicon.yandex.ru/favicon/ya.ru" alt="" />
+                        <span class="link__inner">Яндекс</span>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <th>Псевдоссылка с иконкой в конце:</th>
+                <td>
+                    <a href="http://mail.yandex.ru/" class="link link_wrapper link_pseudo">
+                        <span class="link__inner">удивительно, псевдоссылка почему-то ведёт на Яндекс.Почту:</span>
+                        <img class="ico" src="http://favicon.yandex.ru/favicon/mail.yandex.ru" alt="" />
+                    </a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+</html>

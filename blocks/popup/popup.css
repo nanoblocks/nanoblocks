@@ -1,0 +1,63 @@
+/* Popup */
+.popup {
+	z-index: 1073741823;
+	position: absolute;
+
+	text-align: left;
+	white-space: normal;
+
+	background: #FFF;
+
+	-webkit-box-shadow: 0 3px 7px -1px rgba(0,0,0,0.6);
+	   -moz-box-shadow: 0 3px 7px -1px rgba(0,0,0,0.6);
+	        box-shadow: 0 3px 7px -1px rgba(0,0,0,0.6);
+    }
+
+	/* Custom content goes here.
+	   If there is a need in popup-wide things, drop it. */
+	.popup__content {
+		display: block;
+
+		padding: 6px 12px;
+
+		white-space: normal; /* Doubled to fix IE bug */
+		}
+
+	/* Popup's line (like for dropdowns) */
+	.popup__line {
+		display: block;
+		padding: 3px 12px;
+		}
+
+	/* Find out if it needs to be an extra class, not multiclass one */
+	/* Also, all the color/decoration things could go somewhere else? */
+	.popup__line.link {
+		white-space: nowrap; /* Inline-only, can be  */
+
+		line-height: 1.5em;
+		}
+
+	/* Blocky hover dropdown style */
+	.popup_theme_blocky .popup__line.link {
+		text-decoration: none;
+
+		color: #000;
+		}
+	.popup_theme_blocky .popup__line.link:hover {
+		background-color: #85CDFF;
+		}
+
+	/* Popup's separator */
+	.popup__hr {
+		margin: 3px 0;
+		height: 1px;
+		background: #DDD;
+		overflow: hidden;
+		}
+
+/* Popup modes */
+
+/* Dropdowny popups */
+.popup_dropdown {
+	padding: 3px 0;
+	}
