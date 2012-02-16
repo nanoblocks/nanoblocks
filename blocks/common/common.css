@@ -6,3 +6,8 @@ BODY {
 IMG {
     border: 0;
     }
+
+._hidden {
+    display: none;
+    }
+
