@@ -3,10 +3,10 @@
     cursor: pointer;
 
     color: #1A3DC1;
-	}
+    }
 .link:hover {
     color: #F00;
-	}
+    }
 
 /* Awfully useful wrapper link (also, all pseudo-links are made as wrappers) */
 .link_wrapper,

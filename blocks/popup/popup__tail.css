@@ -1,73 +1,73 @@
 /* Popup's tail */
 .popup__tail {
-	position: absolute;
+    position: absolute;
 
-	font-size: 11px;
+    font-size: 11px;
 
-	width: 1em;
-	height: 1em;
-	margin: -1em;
-	}
+    width: 1em;
+    height: 1em;
+    margin: -1em;
+    }
 .popup__tail_on_top {
-	top: 0;
-	left: 50%;
-	margin-left: -.5em;
-	clip: rect(-99em, 99em, auto, -99em)
-	}
+    top: 0;
+    left: 50%;
+    margin-left: -.5em;
+    clip: rect(-99em, 99em, auto, -99em)
+    }
 .popup__tail_on_bottom {
-	bottom: 0;
-	left: 50%;
-	margin-left: -.5em;
-	clip: rect(0, 99em, 99em, -99em)
-	}
+    bottom: 0;
+    left: 50%;
+    margin-left: -.5em;
+    clip: rect(0, 99em, 99em, -99em)
+    }
 .popup__tail_on_right {
-	top: 50%;
-	right: 0;
-	margin-top: -.5em;
-	clip: rect(-99em, 99em, 99em, 0)
-	}
+    top: 50%;
+    right: 0;
+    margin-top: -.5em;
+    clip: rect(-99em, 99em, 99em, 0)
+    }
 .popup__tail_on_left {
-	top: 50%;
-	left: 0;
-	margin-top: -.5em;
-	clip: rect(-99em, auto, 99em, -99em)
-	}
-	.popup__tail:before {
-		content: "";
+    top: 50%;
+    left: 0;
+    margin-top: -.5em;
+    clip: rect(-99em, auto, 99em, -99em)
+    }
+    .popup__tail:before {
+        content: "";
 
-		position: absolute;
-		top: 0;
-		left: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
 
-		width: 100%;
-		height: 100%;
+        width: 100%;
+        height: 100%;
 
-		background: #FFF;
+        background: #FFF;
 
-		-webkit-box-shadow: .2em .2em .8em -.2em #000;
-		   -moz-box-shadow: .2em .2em .8em -.2em #000;
-		        box-shadow: .2em .2em .8em -.2em #000;
-		-webkit-transform: scale(.65,1) rotate(45deg);
-		   -moz-transform: scale(.65,1) rotate(45deg);
-		     -o-transform: scale(.65,1) rotate(45deg);
-		        transform: scale(.65,1) rotate(45deg);
-		}
-	.popup__tail_on_right:before,
-	.popup__tail_on_left:before {
-		-webkit-transform: scale(1,.65) rotate(45deg);
-		   -moz-transform: scale(1,.65) rotate(45deg);
-		     -o-transform: scale(1,.65) rotate(45deg);
-		        transform: scale(1,.65) rotate(45deg);
-		}
-	.popup__tail_on_top:before {
-		top: 50%;
-		}
-	.popup__tail_on_bottom:before {
-		top: -50%;
-		}
-	.popup__tail_on_left:before {
-		left: 50%;
-		}
-	.popup__tail_on_right:before {
-		left: -50%;
-		}
+        -webkit-box-shadow: .2em .2em .8em -.2em #000;
+           -moz-box-shadow: .2em .2em .8em -.2em #000;
+                box-shadow: .2em .2em .8em -.2em #000;
+        -webkit-transform: scale(.65,1) rotate(45deg);
+           -moz-transform: scale(.65,1) rotate(45deg);
+             -o-transform: scale(.65,1) rotate(45deg);
+                transform: scale(.65,1) rotate(45deg);
+        }
+    .popup__tail_on_right:before,
+    .popup__tail_on_left:before {
+        -webkit-transform: scale(1,.65) rotate(45deg);
+           -moz-transform: scale(1,.65) rotate(45deg);
+             -o-transform: scale(1,.65) rotate(45deg);
+                transform: scale(1,.65) rotate(45deg);
+        }
+    .popup__tail_on_top:before {
+        top: 50%;
+        }
+    .popup__tail_on_bottom:before {
+        top: -50%;
+        }
+    .popup__tail_on_left:before {
+        left: 50%;
+        }
+    .popup__tail_on_right:before {
+        left: -50%;
+        }
