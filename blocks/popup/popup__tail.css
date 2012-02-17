@@ -7,6 +7,7 @@
     width: 1em;
     height: 1em;
     margin: -1em;
+    clip: rect(0,0,0,0); /* Hide until mode set */
     }
 .popup_to_bottom>.popup__tail {
     top: 0;
