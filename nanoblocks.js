@@ -92,6 +92,8 @@ nb.Events.on = function(name, handler) {
     var handlers = this._getEventHandlers(name);
 
     handlers.push(handler);
+
+    return handler;
 };
 
 //  Отписываем обработчик handler от события name.
@@ -233,6 +235,9 @@ nb.init = function(where) {
     }
 };
 
+nb.find = function(id) {
+    return nb.block( document.getElementById(id) );
+};
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
@@ -282,9 +287,16 @@ nb.Block.prototype._bindCustomEvents = function() {
     }
 };
 
-//  Метод возвращает значение data-атрибута блока.
-nb.Block.prototype.data = function(key) {
-    return this.node.getAttribute('data-' + key);
+//  Метод возвращает или устанавливает значение data-атрибута блока.
+//  Блок имеет доступ (через этот метод) только к data-атрибутам с префиксом `nb-`.
+//  Как следствие, атрибут `data-nb` недоступен -- он определяет тип блока
+//  и менять его не рекомендуется в любом случае.
+nb.Block.prototype.data = function(key, value) {
+    if (value !== undefined) {
+        this.node.setAttribute('data-nb-' + key, value);
+    } else {
+        return this.node.getAttribute('data-nb-' + key);
+    }
 };
 
 //  Создаем методы блоков для обработки событий click, ...
@@ -312,7 +324,10 @@ nb.Block._domEvents.forEach(function(event) {
                         handler = this[handler];
                     }
 
-                    if ( handler.call(this, e, node) === false ) {
+                    //  Если событие с селектором, то передаем в обработчик ту ноду,
+                    //  которая на самом деле матчится на селектор.
+                    //  В противном случае, передаем ноду всего блока.
+                    if ( handler.call(this, e, (selector) ? node : blockNode) === false ) {
                         r = false;
                     }
                 }

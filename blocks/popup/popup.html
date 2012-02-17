@@ -1,0 +1,55 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Попапы и дропдауны</title>
+    <link rel="stylesheet" href="../s/all.css">
+    <script type="text/javascript" src="http://yandex.st/jquery/1.7.1/jquery.js"></script>
+    <script type="text/javascript" src="../../nanoblocks.js"></script>
+    <script type="text/javascript" src="popup.js"></script>
+</head>
+<body>
+
+    <div class="popup popup_dropdown _hidden" data-nb="popup" id="popup-1">
+        <div class="popup__tail"></div>
+        <a href="#" class="popup__line link">Попап #1</a>
+        <a href="#" class="popup__line link">Какое-то меню</a>
+        <a href="#" class="popup__line link">Ололололо</a>
+        <div class="popup__hr"></div>
+        <a href="#" class="popup__line link">И ещё пункт</a>
+        <a class="popup__line link link_pseudo"><span class="link__inner">Закрыть</span></a>
+    </div>
+
+    <div class="popup popup_dropdown _hidden" data-nb="popup" id="popup-2">
+        <div class="popup__tail"></div>
+        <a href="#" class="popup__line link">Попап #2</a>
+        <a href="#" class="popup__line link">Какое-то меню</a>
+        <a href="#" class="popup__line link">Ололололо</a>
+        <div class="popup__hr"></div>
+        <a href="#" class="popup__line link">И ещё пункт</a>
+        <a class="popup__line link link_pseudo"><span class="link__inner">Закрыть</span></a>
+    </div>
+
+    <p style="margin-top: 150px; margin-bottom: 500px">
+        Поиск Почта Фотки Что-то
+        <a href="#hello" class="link link_wrapper link_pseudo" data-nb="popup-toggler" data-nb-popup-id="popup-1">
+            <span class="link__inner">ещё</span>
+        </a>
+        и Карты Видео Директ Музыка и
+        <a href="#hello" class="link link_wrapper link_pseudo" data-nb="popup-toggler" data-nb-popup-id="popup-1" data-nb-popup-dir="left">
+            <span class="link__inner">ещё</span>
+        </a>
+        и Поиск Почта Фотки Что-то
+        <a href="#hello" class="link link_wrapper link_pseudo" data-nb="popup-toggler" data-nb-popup-id="popup-2" data-nb-popup-dir="right">
+            <span class="link__inner">ещё</span>
+        </a>
+        и Карты Видео Директ Музыка и
+        <a href="#hello" class="link link_wrapper link_pseudo" data-nb="popup-toggler" data-nb-popup-id="popup-2" data-nb-popup-dir="top">
+            <span class="link__inner">ещё</span>
+        </a>
+        и еще одна <a href="#" id="link-1">ссылка</a>
+    </p>
+
+</body>
+</html>
+
