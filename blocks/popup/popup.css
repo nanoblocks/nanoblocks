@@ -32,6 +32,8 @@
     /* Find out if it needs to be an extra class, not multiclass one */
     /* Also, all the color/decoration things could go somewhere else? */
     .popup__line.link {
+        display: block;
+
         white-space: nowrap; /* Inline-only, can be  */
 
         line-height: 1.5em;
