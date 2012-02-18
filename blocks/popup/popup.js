@@ -25,17 +25,17 @@ popup.open = function(where, dir) {
         }
     } else {
         nb.trigger('popup-close');
+
         this._move(where, dir);
         this._bindClose();
-        $(this.node).removeClass('_hidden');
+        this.show();
     }
 };
 
 popup._close = function() {
-    this._unbindClose();
     this.where = null;
-
-    $(this.node).addClass('_hidden');
+    this._unbindClose();
+    this.hide();
 };
 
 popup._move = function(where, dir) {
@@ -45,8 +45,11 @@ popup._move = function(where, dir) {
     var $where = $(where);
 
     dir = dir || 'bottom';
-    // $popup.find('.popup__tail').remove();
-    // $popup.prepend( $('<div class="popup__tail popup__tail_on_' + dir + '"></div>') );
+
+    var className = this.node.className;
+    className = className.replace(/\b\s*popup_to_(?:top|left|right|bottom)\b/, '').trim();
+    className += ' popup_to_' + dir;
+    this.node.className = className;
 
     dir = ({
         'top': [ 0, -1 ],

@@ -377,6 +377,14 @@ nb.Block._prepareEvents = function(events) {
     };
 };
 
+nb.Block.prototype.show = function() {
+    $(this.node).removeClass('_hidden');
+};
+
+nb.Block.prototype.hide = function() {
+    $(this.node).addClass('_hidden');
+};
+
 //  Добавляем интерфейс событий ко всем экземплярам блоков.
 nb.extend(nb.Block.prototype, nb.Events);
 
