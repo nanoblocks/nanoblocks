@@ -236,7 +236,10 @@ nb.init = function(where) {
 };
 
 nb.find = function(id) {
-    return nb.block( document.getElementById(id) );
+    var node = document.getElementById(id);
+    if (node) {
+        return nb.block(node);
+    }
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
