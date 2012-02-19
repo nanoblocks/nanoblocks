@@ -5,7 +5,9 @@ var popup = {};
 // ----------------------------------------------------------------------------------------------------------------- //
 
 popup.events = {
-    'init': 'oninit'
+    'init': 'oninit',
+    'open': 'onopen',
+    'close': 'onclose'
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -18,12 +20,15 @@ popup.oninit = function() {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-popup.open = function(where, dir) {
+popup.onopen = function(e, params) {
+    var where = params.where;
+    var dir = params.dir || 'bottom';
+
     if (this.where) {
         //  Попап уже открыт
         if (where === this.where) {
             //  На той же ноде. Значит закрываем его.
-            this._close();
+            this.trigger('close');
         } else {
             //  На другой ноде. Передвигаем его в нужное место.
             this._move(where, dir);
@@ -43,7 +48,7 @@ popup.open = function(where, dir) {
     }
 };
 
-popup._close = function() {
+popup.onclose = function() {
     //  Снимаем все события, которые повесили в open.
     this._unbindClose();
     //  Снимаем флаг о том, что попап открыт.
@@ -165,7 +170,7 @@ popup._bindClose = function() {
 
     this._onkeypress = function(e) {
         if (e.keyCode === 27) {
-            that._close();
+            that.trigger('close');
         }
     };
     $(document).on('keydown', this._onkeypress);
@@ -173,13 +178,13 @@ popup._bindClose = function() {
     this._onclick = function(e) {
         //  Проверяем, что клик случился не внутри попапа и не на ноде, на которой попап открыт (если открыт).
         if ( !$.contains(that.node, e.target) && !(that.where && $.contains(that.where, e.target)) ) {
-            that._close();
+            that.trigger('close');
         }
     };
     $(document).on('click', this._onclick);
 
     this._onpopupclose = nb.on('popup-close', function() {
-        that._close();
+        that.trigger('close');
     });
 };
 
@@ -210,9 +215,14 @@ nb.define('popup-toggler', {
             var popup = nb.find( this.data('popup-id') );
 
             //  Открываем его на текущей ноде и с нужным направлением.
-            popup.open( this.node, this.data('popup-dir') );
+            if (popup) {
+                popup.trigger('open', {
+                    where: this.node,
+                    dir: this.data('popup-dir')
+                });
 
-            return false;
+                return false;
+            }
         }
     }
 
