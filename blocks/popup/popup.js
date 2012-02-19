@@ -38,42 +38,99 @@ popup._close = function() {
     this.hide();
 };
 
+// ----------------------------------------------------------------------------------------------------------------- //
+
+var dirs = {
+    'top': [ 0, -1 ],
+    'left': [ -1, 0 ],
+    'bottom': [ 0, 1 ],
+    'right': [ 1, 0 ]
+};
+
 popup._move = function(where, dir) {
-    this.where = where;
-
-    var $popup = $(this.node);
-    var $where = $(where);
-
+    //  Дефолтное направление -- вниз.
     dir = dir || 'bottom';
 
+    //  Запоминаем, на какой ноде мы открываем попап.
+    this.where = where;
+
+    //  Выставляем нужный модификатор для "хвостика" попапа.
+    //  Но сперва удаляем старый модификатор, если он там был.
     var className = this.node.className;
     className = className.replace(/\b\s*popup_to_(?:top|left|right|bottom)\b/, '').trim();
     className += ' popup_to_' + dir;
     this.node.className = className;
 
-    dir = ({
-        'top': [ 0, -1 ],
-        'left': [ -1, 0 ],
-        'bottom': [ 0, 1 ],
-        'right': [ 1, 0 ]
-    })[dir];
+    //  Позиционируем попап.
 
-    var pw = $popup.width();
-    var ph = $popup.height();
-    var ww = $where.width();
-    var wh = $where.height();
+    //  Картинка. Попап (popup) открывается вниз под нодой where.
+    //
+    //      A-------- where
+    //      |   B   |
+    //      ---------
+    //          ^
+    //  D---------------- popup
+    //  |               |
+    //  |               |
+    //  |       C       |
+    //  |               |
+    //  |               |
+    //  -----------------
+    //
+    //  Нам нужно получить координаты левого верхнего угла попапа. Т.е. точку D.
 
-    dir = [
-        dir[0] * (ww + pw + 24) / 2,
-        dir[1] * (wh + ph + 20) / 2
-    ];
+    var $where = $(where);
+    var $popup = $(this.node);
 
-    var pos = $where.position();
+    //  Начинаем мы из левого верхнего угла where -- ноды, на которой мы открываем попап (место клика обычно).
+    var A = getOrig($where);
 
+    //  Вектора AB и DC.
+    var AB = getDiag($where);
+    var DC = getDiag($popup);
+
+    //  Вектор BC -- это вектор-смещение от центра where до центра popup.
+    //  Направление его берется из объекта dirs, а длина --
+    //  это сумма полувысот where и popup (либо полуширин, если открываем вбок).
+    //  Вектор [ 12, 10 ] -- это зазор для "хвостика". По высоте он чуть меньше, чем по ширине.
+    //  FIXME: когда открываем попап вверх, нужно его смещать чуть больше, чем когда вниз.
+    var BC = mul( add( add(AB, DC), [ 12, 10 ] ), dirs[dir] );
+
+    //  Вектор CD = -DC.
+    var CD = mul( DC, [ -1, -1 ] );
+
+    // D := A + AB + BC + CD.
+    var D = add( add( add(A, AB), BC), CD );
+
+    //  Устанавливаем нужные координаты.
     $popup.css({
-        left: dir[0] - pw / 2 + pos.left + ww / 2,
-        top: dir[1] - ph / 2 + pos.top + wh / 2
+        left: D[0],
+        top: D[1]
     });
+
+    //  Служебные функции для работы с векторами.
+
+    //  Возвращает вектор с левым верхним углом прямоугольника.
+    function getOrig($o) {
+        var pos = $o.position();
+        return [ pos.left, pos.top ];
+    }
+
+    //  Возвращает вектор от левого верхнего угла до центра прямоугольника.
+    function getDiag($o) {
+        return [ $o.width() / 2, $o.height() /2 ];
+    }
+
+    //  Складывает два вектора.
+    function add(a, b) {
+        return [ a[0] + b[0], a[1] + b[1] ];
+    }
+
+    //  "Умножает" два вектора.
+    function mul(a, b) {
+        return [ a[0] * b[0], a[1] * b[1] ];
+    }
+
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -127,8 +184,7 @@ nb.define('popup-toggler', {
 
     events: {
         'click': function() {
-            var popup_id = this.data('popup-id');
-            var popup = nb.block( document.getElementById(popup_id) );
+            var popup = nb.find( this.data('popup-id') );
 
             var that = this;
             setTimeout(function() {
