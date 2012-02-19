@@ -11,6 +11,8 @@ popup.events = {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 popup.oninit = function() {
+    //  Переносим ноду попапа в самый конец документа,
+    //  чтобы избежать разных проблем с css.
     $('body').append( $(this.node) );
 };
 
@@ -18,28 +20,41 @@ popup.oninit = function() {
 
 popup.open = function(where, dir) {
     if (this.where) {
+        //  Попап уже открыт
         if (where === this.where) {
+            //  На той же ноде. Значит закрываем его.
             this._close();
         } else {
+            //  На другой ноде. Передвигаем его в нужное место.
             this._move(where, dir);
         }
     } else {
+        //  Попап закрыт. Будем открывать.
+
+        //  На всякий случай даем сигнал, что нужно закрыть все открытые попапы.
         nb.trigger('popup-close');
 
+        //  Передвигаем попап.
         this._move(where, dir);
+        //  Вешаем события, чтобы попап закрывался по нажатие ESC и клику вне попапа.
         this._bindClose();
+        //  Показываем.
         this.show();
     }
 };
 
 popup._close = function() {
-    this.where = null;
+    //  Снимаем все события, которые повесили в open.
     this._unbindClose();
+    //  Снимаем флаг о том, что попап открыт.
+    this.where = null;
+    //  Прячем.
     this.hide();
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
+//  В какую сторону смещать попап для каждого из направлений.
 var dirs = {
     'top': [ 0, -1 ],
     'left': [ -1, 0 ],
@@ -135,6 +150,16 @@ popup._move = function(where, dir) {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
+//  Вешаем события перед открытием попапа, чтобы он закрывался при:
+//
+//    * Нажатии ESC;
+//    * Клике в любое место вне попапа;
+//    * При получении глобального события `popup-close`.
+//
+//  В случае необходимости, можно закрыть все открытые попапы вот так:
+//
+//      nb.trigger('popup-close');
+//
 popup._bindClose = function() {
     var that = this;
 
@@ -143,10 +168,11 @@ popup._bindClose = function() {
             that._close();
         }
     };
-    $(document).on('keypress', this._onkeypress);
+    $(document).on('keydown', this._onkeypress);
 
     this._onclick = function(e) {
-        if ( !$.contains(that.node, e.target) && !$.contains(that.where, e.target) ) {
+        //  Проверяем, что клик случился не внутри попапа и не на ноде, на которой попап открыт (если открыт).
+        if ( !$.contains(that.node, e.target) && !(that.where && $.contains(that.where, e.target)) ) {
             that._close();
         }
     };
@@ -157,19 +183,14 @@ popup._bindClose = function() {
     });
 };
 
+//  Снимаем все события, повешенные в `_bindClose`.
 popup._unbindClose = function() {
-    if (this._onkeypress) {
+    if (this.where) {
         $(document).off('keypress', this._onkeypress);
-    }
-    if (this._onclick) {
         $(document).off('click', this._onclick);
-    }
-    if (this._onpopupclose) {
         nb.off('popup-close', this._onpopupclose);
     }
-    this._onkeypress = null;
-    this._onclick = null;
-    this._onpopupclose = null;
+    this._onkeypress = this._onclick = this._onpopupclose = null;
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -184,12 +205,12 @@ nb.define('popup-toggler', {
 
     events: {
         'click': function() {
+            //  Находим соответствующий попап.
+            //  Соответствие задается атрибутом `popup-id`.
             var popup = nb.find( this.data('popup-id') );
 
-            var that = this;
-            setTimeout(function() {
-                popup.open( that.node, that.data('popup-dir') );
-            }, 0);
+            //  Открываем его на текущей ноде и с нужным направлением.
+            popup.open( this.node, this.data('popup-dir') );
 
             return false;
         }
