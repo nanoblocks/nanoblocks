@@ -258,6 +258,12 @@ nb.find = function(id) {
 //  nb.Block
 //  --------
 
+//  Публичные методы у `nb.Block` следующие:
+//
+//    * `on`, 'off`, `trigger` -- миксин от `nb.Events`;
+//    * `data` -- получает/меняет `data-nb`-атрибуты блока.
+//    * `show`, `hide` -- показывает/прячет блок.
+
 nb.Block = function() {};
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -388,10 +394,12 @@ nb.Block.__B_prepareEvents = function(events) {
     };
 };
 
+//  Показываем блок.
 nb.Block.prototype.show = function() {
     $(this.node).removeClass('_hidden');
 };
 
+//  Прячем блок.
 nb.Block.prototype.hide = function() {
     $(this.node).addClass('_hidden');
 };
