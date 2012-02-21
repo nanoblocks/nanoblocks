@@ -394,6 +394,8 @@ nb.Block.__B_prepareEvents = function(events) {
     };
 };
 
+// ----------------------------------------------------------------------------------------------------------------- //
+
 //  Показываем блок.
 nb.Block.prototype.show = function() {
     $(this.node).removeClass('_hidden');
@@ -403,6 +405,42 @@ nb.Block.prototype.show = function() {
 nb.Block.prototype.hide = function() {
     $(this.node).addClass('_hidden');
 };
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+// FIXME: Сделать отдельные методы, работающие с нодами, а не с блоками.
+
+//  Получить модификатор.
+nb.Block.prototype.getMod = function(name) {
+    return this.setMod(name);
+};
+
+//  Удалить модификатор.
+nb.Block.prototype.delMod = function(name) {
+    this.setMod(name, null);
+};
+
+//  Установить модификатор.
+nb.Block.prototype.setMod = function(name, value) {
+    var rx = new RegExp('(?:^|\\s+)' + name + '_([\\w-]+)'); // FIXME: Кэшировать regexp?
+
+    var className = this.node.className;
+    if (value === undefined) {
+        // getMod
+        var r = rx.exec(className);
+        return (r) ? r[1] : '';
+    } else {
+        // delMod
+        className = className.replace(rx, '').trim();
+        if (value !== null) {
+            // setMod
+            className += ' ' + name + '_' + value;
+        }
+        this.node.className = className;
+    }
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
 
 //  Добавляем интерфейс событий ко всем экземплярам блоков.
 nb.extend(nb.Block.prototype, nb.Events);

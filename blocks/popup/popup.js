@@ -75,11 +75,7 @@ popup._move = function(where, dir) {
     this.where = where;
 
     //  Выставляем нужный модификатор для "хвостика" попапа.
-    //  Но сперва удаляем старый модификатор, если он там был.
-    var className = this.node.className;
-    className = className.replace(/\b\s*popup_to_(?:top|left|right|bottom)\b/, '').trim();
-    className += ' popup_to_' + dir;
-    this.node.className = className;
+    this.setMod('popup_to', dir);
 
     //  Позиционируем попап.
 
