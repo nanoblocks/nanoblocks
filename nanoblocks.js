@@ -384,7 +384,7 @@ nb.Block.__B_prepareEvents = function(events, Class) {
     //  то будет добавлен всего один обработчик `click`.
     //  Если у блока вообще нет ничего про `click`, то `click` не будет добавлен вовсе.
     for (var event in domEvents) {
-        Class.prototype[event] = nb.Block.__B_eventHandlers[event];
+        Class.prototype['__B_on' + event] = nb.Block.__B_eventHandlers[event];
     }
 };
 
@@ -460,10 +460,13 @@ $(function() {
             //  Отсутствие parentNode означает, что node === document.
             while (( parent = node.parentNode )) {
                 block = nb.block(node);
-                if ( block && block[event] ) {
-                    var r = block[event](e);
-                    //  Если обработчик вернул false, то выше не баблимся.
-                    if (r === false) { return r; }
+                if (block) {
+                    var method = '__B_on' + event;
+                    if  ( block[method] ) {
+                        var r = block[method](e);
+                        //  Если обработчик вернул false, то выше не баблимся.
+                        if (r === false) { return r; }
+                    }
                 }
                 node = parent;
             }
