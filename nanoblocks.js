@@ -287,17 +287,14 @@ nb.Block.prototype.__B_init = function(node) {
 
 //  Вешаем кастомные (не DOM) события на экземпляр блока.
 nb.Block.prototype.__B_bindCustomEvents = function() {
-    var that = this;
-
     var events = this.__B_customEvents;
     for (var event in events) {
-        (function(event, handler) {
-            //  Если `handler` это строка, то нужно вызывать соответствующий метод блока.
-            var method = (typeof handler === 'string') ? that[handler] : handler;
+        var handler = events[event];
+        //  Если `handler` это строка, то нужно вызывать соответствующий метод блока.
+        var method = (typeof handler === 'string') ? this[handler] : handler;
 
-            //  method при это всегда вызывается в контексте that.
-            that.on(event, method);
-        })( event, events[event] );
+        //  method при это всегда вызывается в контексте that.
+        this.on(event, method);
     }
 };
 
