@@ -203,30 +203,14 @@ nb.define = function(name, options) { // FIXME: Сделать миксины.
     var Class = function() {};
     nb.inherit(Class, nb.Block);
 
-    //  Добавляем имя блока (на всякий случай).
-    Class.prototype.name = name;
-
-    //  Делим события на DOM и кастомные.
-    var events = nb.Block.__B_prepareEvents(options.events);
-
-    //  Добавляем в прототип информацию про DOM-события (в том числе и с уточняющими селекторами),
-    //  которые должен ловить блок.
-    var domEvents = Class.prototype.__B_domEvents = events.dom;
-    //  Добавляем в прототип специальные обработчики для DOM-событий.
-    //  Если, например, в блоке есть события `click .foo` и `click .bar`,
-    //  то будет добавлен всего один обработчик `click`.
-    //  Если у блока вообще нет ничего про `click`, то `click` не будет добавлен вовсе.
-    for (var event in domEvents) {
-        Class.prototype[event] = nb.Block.__B_eventHandlers[event];
-    }
-    //  Добавляем в прототип информацию про кастомные события блока.
-    //  Они будут забинжены на экземпляр блока при его создании.
-    Class.prototype.__B_customEvents = events.custom;
-    //  Уже не нужно.
+    var events = options.events;
     delete options.events;
 
     //  Все, что осталось в options -- это дополнительные методы блока.
     nb.extend(Class.prototype, options);
+
+    //  Обрабатываем объект events: делим события на DOM и кастомные.
+    nb.Block.__B_prepareEvents(events, Class);
 
     //  Сохраняем класс в кэше.
     nb.Block.__B_classes[name] = Class;
@@ -363,35 +347,45 @@ nb.Block.__B_domEvents.forEach(function(event) {
 });
 
 //  Делим события на DOM и кастомные.
-//  Селекторы для DOM событий сразу компилируем.
-nb.Block.__B_prepareEvents = function(events) {
+nb.Block.__B_prepareEvents = function(events, Class) {
     events = events || {};
 
-    var dom = {};
-    var custom = {};
+    //  Делим события на DOM и кастомные.
+
+    //  Добавляем в прототип информацию про DOM-события (в том числе и с уточняющими селекторами),
+    //  которые должен ловить блок.
+    var domEvents = Class.prototype.__B_domEvents = {};
+
+    //  Добавляем в прототип информацию про кастомные события блока.
+    //  Они будут забинжены на экземпляр блока при его создании.
+    var customEvents = Class.prototype.__B_customEvents = {};
 
     for (var event in events) {
         //  Матчим строки вида `click` или `click .foo`.
         var r = nb.Block.__B_rx_domEvents.exec(event);
 
+        var handler = events[event];
         if (r) {
             //  Тип DOM-события, например, `click`.
             var type = r[1];
-            var typeEvents = dom[type] || (( dom[type] = [] ));
+            var typeEvents = domEvents[type] || (( domEvents[type] = [] ));
 
             typeEvents.push({
                 selector: r[2] || '',
-                handler: events[event]
+                handler: handler
             });
         } else {
-            custom[event] = events[event];
+            customEvents[event] = handler;
         }
     }
 
-    return {
-        dom: dom,
-        custom: custom
-    };
+    //  Добавляем в прототип специальные обработчики для DOM-событий.
+    //  Если, например, в блоке есть события `click .foo` и `click .bar`,
+    //  то будет добавлен всего один обработчик `click`.
+    //  Если у блока вообще нет ничего про `click`, то `click` не будет добавлен вовсе.
+    for (var event in domEvents) {
+        Class.prototype[event] = nb.Block.__B_eventHandlers[event];
+    }
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
