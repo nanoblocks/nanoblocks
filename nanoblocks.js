@@ -47,6 +47,16 @@ nb.extend = function(dest) {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
+//  Префиксы
+//  --------
+//
+//  Поскольку предполагается, что блоки будут смешиваться (например, `nb.Events` подмешивается во все `nb.Block`),
+//  то приватные методы и свойства отдельных классов будет называть со специальными префиксами.
+//  Для `nb.Events`, например, это `__E_`, для `nb.Block` -- `__B_`.
+//  Так как у блоков унаследованных от `nb.Block` могут быть свои приватные методы, то используем `__`, а не `_`.
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
 //  nb.Events
 //  ---------
 
@@ -82,15 +92,15 @@ nb.Events = {};
 
 //  Возвращает список обработчиков события name.
 //  Если еще ни одного обработчика не забинжено, возвращает (и сохраняет) пустой список.
-nb.Events._getEventHandlers = function(name) {
-    var handlers = this._eventHandlers || (( this._eventHandlers = {} ));
+nb.Events.__E_getHandlers = function(name) {
+    var handlers = this.__E_handlers || (( this.__E_handlers = {} ));
 
     return handlers[name] || (( handlers[name] = [] ));
 };
 
 //  Подписываем обработчик handler на событие name.
 nb.Events.on = function(name, handler) {
-    var handlers = this._getEventHandlers(name);
+    var handlers = this.__E_getHandlers(name);
 
     handlers.push(handler);
 
@@ -101,7 +111,7 @@ nb.Events.on = function(name, handler) {
 //  Если не передать handler, то удалятся вообще все обработчики события name.
 nb.Events.off = function(name, handler) {
     if (handler) {
-        var handlers = this._getEventHandlers(name);
+        var handlers = this.__E_getHandlers(name);
         //  Ищем этот хэндлер среди уже забинженных обработчиков этого события.
         var i = handlers.indexOf(handler);
 
@@ -111,7 +121,7 @@ nb.Events.off = function(name, handler) {
         }
     } else {
         //  Удаляем всех обработчиков этого события.
-        var handlers = this._eventHandlers;
+        var handlers = this.__E_handlers;
         if (handlers) {
             delete handlers[name];
         }
@@ -123,7 +133,7 @@ nb.Events.off = function(name, handler) {
 nb.Events.trigger = function(name, params) {
     // Копируем список хэндлеров. Если вдруг внутри какого-то обработчика будет вызван off(),
     // то мы не потеряем вызов следующего обработчика.
-    var handlers = this._getEventHandlers(name).slice();
+    var handlers = this.__E_getHandlers(name).slice();
 
     for (var i = 0, l = handlers.length; i < l; i++) {
         //  Вызываем обработчик в контексте this.
@@ -156,20 +166,20 @@ nb.block = function(node) {
     var id = node.getAttribute('id');
     if (id) {
         //  Пытаемся достать блок из кэша по id.
-        block = nb.Block._blocks[id];
+        block = nb.Block.__B_cache[id];
     } else {
         //  У блока нет атрибута id. Создаем его, генерим уникальный id.
-        id = 'nb-' + nb.Block._id++;
+        id = 'nb-' + nb.Block.__B_id++;
         node.setAttribute('id', id);
     }
 
     if (!block) {
         //  Блока в кэше еще нет.
         //  Создаем экземпляр блока нужного класса и инициализируем его.
-        block = nb.Block._blocks[id] = new nb.Block._classes[block_id];
+        block = nb.Block.__B_cache[id] = new nb.Block.__B_classes[block_id];
 
         //  Инициализируем блок.
-        block._init(node);
+        block.__B_init(node);
         block.trigger('init');
     }
 
@@ -197,21 +207,21 @@ nb.define = function(name, options) { // FIXME: Сделать миксины.
     Class.prototype.name = name;
 
     //  Делим события на DOM и кастомные.
-    var events = nb.Block._prepareEvents(options.events);
+    var events = nb.Block.__B_prepareEvents(options.events);
 
     //  Добавляем в прототип информацию про DOM-события (в том числе и с уточняющими селекторами),
     //  которые должен ловить блок.
-    var domEvents = Class.prototype._domEvents = events.dom;
+    var domEvents = Class.prototype.__B_domEvents = events.dom;
     //  Добавляем в прототип специальные обработчики для DOM-событий.
     //  Если, например, в блоке есть события `click .foo` и `click .bar`,
     //  то будет добавлен всего один обработчик `click`.
     //  Если у блока вообще нет ничего про `click`, то `click` не будет добавлен вовсе.
     for (var event in domEvents) {
-        Class.prototype[event] = nb.Block._eventHandlers[event];
+        Class.prototype[event] = nb.Block.__B_eventHandlers[event];
     }
     //  Добавляем в прототип информацию про кастомные события блока.
     //  Они будут забинжены на экземпляр блока при его создании.
-    Class.prototype._customEvents = events.custom;
+    Class.prototype.__B_customEvents = events.custom;
     //  Уже не нужно.
     delete options.events;
 
@@ -219,7 +229,7 @@ nb.define = function(name, options) { // FIXME: Сделать миксины.
     nb.extend(Class.prototype, options);
 
     //  Сохраняем класс в кэше.
-    nb.Block._classes[name] = Class;
+    nb.Block.__B_classes[name] = Class;
 };
 
 //  Неленивая инициализация.
@@ -253,33 +263,33 @@ nb.Block = function() {};
 // ----------------------------------------------------------------------------------------------------------------- //
 
 //  Кэш классов для создания экземпляров блоков.
-nb.Block._classes = {};
+nb.Block.__B_classes = {};
 
 //  Обработчики DOM-событий. Они добавляются по необходимости в прототип соответствующих классов.
-nb.Block._eventHandlers = {};
+nb.Block.__B_eventHandlers = {};
 
 //  Список всех поддерживаемых DOM-событий.
-nb.Block._domEvents = [ 'click', 'dblclick', 'mouseup', 'mousedown', 'keydown', 'keypress', 'keyup' ]; // FIXME: Еще чего-нибудь добавить.
+nb.Block.__B_domEvents = [ 'click', 'dblclick', 'mouseup', 'mousedown', 'keydown', 'keypress', 'keyup' ]; // FIXME: Еще чего-нибудь добавить.
 //  Regexp для строк вида `click .foo`.
-nb.Block._rx_domEvents = new RegExp( '^(' + nb.Block._domEvents.join('|') + ')\\b\\s*(.*)?$' );
+nb.Block.__B_rx_domEvents = new RegExp( '^(' + nb.Block.__B_domEvents.join('|') + ')\\b\\s*(.*)?$' );
 
 //  Автоинкрементный id для блоков, у которых нет атрибута id.
-nb.Block._id = 0;
+nb.Block.__B_id = 0;
 //  Кэш проинициализированных блоков.
-nb.Block._blocks = {};
+nb.Block.__B_cache = {};
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-nb.Block.prototype._init = function(node) {
+nb.Block.prototype.__B_init = function(node) {
     this.node = node;
-    this._bindCustomEvents();
+    this.__B_bindCustomEvents();
 };
 
 //  Вешаем кастомные (не DOM) события на экземпляр блока.
-nb.Block.prototype._bindCustomEvents = function() {
+nb.Block.prototype.__B_bindCustomEvents = function() {
     var that = this;
 
-    var events = this._customEvents;
+    var events = this.__B_customEvents;
     for (var event in events) {
         (function(event, handler) {
             //  Если `handler` это строка, то нужно вызывать соответствующий метод блока.
@@ -306,15 +316,15 @@ nb.Block.prototype.data = function(key, value) {
 //  Создаем методы блоков для обработки событий click, ...
 //  Эти методы не добавлены в прототип Block сразу, они добавляются в класс,
 //  унаследованный от Block только если этот блок подписывается на такое событие.
-nb.Block._domEvents.forEach(function(event) {
+nb.Block.__B_domEvents.forEach(function(event) {
 
-    nb.Block._eventHandlers[event] = function(e) {
+    nb.Block.__B_eventHandlers[event] = function(e) {
         var blockNode = this.node;
         var node = e.target;
 
         //  Идем вверх по DOM, проверяем, матчатся ли ноды на какие-нибудь
         //  селекторы из событий блока.
-        var events = this._domEvents[event];
+        var events = this.__B_domEvents[event];
         var r;
         while (1) {
             for (var i = 0, l = events.length; i < l; i++) {
@@ -351,7 +361,7 @@ nb.Block._domEvents.forEach(function(event) {
 
 //  Делим события на DOM и кастомные.
 //  Селекторы для DOM событий сразу компилируем.
-nb.Block._prepareEvents = function(events) {
+nb.Block.__B_prepareEvents = function(events) {
     events = events || {};
 
     var dom = {};
@@ -359,7 +369,7 @@ nb.Block._prepareEvents = function(events) {
 
     for (var event in events) {
         //  Матчим строки вида `click` или `click .foo`.
-        var r = nb.Block._rx_domEvents.exec(event);
+        var r = nb.Block.__B_rx_domEvents.exec(event);
 
         if (r) {
             //  Тип DOM-события, например, `click`.
@@ -403,7 +413,7 @@ $(function() {
 
     //  Навешиваем на документ обработчики всех событий,
     //  использующихся хоть в каких-нибудь блоках.
-    nb.Block._domEvents.forEach(function(event) {
+    nb.Block.__B_domEvents.forEach(function(event) {
         $(document).on(event, function(e) {
             var node = e.target;
 
