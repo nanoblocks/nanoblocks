@@ -119,7 +119,7 @@ popup._move = function(where, dir) {
     //  Вектор CD = -DC.
     var CD = mul( DC, [ -1, -1 ] );
 
-    // D := A + AB + BC + CD.
+    //  D := A + AB + BC + CD.
     var D = add( add( add(A, AB), BC), CD );
 
     //  Устанавливаем нужные координаты.
@@ -138,7 +138,7 @@ popup._move = function(where, dir) {
 
     //  Возвращает вектор от левого верхнего угла до центра прямоугольника.
     function getDiag($o) {
-        return [ $o.width() / 2, $o.height() /2 ];
+        return [ $o.width() / 2, $o.height() / 2 ];
     }
 
     //  Складывает два вектора.
