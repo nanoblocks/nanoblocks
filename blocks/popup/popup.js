@@ -205,20 +205,22 @@ nb.define('popup', popup);
 nb.define('popup-toggler', {
 
     events: {
-        'click': function() {
-            //  Находим соответствующий попап.
-            //  Соответствие задается атрибутом `popup-id`.
-            var popup = nb.find( this.data('popup-id') );
+        'click': 'onclick'
+    },
 
-            //  Открываем его на текущей ноде и с нужным направлением.
-            if (popup) {
-                popup.trigger('open', {
-                    where: this.node,
-                    dir: this.data('popup-dir')
-                });
+    'onclick': function() {
+        //  Находим соответствующий попап.
+        //  Соответствие задается атрибутом `popup-id`.
+        var popup = nb.find( this.data('popup-id') );
 
-                return false;
-            }
+        //  Открываем его на текущей ноде и с нужным направлением.
+        if (popup) {
+            popup.trigger('open', {
+                where: this.node,
+                dir: this.data('popup-dir')
+            });
+
+            return false;
         }
     }
 

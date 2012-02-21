@@ -279,12 +279,8 @@ nb.Block.prototype.__B_init = function(node) {
 nb.Block.prototype.__B_bindCustomEvents = function() {
     var events = this.__B_customEvents;
     for (var event in events) {
-        var handler = events[event];
-        //  Если `handler` это строка, то нужно вызывать соответствующий метод блока.
-        var method = (typeof handler === 'string') ? this[handler] : handler;
-
-        //  method при это всегда вызывается в контексте that.
-        this.on(event, method);
+        //  Обработчик кастомных событий всегда вызывается в контексте this.
+        this.on(event, events[event]);
     }
 };
 
@@ -320,15 +316,10 @@ nb.Block.__B_domEvents.forEach(function(event) {
 
                 //  Проверяем, матчится ли нода на селектор.
                 if ( !selector || $(node).is(selector) ) {
-                    var handler = event_.handler;
-                    if (typeof handler === 'string') {
-                        handler = this[handler];
-                    }
-
                     //  Если событие с селектором, то передаем в обработчик ту ноду,
                     //  которая на самом деле матчится на селектор.
                     //  В противном случае, передаем ноду всего блока.
-                    if ( handler.call(this, e, (selector) ? node : blockNode) === false ) {
+                    if ( event_.handler.call(this, e, (selector) ? node : blockNode) === false ) {
                         r = false;
                     }
                 }
@@ -365,6 +356,10 @@ nb.Block.__B_prepareEvents = function(events, Class) {
         var r = nb.Block.__B_rx_domEvents.exec(event);
 
         var handler = events[event];
+        if (typeof handler === 'string') {
+            handler = Class.prototype[handler];
+        }
+
         if (r) {
             //  Тип DOM-события, например, `click`.
             var type = r[1];
