@@ -228,3 +228,13 @@ nb.define('popup-toggler', {
 
 });
 
+nb.define('logger', {
+
+    events: {
+        'click': function() {
+            console.log('click-click');
+        }
+    }
+
+});
+

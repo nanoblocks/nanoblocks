@@ -176,7 +176,8 @@ nb.block = function(node) {
     if (!block) {
         //  Блока в кэше еще нет.
         //  Создаем экземпляр блока нужного класса и инициализируем его.
-        block = nb.Block.__B_cache[id] = new nb.Block.__B_classes[block_id];
+        var Class = nb.mixin(block_id);
+        block = nb.Block.__B_cache[id] = new Class;
 
         //  Инициализируем блок.
         block.__B_init(node);
@@ -214,6 +215,26 @@ nb.define = function(name, options) { // FIXME: Сделать миксины.
 
     //  Сохраняем класс в кэше.
     nb.Block.__B_classes[name] = Class;
+};
+
+nb.mixin = function(name) {
+    var Class = nb.Block.__B_classes[name];
+
+    var events = [];
+    if (!Class) {
+        var Class = function() {};
+
+        var names = name.trim().split(/\s+/);
+        for (var i = 0, l = names.length; i < l; i++) {
+            var Mixin = nb.Block.__B_classes[ names[i] ];
+            nb.inherit(Class, Mixin);
+            events.push( Mixin.prototype.__B_events[0] );
+        }
+
+        Class.prototype.__B_events = events;
+    }
+
+    return Class;
 };
 
 //  Неленивая инициализация.
@@ -321,10 +342,10 @@ nb.Block.__B_domEvents.forEach(function(event) {
         //  Идем вверх по DOM, проверяем, матчатся ли ноды на какие-нибудь
         //  селекторы из событий блока.
         var mixinEvents = this.__B_events;
+        var r;
         for (var i = 0, l = mixinEvents.length; i < l; i++) {
             var events = mixinEvents[i].dom[event];
 
-            var r;
             while (1) {
                 for (var selector in events) {
                     var handlers = events[selector];
@@ -345,15 +366,17 @@ nb.Block.__B_domEvents.forEach(function(event) {
                 }
 
                 //  Если хотя бы один блок вернул false, останавливаемся.
-                if (r === false) {
-                    return false;
-                }
+                if (r === false) { break; }
 
                 //  Дошли до ноды блока, дальше не идем.
                 if (node === blockNode) { return; }
 
                 node = node.parentNode;
             }
+        }
+
+        if (r === false) {
+            return false;
         }
     };
 
