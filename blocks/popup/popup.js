@@ -7,7 +7,9 @@ var popup = {};
 popup.events = {
     'init': 'oninit',
     'open': 'onopen',
-    'close': 'onclose'
+    'close': 'onclose',
+
+    'click .popup__close': 'onclose'
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
