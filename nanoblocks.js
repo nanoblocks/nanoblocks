@@ -334,9 +334,9 @@ nb.Block.__B_domEvents.forEach(function(event) {
                         //  Если событие с селектором, то передаем в обработчик ту ноду,
                         //  которая на самом деле матчится на селектор.
                         //  В противном случае, передаем ноду всего блока.
-                        for (var j = 0, m = handlers.length; j < m; j++) {
-                            var handler = handlers[j];
-                            if ( handler.call(this, e, (selector) ? node : blockNode) === false ) {
+                        var eventNode = (selector) ? node : blockNode;
+                        for (var j = handlers.length; j--; ) {
+                            if ( handlers[j].call(this, e, eventNode) === false ) {
                                 r = false;
                                 break;
                             }
@@ -404,12 +404,10 @@ nb.Block.__B_domEvents.forEach(function(event) {
 nb.Block.__B_prepareEvents = function(events, Class) {
     events = events || {};
 
-    //  Делим события на DOM и кастомные.
-
     var proto = Class.prototype;
 
+    //  Делим события на DOM и кастомные.
     var domEvents = {};
-
     var customEvents = {};
 
     for (var event in events) {
