@@ -277,10 +277,23 @@ nb.Block.prototype.__B_init = function(node) {
 
 //  Вешаем кастомные (не DOM) события на экземпляр блока.
 nb.Block.prototype.__B_bindCustomEvents = function() {
-    var events = this.__B_customEvents;
-    for (var event in events) {
-        //  Обработчик кастомных событий всегда вызывается в контексте this.
-        this.on(event, events[event]);
+    var that = this;
+
+    var mixinEvents = this.__B_events;
+    for (var i = 0, l = mixinEvents.length; i < l; i++) {
+        var events = mixinEvents[i].custom;
+
+        for (var event in events) {
+            (function(handlers) {
+                that.on(event, function(e, params) {
+                    for (var i = handlers.length; i--; ) {
+                        if ( handlers[i].call(that, e, params) === false ) {
+                            return false;
+                        }
+                    }
+                });
+            })( events[event] )
+        }
     }
 };
 
@@ -307,49 +320,97 @@ nb.Block.__B_domEvents.forEach(function(event) {
 
         //  Идем вверх по DOM, проверяем, матчатся ли ноды на какие-нибудь
         //  селекторы из событий блока.
-        var events = this.__B_domEvents[event];
-        var r;
-        while (1) {
-            for (var i = 0, l = events.length; i < l; i++) {
-                var event_ = events[i];
-                var selector = event_.selector;
+        var mixinEvents = this.__B_events;
+        for (var i = 0, l = mixinEvents.length; i < l; i++) {
+            var events = mixinEvents[i].dom[event];
 
-                //  Проверяем, матчится ли нода на селектор.
-                if ( !selector || $(node).is(selector) ) {
-                    //  Если событие с селектором, то передаем в обработчик ту ноду,
-                    //  которая на самом деле матчится на селектор.
-                    //  В противном случае, передаем ноду всего блока.
-                    if ( event_.handler.call(this, e, (selector) ? node : blockNode) === false ) {
-                        r = false;
+            var r;
+            while (1) {
+                for (var selector in events) {
+                    var handlers = events[selector];
+
+                    //  Проверяем, матчится ли нода на селектор.
+                    if ( !selector || $(node).is(selector) ) {
+                        //  Если событие с селектором, то передаем в обработчик ту ноду,
+                        //  которая на самом деле матчится на селектор.
+                        //  В противном случае, передаем ноду всего блока.
+                        for (var j = 0, m = handlers.length; j < m; j++) {
+                            var handler = handlers[j];
+                            if ( handler.call(this, e, (selector) ? node : blockNode) === false ) {
+                                r = false;
+                                break;
+                            }
+                        }
                     }
                 }
+
+                //  Если хотя бы один блок вернул false, останавливаемся.
+                if (r === false) {
+                    return false;
+                }
+
+                //  Дошли до ноды блока, дальше не идем.
+                if (node === blockNode) { return; }
+
+                node = node.parentNode;
             }
-
-            //  Если хотя бы один блок вернул false, останавливаемся.
-            if (r === false) { return r; }
-
-            //  Дошли до ноды блока, дальше не идем.
-            if (node === blockNode) { return; }
-
-            node = node.parentNode;
         }
     };
 
 });
 
 //  Делим события на DOM и кастомные.
+//  В каждом блока (а точнее в прототипе класса) есть свойство `__B_events`
+//  с примерно такой структурой:
+//
+//      block.__B_events = [
+//          //  Каждый элемент в этом массиве -- это миксин.
+//          //  Т.е. для каждого класса, указанного в data-nb,
+//          //  в этот массив добавляется такой объект:
+//          {
+//              //  DOM-события.
+//              dom: {
+//                  //  Тип DOM-события.
+//                  click: {
+//                      //  Селектор DOM-события (может быть пустой строкой).
+//                      '': [
+//                          Этот массив -- это обработчики для блока и его предков.
+//                          handler1,
+//                          handler2,
+//                          ...
+//                      ],
+//                      '.close': [ handler3 ],
+//                      ...
+//                  },
+//                  ...
+//              },
+//              //  Кастомные события.
+//              custom: {
+//                  'open': [ handler4, handler5 ],
+//                  ...
+//              }
+//          },
+//          {
+//              dom: {
+//                  ...
+//              },
+//              custom: {
+//                  ...
+//              }
+//          },
+//          ...
+//      ];
+//
 nb.Block.__B_prepareEvents = function(events, Class) {
     events = events || {};
 
     //  Делим события на DOM и кастомные.
 
-    //  Добавляем в прототип информацию про DOM-события (в том числе и с уточняющими селекторами),
-    //  которые должен ловить блок.
-    var domEvents = Class.prototype.__B_domEvents = {};
+    var proto = Class.prototype;
 
-    //  Добавляем в прототип информацию про кастомные события блока.
-    //  Они будут забинжены на экземпляр блока при его создании.
-    var customEvents = Class.prototype.__B_customEvents = {};
+    var domEvents = {};
+
+    var customEvents = {};
 
     for (var event in events) {
         //  Матчим строки вида `click` или `click .foo`.
@@ -357,29 +418,35 @@ nb.Block.__B_prepareEvents = function(events, Class) {
 
         var handler = events[event];
         if (typeof handler === 'string') {
-            handler = Class.prototype[handler];
+            handler = proto[handler];
         }
 
         if (r) {
             //  Тип DOM-события, например, `click`.
             var type = r[1];
-            var typeEvents = domEvents[type] || (( domEvents[type] = [] ));
+            var selector = r[2] || '';
 
-            typeEvents.push({
-                selector: r[2] || '',
-                handler: handler
-            });
+            var typeEvents = domEvents[type] || (( domEvents[type] = {} ));
+            typeEvents[selector] = [ handler ];
         } else {
-            customEvents[event] = handler;
+            customEvents[event] = [ handler ];
         }
     }
+
+    //  Добавляем в прототип информацию про события, которые должен ловить блок.
+    //  DOM-события (в том числе и с уточняющими селекторами) и кастомные события блока.
+    var blockEvents = proto.__B_events || (( proto.__B_events = [] ));
+    blockEvents.push({
+        dom: domEvents,
+        custom: customEvents
+    });
 
     //  Добавляем в прототип специальные обработчики для DOM-событий.
     //  Если, например, в блоке есть события `click .foo` и `click .bar`,
     //  то будет добавлен всего один обработчик `click`.
     //  Если у блока вообще нет ничего про `click`, то `click` не будет добавлен вовсе.
     for (var event in domEvents) {
-        Class.prototype['__B_on' + event] = nb.Block.__B_eventHandlers[event];
+        proto['__B_on' + event] = nb.Block.__B_eventHandlers[event];
     }
 };
 
@@ -458,9 +525,10 @@ $(function() {
                 if (block) {
                     var method = '__B_on' + event;
                     if  ( block[method] ) {
-                        var r = block[method](e);
-                        //  Если обработчик вернул false, то выше не баблимся.
-                        if (r === false) { return r; }
+                        if ( block[method](e) === false ) {
+                            //  Если обработчик вернул false, то выше не баблимся.
+                            return false;
+                        }
                     }
                 }
                 node = parent;
