@@ -4,39 +4,43 @@
     <meta charset="UTF-8">
     <title>Кнопки</title>
     <link rel="stylesheet" href="../s/all.css">
+    <style>td,th{padding:1ex}</style>
 </head>
 <body>
-
     <table>
         <thead>
             <tr>
                 <th></th>
-                <th>Просто кнопка</th>
-                <th>Просто ссылка</th>
-                <th>Кнопка-стрелка</th>
-                <th>Ссылка-стрелка</th>
+                <th>Кнопка<br>(button)</th>
+                <th>Кнопка<br>(input)</th>
+                <th>Ссылка<br>(a href)</th>
+                <th>Кнопка-стрелка<br>(button)</th>
+                <th>Ссылка-стрелка<br>(a href)</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <th>Маленькая</th>
                 <td>
-                    <button type="button" class="button button_size_s" tabindex="1">Найти</button>
+                    <button type="button" class="button button_size_s">Найти</button>
                 </td>
                 <td>
-                    <a class="button button_size_s" href="#" tabindex="2">Найти</a>
+                    <input type="button" class="button button_size_s" value="Найти">
                 </td>
                 <td>
-                    <a class="button button_size_s button_arrowed" href="#" tabindex="3">
-                        Найти
-                        <span class="button__arrow"></span>
-                    </a>
+                    <a class="button button_size_s" href="#">Найти</a>
                 </td>
                 <td>
-                    <button type="button" class="button button_size_s button_arrowed" href="#" tabindex="4">
+                    <button type="button" class="button button_size_s button_arrowed">
                         Найти
                         <span class="button__arrow"></span>
                     </button>
+                </td>
+                <td>
+                    <a class="button button_size_s button_arrowed" href="#">
+                        Найти
+                        <span class="button__arrow"></span>
+                    </a>
                 </td>
             </tr>
             <tr>
@@ -45,19 +49,22 @@
                     <button type="button" class="button">Найти</button>
                 </td>
                 <td>
+                    <input type="button" class="button" value="Найти">
+                </td>
+                <td>
                     <a class="button" href="#">Найти</a>
+                </td>
+                <td>
+                    <button type="button" class="button button_arrowed">
+                        Найти
+                        <span class="button__arrow"></span>
+                    </button>
                 </td>
                 <td>
                     <a class="button button_arrowed" href="#">
                         Найти
                         <span class="button__arrow"></span>
                     </a>
-                </td>
-                <td>
-                    <button type="button" class="button button_arrowed" href="#">
-                        Найти
-                        <span class="button__arrow"></span>
-                    </button>
                 </td>
             </tr>
             <tr>
@@ -66,19 +73,22 @@
                     <button type="button" class="button button_size_l">Найти</button>
                 </td>
                 <td>
+                    <input type="button" class="button button_size_l" value="Найти">
+                </td>
+                <td>
                     <a class="button button_size_l" href="#">Найти</a>
+                </td>
+                <td>
+                    <button type="button" class="button button_size_l button_arrowed">
+                        Найти
+                        <span class="button__arrow"></span>
+                    </button>
                 </td>
                 <td>
                     <a class="button button_size_l button_arrowed" href="#">
                         Найти
                         <span class="button__arrow"></span>
                     </a>
-                </td>
-                <td>
-                    <button type="button" class="button button_size_l button_arrowed" href="#">
-                        Найти
-                        <span class="button__arrow"></span>
-                    </button>
                 </td>
             </tr>
         </tbody>
