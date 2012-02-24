@@ -1,6 +1,9 @@
+//  nanoblocks
+//  ==========
+
 var nb = {};
 
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
 
 //  Минимальный common.js
 //  ---------------------
@@ -45,7 +48,7 @@ nb.extend = function(dest) {
 };
 
 
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
 
 //  Префиксы
 //  --------
@@ -55,12 +58,13 @@ nb.extend = function(dest) {
 //  Для `nb.Events`, например, это `__E_`, для `nb.Block` -- `__B_`.
 //  Так как у блоков унаследованных от `nb.Block` могут быть свои приватные методы, то используем `__`, а не `_`.
 
-// ----------------------------------------------------------------------------------------------------------------- //
+
+//  ---------------------------------------------------------------------------------------------------------------  //
 
 //  nb.Events
 //  ---------
 
-//  Простейший pub/sub
+//  Простейший pub/sub.
 //
 //  nb.Events -- объект, который можно подмиксовать к любому другому объекту:
 //
@@ -145,144 +149,17 @@ nb.Events.trigger = function(name, params) {
 nb.extend(nb, nb.Events);
 
 
-// ----------------------------------------------------------------------------------------------------------------- //
-
-//  Интерфейсная часть
-//  ------------------
-
-//  Метод создает блок на заданной ноде:
-//
-//      var popup = nb.block( document.getElementById('popup') );
-//
-nb.block = function(node) {
-    var block_id = node.getAttribute('data-nb');
-    if (!block_id) {
-        //  Эта нода не содержит блока. Ничего не делаем.
-        return null;
-    }
-
-    var block;
-
-    var id = node.getAttribute('id');
-    if (id) {
-        //  Пытаемся достать блок из кэша по id.
-        block = nb.Block.__B_cache[id];
-    } else {
-        //  У блока нет атрибута id. Создаем его, генерим уникальный id.
-        id = 'nb-' + nb.Block.__B_id++;
-        node.setAttribute('id', id);
-    }
-
-    if (!block) {
-        //  Блока в кэше еще нет.
-        //  Создаем экземпляр блока нужного класса и инициализируем его.
-        var Class = nb.mixin(block_id);
-        block = nb.Block.__B_cache[id] = new Class;
-
-        //  Инициализируем блок.
-        block.__B_init(node);
-        block.trigger('init');
-    }
-
-    return block;
-};
-
-//  Метод определяет новый блок (точнее класс):
-//
-//      nb.define('popup', {
-//          events: {
-//              'init': 'init',
-//              'click .close': 'close',
-//              'open': 'open'
-//          },
-//
-//          'init': function() { ... }
-//          ...
-//      });
-//
-nb.define = function(name, options, base) {
-    var Class = function() {};
-    nb.inherit(Class, nb.Block);
-
-    var events = options.events;
-    delete options.events;
-
-    var Parent;
-    if (base) {
-        Parent = nb.Block.__B_classes[base];
-        nb.extend(Class.prototype, Parent.prototype);
-    }
-    delete Class.prototype['__B_events'];
-
-    //  Все, что осталось в options -- это дополнительные методы блока.
-    nb.extend(Class.prototype, options);
-
-    //  Обрабатываем объект events: делим события на DOM и кастомные.
-    nb.Block.__B_prepareEvents(events, Class);
-
-    if (base) {
-        nb.Block.__B_inheritEvents(Class.prototype.__B_events, Parent.prototype.__B_events);
-    }
-
-    //  Сохраняем класс в кэше.
-    nb.Block.__B_classes[name] = Class;
-};
-
-nb.mixin = function(name) {
-    var Class = nb.Block.__B_classes[name];
-
-    var events = [];
-    if (!Class) {
-        var Class = function() {};
-
-        var names = name.trim().split(/\s+/);
-        for (var i = 0, l = names.length; i < l; i++) {
-            var Mixin = nb.Block.__B_classes[ names[i] ];
-            nb.inherit(Class, Mixin);
-            events.push( Mixin.prototype.__B_events[0] );
-        }
-
-        Class.prototype.__B_events = events;
-    }
-
-    return Class;
-};
-
-//  Неленивая инициализация.
-//  Находим все ноды с классом `_init` и на каждой из них инициализируем блок.
-//  По-дефолту ищем ноды во всем документе, но можно передать ноду,
-//  внутри которой будет происходить поиск. Полезно для инициализации динамически
-//  созданных блоков.
-nb.init = function(where) {
-    where = where || document;
-
-    var nodes = where.getElementsByClassName('_init');
-    for (var i = 0, l = nodes.length; i < l; i++) {
-        nb.block( nodes[i] );
-    }
-};
-
-nb.find = function(id) {
-    var node = document.getElementById(id);
-    if (node) {
-        return nb.block(node);
-    }
-};
-
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
 
 //  nb.Block
 //  --------
 
-//  Публичные методы у `nb.Block` следующие:
-//
-//    * `on`, 'off`, `trigger` -- миксин от `nb.Events`;
-//    * `data` -- получает/меняет `data-nb`-атрибуты блока.
-//    * `show`, `hide` -- показывает/прячет блок.
+//  Базовый класс для блоков. В явном виде не используется.
+//  Все реальные блоки наследуются от него при помощи функции `nb.define`.
 
 nb.Block = function() {};
 
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
 
 //  Кэш классов для создания экземпляров блоков.
 nb.Block.__B_classes = {};
@@ -300,8 +177,90 @@ nb.Block.__B_id = 0;
 //  Кэш проинициализированных блоков.
 nb.Block.__B_cache = {};
 
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
 
+//  Публичные методы
+//  ----------------
+
+//  Публичные методы у `nb.Block` следующие:
+//
+//    * `on`, 'off`, `trigger` -- миксин от `nb.Events`;
+//    * `data` -- получает/меняет `data-nb`-атрибуты блока.
+//    * `show`, `hide` -- показывает/прячет блок.
+//    * `getMod`, 'setMod`, 'delMod` -- методы для работы с модификаторами.
+
+
+//  Метод возвращает или устанавливает значение data-атрибута блока.
+//  Блок имеет доступ (через этот метод) только к data-атрибутам с префиксом `nb-`.
+//  Как следствие, атрибут `data-nb` недоступен -- он определяет тип блока
+//  и менять его не рекомендуется в любом случае.
+nb.Block.prototype.data = function(key, value) {
+    if (value !== undefined) {
+        this.node.setAttribute('data-nb-' + key, value);
+    } else {
+        return this.node.getAttribute('data-nb-' + key);
+    }
+};
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+//  Показываем блок.
+nb.Block.prototype.show = function() {
+    $(this.node).removeClass('_hidden');
+};
+
+//  Прячем блок.
+nb.Block.prototype.hide = function() {
+    $(this.node).addClass('_hidden');
+};
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+// FIXME: Сделать отдельные методы, работающие с нодами, а не с блоками.
+
+//  Получить модификатор.
+nb.Block.prototype.getMod = function(name) {
+    return this.setMod(name);
+};
+
+//  Установить модификатор.
+nb.Block.prototype.setMod = function(name, value) {
+    var rx = new RegExp('(?:^|\\s+)' + name + '_([\\w-]+)'); // FIXME: Кэшировать regexp?
+
+    var className = this.node.className;
+    if (value === undefined) {
+        // getMod
+        var r = rx.exec(className);
+        return (r) ? r[1] : '';
+    } else {
+        // delMod
+        className = className.replace(rx, '').trim();
+        if (value !== null) {
+            // setMod
+            className += ' ' + name + '_' + value;
+        }
+        this.node.className = className;
+    }
+};
+
+//  Удалить модификатор.
+nb.Block.prototype.delMod = function(name) {
+    this.setMod(name, null);
+};
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+//  Добавляем интерфейс событий ко всем экземплярам блоков.
+nb.extend(nb.Block.prototype, nb.Events);
+
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+//  Приватные методы
+//  ----------------
+
+//  Сам конструктор пустой для удобства наследования,
+//  поэтому вся реальная инициализация тут.
 nb.Block.prototype.__B_init = function(node) {
     this.node = node;
     this.__B_bindCustomEvents();
@@ -329,18 +288,6 @@ nb.Block.prototype.__B_bindCustomEvents = function() {
     }
 };
 
-//  Метод возвращает или устанавливает значение data-атрибута блока.
-//  Блок имеет доступ (через этот метод) только к data-атрибутам с префиксом `nb-`.
-//  Как следствие, атрибут `data-nb` недоступен -- он определяет тип блока
-//  и менять его не рекомендуется в любом случае.
-nb.Block.prototype.data = function(key, value) {
-    if (value !== undefined) {
-        this.node.setAttribute('data-nb-' + key, value);
-    } else {
-        return this.node.getAttribute('data-nb-' + key);
-    }
-};
-
 //  Создаем методы блоков для обработки событий click, ...
 //  Эти методы не добавлены в прототип Block сразу, они добавляются в класс,
 //  унаследованный от Block только если этот блок подписывается на такое событие.
@@ -350,16 +297,16 @@ nb.Block.__B_domEvents.forEach(function(event) {
         var blockNode = this.node;
         var node = e.target;
 
-        //  Идем вверх по DOM, проверяем, матчатся ли ноды на какие-нибудь
-        //  селекторы из событий блока.
+        //  Для каждого миксина ищем подходящий обработчик.
         var mixinEvents = this.__B_events;
         var r;
         for (var i = 0, l = mixinEvents.length; i < l; i++) {
             var events = mixinEvents[i].dom[event];
 
+            //  Идем вверх по DOM, проверяем, матчатся ли ноды на какие-нибудь
+            //  селекторы из событий блока.
             while (1) {
                 for (var selector in events) {
-                    var handlers = events[selector];
 
                     //  Проверяем, матчится ли нода на селектор.
                     if ( !selector || $(node).is(selector) ) {
@@ -367,8 +314,15 @@ nb.Block.__B_domEvents.forEach(function(event) {
                         //  которая на самом деле матчится на селектор.
                         //  В противном случае, передаем ноду всего блока.
                         var eventNode = (selector) ? node : blockNode;
+
+                        //  В `handlers` лежит цепочка обработчиков этого события.
+                        //  Самый последний обработчик -- это обработчик собственно этого блока.
+                        //  Перед ним -- обработчик предка и т.д.
+                        //  Если в `nb.define` не был указан базовый блок, то длина цепочки равна 1.
+                        var handlers = events[selector];
                         for (var j = handlers.length; j--; ) {
                             if ( handlers[j].call(this, e, eventNode) === false ) {
+                                //  Обработчик вернул `false`, значит оставшиеся обработчики не вызываем.
                                 r = false;
                                 break;
                             }
@@ -376,16 +330,14 @@ nb.Block.__B_domEvents.forEach(function(event) {
                     }
                 }
 
-                //  Если хотя бы один блок вернул false, останавливаемся.
-                if (r === false) { break; }
-
-                //  Дошли до ноды блока, дальше не идем.
-                if (node === blockNode) { return; }
+                //  Если хотя бы один блок вернул false или же мы дошли до ноды блока, останавливаемся.
+                if (r === false || node === blockNode) { break; }
 
                 node = node.parentNode;
             }
         }
 
+        //  Хотя бы один обработчик вернул false. Дальше вверх по DOM'у не баблимся.
         if (r === false) {
             return false;
         }
@@ -393,8 +345,9 @@ nb.Block.__B_domEvents.forEach(function(event) {
 
 });
 
-//  Делим события на DOM и кастомные.
-//  В каждом блока (а точнее в прототипе класса) есть свойство `__B_events`
+//  Делим события на DOM и кастомные и создаем объект,
+//  в котором хранится информация про события и их обработчики.
+//  В каждом блоке (а точнее в прототипе класса) есть свойство `__B_events`
 //  с примерно такой структурой:
 //
 //      block.__B_events = [
@@ -453,16 +406,18 @@ nb.Block.__B_prepareEvents = function(events, Class) {
             handler = proto[handler];
         }
 
+        var handlers;
         if (r) {
             //  Тип DOM-события, например, `click`.
             var type = r[1];
             var selector = r[2] || '';
 
             var typeEvents = domEvents[type] || (( domEvents[type] = {} ));
-            typeEvents[selector] = [ handler ];
+            handlers = typeEvents[selector] || (( typeEvents[selector] = [] ));
         } else {
-            customEvents[event] = [ handler ];
+            handlers = customEvents[event] || (( customEvents[event] = [] ));
         }
+        handlers.push(handler);
     }
 
     //  Добавляем в прототип информацию про события, которые должен ловить блок.
@@ -482,10 +437,33 @@ nb.Block.__B_prepareEvents = function(events, Class) {
     }
 };
 
+//  Наследуем события.
+//  В структуре с событиями (`block.__B_events`) есть куски:
+//
+//      {
+//          dom: {
+//              'click': {
+//                  '.foo': [ .... ] // handlers
+//                  ...
+//
+//  и
+//
+//      {
+//          custom: {
+//              'init': [ ... ] // handlers
+//
+//  Этот метод конкатит вот эти массивы с обработчиками событий.
+//
+//  FIXME: Нужен еще метод для добавления событий в экземпляр блока.
+//
 nb.Block.__B_inheritEvents = function(child, parent) {
+    //  Это всегда "простой" класс, так что всегда берем нулевой элемент.
     var p_dom = parent[0].dom;
     var c_dom = child[0].dom;
+    var p_custom = parent[0].custom;
+    var c_custom = child[0].custom;
 
+    //  Конкатим обработчики DOM-событий.
     for (var event in p_dom) {
         var p_selectors = p_dom[event];
         var c_selectors = c_dom[event] || (( c_dom[event] = {} ));
@@ -497,9 +475,7 @@ nb.Block.__B_inheritEvents = function(child, parent) {
         }
     }
 
-    var p_custom = parent.custom;
-    var c_custom = child.custom;
-
+    //  И обработчики кастомных событий.
     for (var event in p_custom) {
         var p_handlers = p_custom[event];
         var c_handlers = c_handlers[event] || [];
@@ -507,58 +483,154 @@ nb.Block.__B_inheritEvents = function(child, parent) {
     }
 };
 
-// ----------------------------------------------------------------------------------------------------------------- //
+//  Достаем класс по имени.
+//  Имя может быть "простым" -- это классы, которые определены через `nb.define`.
+//  Или "сложным" -- несколько простых классов через пробел (микс нескольких блоков).
+nb.Block.__B_getClass = function(name) {
+    //  Смотрим в кэше.
+    var Class = nb.Block.__B_classes[name];
 
-//  Показываем блок.
-nb.Block.prototype.show = function() {
-    $(this.node).removeClass('_hidden');
-};
+    //  В кэше нет, это будет "сложный" класс, т.к. все простые точно в кэше есть.
+    if (!Class) {
+        //  Пустой класс.
+        var Class = function() {};
 
-//  Прячем блок.
-nb.Block.prototype.hide = function() {
-    $(this.node).addClass('_hidden');
-};
+        var events = [];
 
-// ----------------------------------------------------------------------------------------------------------------- //
+        var names = name.trim().split(/\s+/);
+        for (var i = 0, l = names.length; i < l; i++) {
+            //  Примиксовываем все "простые" классы.
+            var Mixin = nb.Block.__B_classes[ names[i] ];
+            nb.inherit(Class, Mixin);
 
-// FIXME: Сделать отдельные методы, работающие с нодами, а не с блоками.
-
-//  Получить модификатор.
-nb.Block.prototype.getMod = function(name) {
-    return this.setMod(name);
-};
-
-//  Удалить модификатор.
-nb.Block.prototype.delMod = function(name) {
-    this.setMod(name, null);
-};
-
-//  Установить модификатор.
-nb.Block.prototype.setMod = function(name, value) {
-    var rx = new RegExp('(?:^|\\s+)' + name + '_([\\w-]+)'); // FIXME: Кэшировать regexp?
-
-    var className = this.node.className;
-    if (value === undefined) {
-        // getMod
-        var r = rx.exec(className);
-        return (r) ? r[1] : '';
-    } else {
-        // delMod
-        className = className.replace(rx, '').trim();
-        if (value !== null) {
-            // setMod
-            className += ' ' + name + '_' + value;
+            //  Собираем массив из структур с событиями.
+            //  `__B_events[0]` -- здесь `0` потому, что у "простых" классов там всегда один элемент.
+            events.push( Mixin.prototype.__B_events[0] );
         }
-        this.node.className = className;
+
+        //  Выставляем смиксованные события.
+        Class.prototype.__B_events = events;
+    }
+
+    return Class;
+};
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+//  Интерфейсная часть
+//  ------------------
+
+//  Метод создает блок на заданной ноде:
+//
+//      var popup = nb.block( document.getElementById('popup') );
+//
+nb.block = function(node) {
+    var block_id = node.getAttribute('data-nb');
+    if (!block_id) {
+        //  Эта нода не содержит блока. Ничего не делаем.
+        return null;
+    }
+
+    var block;
+
+    var id = node.getAttribute('id');
+    if (id) {
+        //  Пытаемся достать блок из кэша по id.
+        block = nb.Block.__B_cache[id];
+    } else {
+        //  У блока нет атрибута id. Создаем его, генерим уникальный id.
+        id = 'nb-' + nb.Block.__B_id++;
+        node.setAttribute('id', id);
+    }
+
+    if (!block) {
+        //  Блока в кэше еще нет.
+        //  Создаем экземпляр блока нужного класса и инициализируем его.
+        var Class = nb.Block.__B_getClass(block_id);
+        block = nb.Block.__B_cache[id] = new Class;
+
+        //  Инициализируем блок.
+        block.__B_init(node);
+        block.trigger('init');
+    }
+
+    return block;
+};
+
+//  Метод определяет новый блок (точнее класс):
+//
+//      nb.define('popup', {
+//          //  События, на которые реагирует блок.
+//          events: {
+//              'click': 'onclick',         //  DOM-событие.
+//              'click .close': 'onclose',  //  DOM-событие с уточняющим селектором.
+//              'open': 'onopen',           //  Кастомное событие.
+//              'close': 'onclose',
+//              ...
+//          },
+//
+//          //  Дополнительные методы блока.
+//          'onclick': function() { ... },
+//          ...
+//      });
+//
+nb.define = function(name, options, base) {
+    //  Наследуем пустой класс от `nb.Block`.
+    var Class = function() {};
+    nb.inherit(Class, nb.Block);
+
+    //  Вытаскиваем из `options` информацию про события.
+    var events = options.events;
+    delete options.events;
+
+    var Parent;
+    if (base) {
+        //  Если задан базовый класс, наследуемся и от него.
+        Parent = nb.Block.__B_classes[base];
+        nb.extend(Class.prototype, Parent.prototype);
+
+        //  Выкидываем это свойство, т.к. оно будет мешаться ниже, в `__B_inheritEvents()`.
+        delete Class.prototype['__B_events'];
+    }
+
+    //  Все, что осталось в options -- это дополнительные методы блока.
+    nb.extend(Class.prototype, options);
+
+    //  Сохраняем в `Class` информацию про события (в поле `__B_events`).
+    nb.Block.__B_prepareEvents(events, Class);
+
+    if (base) {
+        //  Если задан базовый класс, то еще и наследуем события от него.
+        nb.Block.__B_inheritEvents(Class.prototype.__B_events, Parent.prototype.__B_events);
+    }
+
+    //  Сохраняем класс в кэше.
+    nb.Block.__B_classes[name] = Class;
+};
+
+//  Неленивая инициализация.
+//  Находим все ноды с классом `_init` и на каждой из них инициализируем блок.
+//  По-дефолту ищем ноды во всем документе, но можно передать ноду,
+//  внутри которой будет происходить поиск. Полезно для инициализации динамически
+//  созданных блоков.
+nb.init = function(where) {
+    where = where || document;
+
+    var nodes = where.getElementsByClassName('_init');
+    for (var i = 0, l = nodes.length; i < l; i++) {
+        nb.block( nodes[i] );
     }
 };
 
-// ----------------------------------------------------------------------------------------------------------------- //
+//  Находим ноду по ее id, создаем на ней блок и возвращаем его.
+nb.find = function(id) {
+    var node = document.getElementById(id);
+    if (node) {
+        return nb.block(node);
+    }
+};
 
-//  Добавляем интерфейс событий ко всем экземплярам блоков.
-nb.extend(nb.Block.prototype, nb.Events);
-
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
 
 //  Инициализация библиотеки
 //  ------------------------
@@ -578,8 +650,10 @@ $(function() {
             //  Идем вверх по DOM'у и ищем ноды, являющиеся блоками.
             //  Отсутствие parentNode означает, что node === document.
             while (( parent = node.parentNode )) {
+                //  Пытаемся создать блок на ноде.
                 block = nb.block(node);
                 if (block) {
+                    //  Проверяем, что у блока есть обработчик соответствующего события.
                     var method = '__B_on' + event;
                     if  ( block[method] ) {
                         if ( block[method](e) === false ) {
