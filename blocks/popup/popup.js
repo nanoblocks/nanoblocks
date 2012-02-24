@@ -238,3 +238,16 @@ nb.define('logger', {
 
 });
 
+nb.define('disabled-popup-toggler', {
+
+    events: {
+        'click': function() {
+            if ( $(this.node).hasClass('__disabled') ) {
+                console.log('disabled!');
+                return false;
+            }
+        }
+    }
+
+}, 'popup-toggler');
+

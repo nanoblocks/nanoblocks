@@ -200,18 +200,29 @@ nb.block = function(node) {
 //          ...
 //      });
 //
-nb.define = function(name, options) { // FIXME: Сделать миксины.
+nb.define = function(name, options, base) {
     var Class = function() {};
     nb.inherit(Class, nb.Block);
 
     var events = options.events;
     delete options.events;
 
+    var Parent;
+    if (base) {
+        Parent = nb.Block.__B_classes[base];
+        nb.extend(Class.prototype, Parent.prototype);
+    }
+    delete Class.prototype['__B_events'];
+
     //  Все, что осталось в options -- это дополнительные методы блока.
     nb.extend(Class.prototype, options);
 
     //  Обрабатываем объект events: делим события на DOM и кастомные.
     nb.Block.__B_prepareEvents(events, Class);
+
+    if (base) {
+        nb.Block.__B_inheritEvents(Class.prototype.__B_events, Parent.prototype.__B_events);
+    }
 
     //  Сохраняем класс в кэше.
     nb.Block.__B_classes[name] = Class;
@@ -468,6 +479,31 @@ nb.Block.__B_prepareEvents = function(events, Class) {
     //  Если у блока вообще нет ничего про `click`, то `click` не будет добавлен вовсе.
     for (var event in domEvents) {
         proto['__B_on' + event] = nb.Block.__B_eventHandlers[event];
+    }
+};
+
+nb.Block.__B_inheritEvents = function(child, parent) {
+    var p_dom = parent[0].dom;
+    var c_dom = child[0].dom;
+
+    for (var event in p_dom) {
+        var p_selectors = p_dom[event];
+        var c_selectors = c_dom[event] || (( c_dom[event] = {} ));
+
+        for (var selector in p_selectors) {
+            var p_handlers = p_selectors[selector];
+            var c_handlers = c_selectors[selector] || [];
+            c_selectors[selector] = p_handlers.concat(c_handlers);
+        }
+    }
+
+    var p_custom = parent.custom;
+    var c_custom = child.custom;
+
+    for (var event in p_custom) {
+        var p_handlers = p_custom[event];
+        var c_handlers = c_handlers[event] || [];
+        c_custom[event] = p_handlers.concat(c_handlers);
     }
 };
 
