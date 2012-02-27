@@ -16,38 +16,39 @@
 
     /* Need transparent clickable background (for IE clickable) */
     /* Tranparent by default so we could create unclickable layer */
-}
-.paranja:after {
-    content: "";
-    display: inline-block;
-    height: 100%;
-    width: 0;
 
-    vertical-align: middle;
-}
+    &:after {
+        content: "";
+        display: inline-block;
+        height: 100%;
+        width: 0;
 
-/* Contextual paranja */
-.paranja_contextual {
-    position: absolute;
-}
+        vertical-align: middle;
+    }
 
-/* Paranja theming */
-.paranja_theme_light {
-    background: #B3B3B3;
-    background: rgba(255,255,255,0.9);
-}
+    /* Contextual paranja */
+    &_contextual {
+        position: absolute;
+    }
 
-.paranja_theme_dark {
-    background: #FFF;
-    background: rgba(0,0,0,0.3);
-}
+    /* Paranja theming */
+    &_theme_light {
+        background: #B3B3B3;
+        background: rgba(255,255,255,0.9);
+    }
 
-/* Contextual styles*/
+    &_theme_dark {
+        background: #FFF;
+        background: rgba(0,0,0,0.3);
+    }
 
-/* Modal centered popup */
-.paranja>.popup {
-    position: relative;
+    /* Contextual styles*/
 
-    display: inline-block;
-    vertical-align: middle;
+    /* Modal centered popup */
+    & > .popup {
+        position: relative;
+
+        display: inline-block;
+        vertical-align: middle;
+    }
 }

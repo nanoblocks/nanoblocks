@@ -1,45 +1,53 @@
 /* Small Button*/
 .button_size_s {
     padding: 1px 8px;
-}
-.button_size_s:active {
-    padding: 2px 8px 0px;
-}
-input.button_size_s:active:hover,
-button.button_size_s:active:hover, x:-o-prefocus {
-    padding: 1px 9px 1px 7px;
-}
-.button_size_s>.button__arrow {
-    width: 11px;
-    height: 11px;
-}
-.button_size_s.button_arrowed,
-.button_size_s.button_arrowed:active {
-    padding-right: 7px;
-    margin-right: 6px;
+
+    &:active {
+        padding: 2px 8px 0px;
+
+        input&:hover,
+        button&:hover, x:-o-prefocus {
+            padding: 1px 9px 1px 7px;
+        }
+    }
+
+    &>.button__arrow {
+        width: 11px;
+        height: 11px;
+    }
+
+    &.button_arrowed,
+    &.button_arrowed:active {
+        padding-right: 7px;
+        margin-right: 6px;
+    }
 }
 
 /* Big button */
 .button_size_l {
     padding: 3px 12px;
     font-size: 15px;
-}
-.button_size_l:active {
-    padding: 4px 12px 2px;
-}
-input.button_size_l:active:hover,
-button.button_size_l:active:hover, x:-o-prefocus {
-    padding: 3px 13px 3px 11px;
-}
-.button_size_l>.button__arrow {
-    width: 16px;
-    height: 16px;
-}
-.button_size_l>.button__arrow:before {
-    top: 3px;
-}
-.button_size_l.button_arrowed,
-.button_size_l.button_arrowed:active {
-    padding-right: 11px;
-    margin-right: 10px;
+
+    &:active {
+        padding: 4px 12px 2px;
+
+        input&:hover,
+        button&:hover, x:-o-prefocus {
+            padding: 3px 13px 3px 11px;
+        }
+    }
+    &>.button__arrow {
+        width: 16px;
+        height: 16px;
+
+        &:before {
+            top: 3px;
+        }
+    }
+
+    &.button_arrowed,
+    &.button_arrowed:active {
+        padding-right: 11px;
+        margin-right: 10px;
+    }
 }
