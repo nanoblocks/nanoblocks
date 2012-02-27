@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<title>nb events bug</title>
+<script src="//yandex.st/jquery/1.7.1/jquery.js"></script>
+<script src="../nanoblocks.js"></script>
+<script>
+nb.define('bug-19', {
+    events: {
+        click: function() {
+            console.log('click');
+        }
+    }
+});
+</script>
+<style>
+div {
+    background: rgba(0,0,0,.2);
+    padding: 1em;
+    display: block;
+    border: 1px solid;
+}
+</style>
+<div data-nb="bug-19"><div><div><div>click me!

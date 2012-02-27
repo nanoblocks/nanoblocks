@@ -307,25 +307,33 @@ nb.Block.__B_domEvents.forEach(function(event) {
             //  селекторы из событий блока.
             while (1) {
                 for (var selector in events) {
+                    var isBlockNode = (node === blockNode);
 
-                    //  Проверяем, матчится ли нода на селектор.
-                    if ( !selector || $(node).is(selector) ) {
-                        //  Если событие с селектором, то передаем в обработчик ту ноду,
-                        //  которая на самом деле матчится на селектор.
-                        //  В противном случае, передаем ноду всего блока.
-                        var eventNode = (selector) ? node : blockNode;
+                    if (selector) {
+                        // Селектор не может матчится на корневую ноду блока
+                        if (isBlockNode) {
+                            continue;
+                        }
+                        if (!$(node).is(selector)) {
+                            continue;
+                        }
+                    } else {
+                        // Если селектора нет, то обработчик вызывается на корневой ноде
+                        if (!isBlockNode) {
+                            continue;
+                        }
+                    }
 
-                        //  В `handlers` лежит цепочка обработчиков этого события.
-                        //  Самый последний обработчик -- это обработчик собственно этого блока.
-                        //  Перед ним -- обработчик предка и т.д.
-                        //  Если в `nb.define` не был указан базовый блок, то длина цепочки равна 1.
-                        var handlers = events[selector];
-                        for (var j = handlers.length; j--; ) {
-                            if ( handlers[j].call(this, e, eventNode) === false ) {
-                                //  Обработчик вернул `false`, значит оставшиеся обработчики не вызываем.
-                                r = false;
-                                break;
-                            }
+                    //  В `handlers` лежит цепочка обработчиков этого события.
+                    //  Самый последний обработчик -- это обработчик собственно этого блока.
+                    //  Перед ним -- обработчик предка и т.д.
+                    //  Если в `nb.define` не был указан базовый блок, то длина цепочки равна 1.
+                    var handlers = events[selector];
+                    for (var j = handlers.length; j--; ) {
+                        if ( handlers[j].call(this, e, node) === false ) {
+                            //  Обработчик вернул `false`, значит оставшиеся обработчики не вызываем.
+                            r = false;
+                            break;
                         }
                     }
                 }
