@@ -241,8 +241,8 @@ nb.define('logger', {
 nb.define('disabled-popup-toggler', {
 
     events: {
-        'click': function() {
-            if ( $(this.node).hasClass('__disabled') ) {
+        'click': function(e, node) {
+            if ( $(node).hasClass('_disabled') ) {
                 console.log('disabled!');
                 return false;
             }
