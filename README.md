@@ -14,41 +14,47 @@ nanoblocks
 Внешний вид блоков задается html-разметкой и набором css-классов.
 Поведение задается через специальные `data`-атрибуты:
 
-    <div class="popup" data-nb="popup">
-        ...
-    </div>
+```html
+<div class="popup" data-nb="popup">
+    ...
+</div>
+```
 
 При этом название блока в css не обязано совпадать с названием блока в js:
 
-    <!-- Внешний вид другой, а поведение такое же. -->
-    <div class="dialog" data-nb="popup">
-        ...
-    </div>
+```html
+<!-- Внешний вид другой, а поведение такое же. -->
+<div class="dialog" data-nb="popup">
+    ...
+</div>
+```
 
 Блоки определяются примерно так:
 
-    nb.define('popup', {
+```javascript
+nb.define('popup', {
 
-        // События, на которые подписан блок.
-        'events': {
-            'click .close': 'onclick',
-            ...
-        },
-
-        // Методы блока (включая и обработчики событий).
-        'onclick': function(e, node) {
-            ...
-            this.close();
-        },
-
-        'close': function() {
-            $(this.node).hide();
-            return false;
-        }
-
+    // События, на которые подписан блок.
+    'events': {
+        'click .close': 'onclick',
         ...
+    },
 
-    });
+    // Методы блока (включая и обработчики событий).
+    'onclick': function(e, node) {
+        ...
+        this.close();
+    },
+
+    'close': function() {
+        $(this.node).hide();
+        return false;
+    }
+
+    ...
+
+});
+```
 
 Первым параметром в `nb.define` передается имя блока, вторым объект, описывающий методы и свойства блока.
 По сути это прототип. Свойство `events` имеет особое значение, оно описывает то, на какие
@@ -65,19 +71,21 @@ nanoblocks
 
   * Кастомные события.
 
-    events: {
+```javascript
+events: {
 
-        'click': function(e, node) {
-            ...
-        },
+    'click': function(e, node) {
+        ...
+    },
 
-        'click .foo': 'onClickFoo',
+    'click .foo': 'onClickFoo',
 
-        'open': function(e, params) {
-            ...
-        }
-
+    'open': function(e, params) {
+        ...
     }
+
+}
+```
 
 В качестве обработчика события можно указать либо функцию, либо название метода блока.
 
@@ -127,22 +135,26 @@ nanoblocks
 В случае, когда блок нужно создать сразу же после загрузки страницы,
 ему нужно задать специальный класс `_init`:
 
-    <div class="popup _init" data-nb="popup">
-        ...
+```html
+<div class="popup _init" data-nb="popup">
+    ...
+```
 
 В момент инициализации библиотеки находятся все блоки на странице с классом `_init` и для
 всех них сразу создаются экземпляры блоков. Если блок в `events` указал событие `init`, то
 он сможет сразу же выполнить какое-то действие:
 
-    nb.define('popup', {
-        events: {
-            'init': function() {
-                // do something
-            },
-            ...
+```javascript
+nb.define('popup', {
+    events: {
+        'init': function() {
+            // do something
         },
         ...
-    }
+    },
+    ...
+}
+```
 
 
 Расширение функциональности блоков
@@ -159,25 +171,29 @@ nanoblocks
 
 На одной html-ноде можно задать несколько js-блоков:
 
-    nb.define('foo', {
-        events: {
-            click: function() {
-                console.log('click foo');
-                return false;
-            }
+```javascript
+nb.define('foo', {
+    events: {
+        click: function() {
+            console.log('click foo');
+            return false;
         }
-    });
+    }
+});
 
-    nb.define('bar', {
-        events: {
-            click: function() {
-                console.log('click bar');
-                return false;
-            }
+nb.define('bar', {
+    events: {
+        click: function() {
+            console.log('click bar');
+            return false;
         }
-    });
+    }
+});
+```
 
-    <div data-nb="foo bar">foobar</div>
+```html
+<div data-nb="foo bar">foobar</div>
+```
 
 В этом примере, при клике в этот `div` будут срабатывать оба обработчика в том порядке,
 в котором они заданы в атрибуте `data-nb`.
@@ -188,40 +204,44 @@ nanoblocks
 Это вариант применим тогда, когда нужно слегка подкорректировать поведение блока.
 Или же добавить новый функционал.
 
-    nb.define('foo', {
-        events: {
-            click: function() {
-                console.log('click foo');
+```javascript
+nb.define('foo', {
+    events: {
+        click: function() {
+            console.log('click foo');
+            return false;
+        }
+    }
+});
+
+nb.define('bar', {
+
+    events: {
+        //  Если у ноды есть класс _disabled, то ничего не делаем.
+        //  Иначе вызывает родительский обработчик.
+        'click': function(e, node) {
+            if ( $(node).hasClass('_disabled') ) {
+                console.log('disabled!');
                 return false;
             }
-        }
-    });
-
-    nb.define('bar', {
-
-        events: {
-            //  Если у ноды есть класс _disabled, то ничего не делаем.
-            //  Иначе вызывает родительский обработчик.
-            'click': function(e, node) {
-                if ( $(node).hasClass('_disabled') ) {
-                    console.log('disabled!');
-                    return false;
-                }
-            },
-
-            //  Новая функциональность.
-            dblclick: 'onDoubleClick'
         },
 
-        'onDoubleClick': function() {
-            ...
-        }
+        //  Новая функциональность.
+        dblclick: 'onDoubleClick'
+    },
 
-    //  Последним параметром указываем базовый класс.
-    }, 'foo');
+    'onDoubleClick': function() {
+        ...
+    }
 
-    <div data-nb="bar">foobar</div>
-    <div class="_disabled" data-nb="bar">disabled foobar</div>
+//  Последним параметром указываем базовый класс.
+}, 'foo');
+```
+
+```html
+<div data-nb="bar">foobar</div>
+<div class="_disabled" data-nb="bar">disabled foobar</div>
+```
 
 
 ### Замена
@@ -231,18 +251,20 @@ nanoblocks
 
 Непонятно, каким образом задавать этот вариант. Вариант:
 
-    nb.define('bar', {
+```javascript
+nb.define('bar', {
 
-        events: {
+    events: {
 
-            //  Даже если этот обработчик не возвращает false,
-            //  родительский обработчик не вызывается.
-            '! click': function() {
-                ...
-            }
+        //  Даже если этот обработчик не возвращает false,
+        //  родительский обработчик не вызывается.
+        '! click': function() {
+            ...
         }
+    }
 
-    }, 'foo');
+}, 'foo');
+```
 
 
 Стандартные методы и свойства блоков
@@ -252,10 +274,12 @@ nanoblocks
 
 Функция `nb.block(node)` принимает html-ноду и возвращает блок, созданный на этой ноде.
 
-    var block = nb.block( document.getElementsByClassName('.popup')[0] );
+```javascript
+var block = nb.block( document.getElementsByClassName('.popup')[0] );
 
-    var block = nb.block( document.getElementById('my-block') );
-    var block = nb.find('my-block'); // Тоже самое.
+var block = nb.block( document.getElementById('my-block') );
+var block = nb.find('my-block'); // Тоже самое.
+```
 
 Функция `nb.find(id)` сперва ищет в документе ноду с заданным `id` и создает на ней блок.
 Лучше ей пока не пользоваться, видимо, т.к. я планирую ее расширить, чтобы она принимала
@@ -266,15 +290,17 @@ nanoblocks
 
 Все блоки имеют методы `on`, `off` и `trigger`:
 
-    var block = nb.block(...);
+```javascript
+var block = nb.block(...);
 
-    var handler = block.on('foo', function(e, params) {
-        console.log(e, params);
-    });
+var handler = block.on('foo', function(e, params) {
+    console.log(e, params);
+});
 
-    block.trigger('foo', 42);
+block.trigger('foo', 42);
 
-    block.off('foo', handler);
+block.off('foo', handler);
+```
 
 
 ### Работа с модификаторами
@@ -288,11 +314,15 @@ nanoblocks
 
 Свойство `node`:
 
-    var node = block.node; // html-нода, на которой инициализирован блок.
+```javascript
+var node = block.node; // html-нода, на которой инициализирован блок.
+```
 
 Метод `data`:
 
-    var foo = block.data('foo'); // тоже самое, что и block.node.getAttribute('data-nb-foo').
-    block.data('foo', 42); // тоже самое, что и block.node.setAttribute('data-nb-foo', 42).
+```javascript
+var foo = block.data('foo'); // тоже самое, что и block.node.getAttribute('data-nb-foo').
+block.data('foo', 42); // тоже самое, что и block.node.setAttribute('data-nb-foo', 42).
+```
 
 
