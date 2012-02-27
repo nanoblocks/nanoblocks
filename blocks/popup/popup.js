@@ -251,3 +251,11 @@ nb.define('disabled-popup-toggler', {
 
 }, 'popup-toggler');
 
+nb.define('bug', {
+    events: {
+        'click': function() {
+            console.log('bug');
+        }
+    }
+});
+
