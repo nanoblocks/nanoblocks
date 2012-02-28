@@ -530,9 +530,12 @@ nb.Block.__B_getClass = function(name) {
 //  Метод создает блок на заданной ноде:
 //
 //      var popup = nb.block( document.getElementById('popup') );
+//      var node_popup = nb.block( document.getElementById('node', 'popup'));
 //
-nb.block = function(node) {
-    var block_id = node.getAttribute('data-nb');
+nb.block = function(node, block_id) {
+    if (!block_id) {
+        block_id = node.getAttribute('data-nb');
+    }
     if (!block_id) {
         //  Эта нода не содержит блока. Ничего не делаем.
         return null;
