@@ -36,22 +36,37 @@
 
     nb.define('bug', {
         events: {
-            'click': function() {
-                console.log('bug');
-            }
+            'click': 'onclick'
+        },
+        onclick: function() {
+            console.log('bug');
+            return false;
         }
     });
+
+    nb.define('insect', {
+        events: {
+            'click': 'onclick'
+        },
+        onclick: function() {
+            this.super.onclick.call(this);
+            console.log('insect', this.super);
+            return false;
+        }
+    }, 'bug');
 </script>
 
 
-    <div data-nb="bug">
+    <div data-nb="insect">
         <div>
             <div>bug</div>
         </div>
     </div>
 
     <div class="popup popup_dropdown _hidden" data-nb="popup" id="popup-1">
+        <!--
         <div class="popup__tail"></div>
+        -->
         <a href="#" class="popup__line link">Попап #1</a>
         <a href="#" class="popup__line link">Какое-то меню</a>
         <a href="#" class="popup__line link">Ололололо</a>
