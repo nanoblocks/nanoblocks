@@ -130,7 +130,7 @@ popup._move = function(where, dir) {
 
     //  Возвращает вектор с левым верхним углом прямоугольника.
     function getOrig($o) {
-        var pos = $o.position();
+        var pos = $o.offset();
         return [ pos.left, pos.top ];
     }
 
