@@ -2,12 +2,11 @@
 (function($, doc){
 
 /* TODO
-    []  ajax request for data
-    []  data-nb-label-key="<key name>"
-    []  display result as items
     []  keyboard navigation in items
     []? item template in page: data-nb-item-template="<selector here>"
     []  make renderItem() method rewritable
+    []  show found substring
+    []? cache rendered suggest items
  */
 
 /**
@@ -37,7 +36,8 @@ suggest.events = {
 
 suggest.onInit = function() {
     // Get params from data().
-    this.delay = +this.data('delay') || 300;
+    this.delay = this.data('delay') || 300;
+
     this.min_length = +this.data('min_length') || 1;
     this.max_items = this.data('max_items') || -1; // -1 means no max.
     this.ignore_case = this.data('ignore_case') || false;
@@ -52,9 +52,6 @@ suggest.onInit = function() {
     this._requests = {};
     this._cache = {};
     this._opened = false;
-
-    this._request_timeout = null;
-    this._display_timeout = null;
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -79,21 +76,8 @@ suggest.onTextChange = function(evt) {
         return;
     }
 
-    if (!this._opened) {
-        this.popup.trigger('open', {
-            where: this.node,
-            data: {
-                dir: 'bottom'
-            }
-        });
-        this._opened = true;
-    }
-
     var text = this._text = this.$input.val().trim();
-    if (this._request_timeout) {
-        clearTimeout(this._request_timeout);
-    }
-    this._request_timeout = setTimeout(this._createRequestData(text), this.delay);
+    this._createRequest(text);
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -108,10 +92,12 @@ suggest.onClose = function() {
  * Create a new request for user entered text.
  * @param {string} text User entered text to find suggestions for.
  */
-suggest._createRequestData = function(text) {
+suggest._createRequest = function(text) {
     var that = this;
 
-    if (text in this._requests) {
+    if (text in this._cache) {
+        // We have it in the cache - display it!
+        that._showFor(text);
         return;
     }
 
@@ -143,7 +129,6 @@ suggest._createRequestData = function(text) {
             'data': data,
             'dataType': 'jsonp',
             'success': function(data) {
-
                 that._cache[text] = that._parseData(data);
                 that._showFor(text);
             },
@@ -154,8 +139,7 @@ suggest._createRequestData = function(text) {
     };
 
     this._requests[text] = request;
-
-    request.retry();
+    setTimeout(function() { request.retry(); }, this.delay);
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -173,12 +157,23 @@ suggest._showFor = function(text) {
 
     var that = this;
     var data = this._cache[text];
-    console.log(data);
+
     var $container = this.$suggest_container;
-    $container.children().remove(); // Clear old and then add new.
+    $container.children().remove(); // Clear old and then add new ones.
+
     data.forEach(function(item) {
         $container.append(that.renderItem(item));
     });
+
+    if (!this._opened) {
+        this.popup.trigger('open', {
+            where: this.node,
+            data: {
+                dir: 'bottom'
+            }
+        });
+        this._opened = true;
+    }
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
