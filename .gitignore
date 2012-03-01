@@ -1,0 +1,4 @@
+.idea/*
+*.esproj
+.DS_Store
+tags

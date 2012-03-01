@@ -168,7 +168,7 @@ nb.Block.__B_classes = {};
 nb.Block.__B_eventHandlers = {};
 
 //  Список всех поддерживаемых DOM-событий.
-nb.Block.__B_domEvents = [ 'click', 'dblclick', 'mouseup', 'mousedown', 'keydown', 'keypress', 'keyup' ]; // FIXME: Еще чего-нибудь добавить.
+nb.Block.__B_domEvents = [ 'click', 'dblclick', 'mouseup', 'mousedown', 'keydown', 'keypress', 'keyup', 'focusin' ]; // FIXME: Еще чего-нибудь добавить.
 //  Regexp для строк вида `click .foo`.
 nb.Block.__B_rx_domEvents = new RegExp( '^(' + nb.Block.__B_domEvents.join('|') + ')\\b\\s*(.*)?$' );
 
