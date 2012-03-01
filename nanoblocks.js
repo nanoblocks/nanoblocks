@@ -179,26 +179,56 @@ nb.Block.__B_cache = {};
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-//  Публичные методы
-//  ----------------
+//  Публичные методы и свойства
+//  ---------------------------
 
-//  Публичные методы у `nb.Block` следующие:
+//  Публичные свойства:
 //
-//    * `on`, 'off`, `trigger` -- миксин от `nb.Events`;
+//    * `name` -- имя блока (класс, id, ...).
+//    * `node` -- html-нода, на которой был проинициализирован блок.
+
+//  Публичные методы у `nb.Block`:
+//
+//    * `on`, 'off`, `trigger` -- миксин от `nb.Events`.
 //    * `data` -- получает/меняет `data-nb`-атрибуты блока.
 //    * `show`, `hide` -- показывает/прячет блок.
 //    * `getMod`, 'setMod`, 'delMod` -- методы для работы с модификаторами.
 
+//  ---------------------------------------------------------------------------------------------------------------  //
 
 //  Метод возвращает или устанавливает значение data-атрибута блока.
 //  Блок имеет доступ (через этот метод) только к data-атрибутам с префиксом `nb-`.
 //  Как следствие, атрибут `data-nb` недоступен -- он определяет тип блока
 //  и менять его не рекомендуется в любом случае.
+//
+//  Если вызвать метод без аргументов, то он вернет объект со всеми data-атрибутами.
+//
+//  FIXME: Унести это в nb.node.*
+//
 nb.Block.prototype.data = function(key, value) {
-    if (value !== undefined) {
-        this.node.setAttribute('data-nb-' + key, value);
+    //  Возвращаем или меняем data-атрибут.
+    if (key) {
+        if (value !== undefined) {
+            this.node.setAttribute('data-nb-' + key, value);
+        } else {
+            return this.node.getAttribute('data-nb-' + key);
+        }
     } else {
-        return this.node.getAttribute('data-nb-' + key);
+        //  Возвращаем все data-атрибуты.
+
+        var data = {};
+        var rx = /^data-nb-(.+)/;
+
+        var attrs = this.node.attributes;
+        var r;
+        for (var i = 0, l = attrs.length; i < l; i++) {
+            var attr = attrs[i];
+            if (( r = rx.exec(attr.name) )) {
+                data[ r[1] ] = attr.value;
+            }
+        }
+
+        return data;
     }
 };
 
@@ -582,26 +612,24 @@ nb.block = function(node) {
 //      });
 //
 nb.define = function(name, options, base) {
-    //  Наследуем пустой класс от `nb.Block`.
+    //  Пустой класс.
     var Class = function() {};
-    nb.inherit(Class, nb.Block);
+    //  Базовый класс.
+    var Parent = (base) ? nb.Block.__B_classes[base] : nb.Block;
+    //  Наследуем пустой класс от `nb.Block` или от блока `base`.
+    nb.inherit(Class, Parent);
+
+    //  Обнуляем свойство `__B_events`, т.к. оно будет мешаться ниже, в `__B_prepareEvents()` и `__B_inheritEvents()`.
+    //  Здесь не получается воспользоваться оператором `delete`, т.к. это свойство может быть в прототипе родителя.
+    Class.prototype.__B_events = null;
 
     //  Вытаскиваем из `options` информацию про события.
     var events = options.events;
     delete options.events;
 
-    var Parent;
-    if (base) {
-        //  Если задан базовый класс, наследуемся и от него.
-        Parent = nb.Block.__B_classes[base];
-        nb.extend(Class.prototype, Parent.prototype);
-
-        //  Выкидываем это свойство, т.к. оно будет мешаться ниже, в `__B_inheritEvents()`.
-        delete Class.prototype['__B_events'];
-    }
-
     //  Все, что осталось в options -- это дополнительные методы блока.
     nb.extend(Class.prototype, options);
+    Class.prototype.name = name;
 
     //  Сохраняем в `Class` информацию про события (в поле `__B_events`).
     nb.Block.__B_prepareEvents(events, Class);

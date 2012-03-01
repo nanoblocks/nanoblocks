@@ -1,32 +1,29 @@
-/* General purpose mixins */
+// Default config
+_ie ?= false // For smart IE including
+vendor-prefixes ?= webkit moz ms o official // Default used prefixes
 
-border-radius() {
-    -webkit-border-radius: arguments;
-       -moz-border-radius: arguments;
-            border-radius: arguments;
-}
+// Based on visionmedia's nib/vendor.styl 
+vendor(prop, args, only = null, ignore = null)
+    push(only, 'official') // Implied official properties
+    for prefix in vendor-prefixes
+        unless (only and !(prefix in only)) or (ignore and prefix in ignore) or _ie
+            if prefix == official
+                {prop}: args
+            else
+                {'-' + prefix + '-' + prop}: args
 
-box-shadow() {
-    -webkit-box-shadow: arguments;
-       -moz-box-shadow: arguments;
-            box-shadow: arguments;
-}
+border-radius()
+    vendor('border-radius', arguments, webkit moz);
 
-transform() {
-    -webkit-transform: arguments;
-       -moz-transform: arguments;
-         -o-transform: arguments;
-            transform: arguments;
-}
+box-shadow()
+    vendor('box-shadow', arguments, webkit moz);
 
-background-size() {
-    -moz-background-size: arguments;
-      -o-background-size: arguments;
-         background-size: arguments;
-}
+transform()
+    vendor('transform', arguments, webkit moz o);
 
-background-origin() {
-    -moz-background-origin: arguments;
-      -o-background-origin: arguments;
-         background-origin: arguments;
-}
+background-size()
+    vendor('background-size', arguments, moz o);
+
+background-origin()
+    vendor('background-origin', arguments, moz o);
+

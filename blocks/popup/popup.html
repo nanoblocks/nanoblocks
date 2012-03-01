@@ -10,14 +10,63 @@
 </head>
 <body>
 
-    <div data-nb="bug">
+<script>
+    nb.define('logger', {
+
+        events: {
+            'click': function() {
+                console.log('click-click');
+            }
+        }
+
+    });
+
+    nb.define('disabled-popup-toggler', {
+
+        events: {
+            'click': function(e, node) {
+                if ( $(node).hasClass('_disabled') ) {
+                    console.log('disabled!');
+                    return false;
+                }
+            }
+        }
+
+    }, 'popup-toggler');
+
+    nb.define('bug', {
+        events: {
+            'click': 'onclick'
+        },
+        onclick: function() {
+            console.log('bug');
+            return false;
+        }
+    });
+
+    nb.define('insect', {
+        events: {
+            'click': 'onclick'
+        },
+        onclick: function() {
+            this.super.onclick.call(this);
+            console.log('insect', this.super);
+            return false;
+        }
+    }, 'bug');
+</script>
+
+
+    <div data-nb="insect">
         <div>
             <div>bug</div>
         </div>
     </div>
 
     <div class="popup popup_dropdown _hidden" data-nb="popup" id="popup-1">
+        <!--
         <div class="popup__tail"></div>
+        -->
         <a href="#" class="popup__line link">Попап #1</a>
         <a href="#" class="popup__line link">Какое-то меню</a>
         <a href="#" class="popup__line link">Ололололо</a>
@@ -38,19 +87,19 @@
 
     <p style="margin-top: 150px; margin-bottom: 500px">
         Поиск Почта Фотки Что-то
-        <a href="#hello" class="link link_wrapper link_pseudo" data-nb="popup-toggler logger" data-nb-popup-id="popup-1">
+        <a href="#hello" class="link link_wrapper link_pseudo" data-nb="popup-toggler logger" data-nb-id="popup-1">
             <span class="link__inner">ещё</span>
         </a>
         и Карты Видео Директ Музыка и
-        <a href="#hello" class="link link_wrapper link_pseudo" data-nb="popup-toggler" data-nb-popup-id="popup-1" data-nb-popup-dir="left">
+        <a href="#hello" class="link link_wrapper link_pseudo" data-nb="popup-toggler" data-nb-id="popup-1" data-nb-dir="left">
             <span class="link__inner">ещё</span>
         </a>
         и Поиск Почта Фотки Что-то
-        <a href="#hello" class="link link_wrapper link_pseudo" data-nb="popup-toggler" data-nb-popup-id="popup-2" data-nb-popup-dir="right">
+        <a href="#hello" class="link link_wrapper link_pseudo" data-nb="popup-toggler" data-nb-id="popup-2" data-nb-dir="right">
             <span class="link__inner">ещё</span>
         </a>
         и Карты Видео Директ Музыка и
-        <a href="#hello" class="link link_wrapper link_pseudo _disabled" data-nb="disabled-popup-toggler" data-nb-popup-id="popup-2" data-nb-popup-dir="top">
+        <a href="#hello" class="link link_wrapper link_pseudo _disabled" data-nb="disabled-popup-toggler" data-nb-id="popup-2" data-nb-dir="top">
             <span class="link__inner">ещё</span>
         </a>
         и еще одна <a href="#" id="link-1">ссылка</a>

@@ -24,7 +24,8 @@ popup.oninit = function() {
 
 popup.onopen = function(e, params) {
     var where = params.where;
-    var dir = params.dir || 'bottom';
+    var data = params.data;
+    var dir = data.dir || 'bottom';
 
     if (this.where) {
         //  Попап уже открыт
@@ -130,7 +131,7 @@ popup._move = function(where, dir) {
 
     //  Возвращает вектор с левым верхним углом прямоугольника.
     function getOrig($o) {
-        var pos = $o.position();
+        var pos = $o.offset();
         return [ pos.left, pos.top ];
     }
 
@@ -211,51 +212,23 @@ nb.define('popup-toggler', {
     },
 
     'onclick': function() {
-        //  Находим соответствующий попап.
-        //  Соответствие задается атрибутом `popup-id`.
-        var popup = nb.find( this.data('popup-id') );
+        var data = this.data();
 
-        //  Открываем его на текущей ноде и с нужным направлением.
+        //  Находим соответствующий попап.
+        //  Соответствие задается атрибутом `id`.
+        var popup = nb.find( data['id'] );
+
         if (popup) {
             popup.trigger('open', {
+                //  Открываем его на текущей ноде.
                 where: this.node,
-                dir: this.data('popup-dir')
+                //  Передаем всю data, в частности, data['dir'] может указывать на направление открытия попапа.
+                data: data
             });
 
             return false;
         }
     }
 
-});
-
-nb.define('logger', {
-
-    events: {
-        'click': function() {
-            console.log('click-click');
-        }
-    }
-
-});
-
-nb.define('disabled-popup-toggler', {
-
-    events: {
-        'click': function(e, node) {
-            if ( $(node).hasClass('_disabled') ) {
-                console.log('disabled!');
-                return false;
-            }
-        }
-    }
-
-}, 'popup-toggler');
-
-nb.define('bug', {
-    events: {
-        'click': function() {
-            console.log('bug');
-        }
-    }
 });
 
