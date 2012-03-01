@@ -215,14 +215,14 @@ nb.define('popup-toggler', {
         var data = this.data();
 
         //  Находим соответствующий попап.
-        //  Соответствие задается атрибутом `popup-id`.
-        var popup = nb.find( data['popup-id'] );
+        //  Соответствие задается атрибутом `id`.
+        var popup = nb.find( data['id'] );
 
         if (popup) {
             popup.trigger('open', {
                 //  Открываем его на текущей ноде.
                 where: this.node,
-                //  Передаем всю data, в частности, data['popup-dir'] может указывать на направление открытия попапа.
+                //  Передаем всю data, в частности, data['dir'] может указывать на направление открытия попапа.
                 data: data
             });
 
