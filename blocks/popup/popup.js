@@ -24,7 +24,8 @@ popup.oninit = function() {
 
 popup.onopen = function(e, params) {
     var where = params.where;
-    var dir = params.dir || 'bottom';
+    var data = params.data;
+    var dir = data.dir || 'bottom';
 
     if (this.where) {
         //  Попап уже открыт
@@ -211,15 +212,18 @@ nb.define('popup-toggler', {
     },
 
     'onclick': function() {
+        var data = this.data();
+
         //  Находим соответствующий попап.
         //  Соответствие задается атрибутом `popup-id`.
-        var popup = nb.find( this.data('popup-id') );
+        var popup = nb.find( data['popup-id'] );
 
-        //  Открываем его на текущей ноде и с нужным направлением.
         if (popup) {
             popup.trigger('open', {
+                //  Открываем его на текущей ноде.
                 where: this.node,
-                dir: this.data('popup-dir')
+                //  Передаем всю data, в частности, data['popup-dir'] может указывать на направление открытия попапа.
+                data: data
             });
 
             return false;
