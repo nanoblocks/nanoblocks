@@ -1,9 +1,18 @@
 // ----------------------------------------------------------------------------------------------------------------- //
 (function($, doc){
 
+/* TODO
+    []  ajax request for data
+    []  data-nb-label-key="<key name>"
+    []  display result as items
+    []  keyboard navigation in items
+    []? item template in page: data-nb-item-template="<selector here>"
+    []  make renderItem() method rewritable
+ */
+
 /**
     Usage:
-    <input type="text" class="search_field" data-nb="suggest" data-nb-source="/ajax/search" />
+    <input type="text" class="search_field" data-nb="suggest" data-nb-source-url="/ajax/search" />
 
     Optional attributes:
     data-nb-delay - delay before making search for suggest.
@@ -12,11 +21,10 @@
     data-nb-scroll_after - TODO if there where more items returned - make suggest popup scrollable with a height of this
         number of items. TODO maybe, this must be a popup functionality.
     data-nb-ignore_case - whether to ignore case when searching, or not.
-    data-nb-source - a source of data to be rendered in suggest. It can be: array | function | url.
+    data-nb-source-url - a source url fo of data to be rendered in suggest. It can be: array | function | url.
  */
 var suggest = {};
 
-// http://localhost:8125/?text=rus
 // ----------------------------------------------------------------------------------------------------------------- //
 
 suggest.events = {
@@ -33,9 +41,11 @@ suggest.onInit = function() {
     this.min_length = +this.data('min_length') || 1;
     this.max_items = this.data('max_items') || -1; // -1 means no max.
     this.ignore_case = this.data('ignore_case') || false;
-    this.source = [] || function() {} || "some/url/that/returns/data";
+    this.label_key = this.data('label-key') || 'label';
+    this.source_url = this.data('source-url');
 
     this._createPopup();
+    this.$input = $(this.node);
 
     // Internal state.
     this._text = null;
@@ -53,28 +63,33 @@ suggest._createPopup = function() {
     var that = this;
     this.$popup = $('<div class="popup _hidden" data-nb="popup"/>')
         .appendTo(doc.body)
-        .html('<div>test</div>');
+        .html('<ul></ul>');
+    this.$suggest_container = this.$popup.find('ul');
     this.popup = nb.block(this.$popup[0]);
     this.popup.on('close', function() {
         that._opened = false;
-        console.log("close");
     });
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-suggest.onTextChange = function() {
+suggest.onTextChange = function(evt) {
+    if (evt.keyCode == 27) {
+        // Do not react on special keys.
+        return;
+    }
+
     if (!this._opened) {
         this.popup.trigger('open', {
             where: this.node,
-            dir: 'bottom'
+            data: {
+                dir: 'bottom'
+            }
         });
         this._opened = true;
-        console.log("open");
     }
-    return;
 
-    var text = this._text = this.val().trim();
+    var text = this._text = this.$input.val().trim();
     if (this._request_timeout) {
         clearTimeout(this._request_timeout);
     }
@@ -123,11 +138,12 @@ suggest._createRequestData = function(text) {
         }
 
         $.ajax({
-            'url': this.url,
+            'url': that.source_url,
             'type': 'GET',
             'data': data,
-            'dataType': 'json',
+            'dataType': 'jsonp',
             'success': function(data) {
+
                 that._cache[text] = that._parseData(data);
                 that._showFor(text);
             },
@@ -151,9 +167,24 @@ suggest._parseData = function(raw) {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 suggest._showFor = function(text) {
-    if (this.val() !== text) { // Only show suggest, if text was not changed after request has been sent.
+    if (this.$input.val() !== text) { // Only show suggest, if text was not changed after request has been sent.
         return;
     }
+
+    var that = this;
+    var data = this._cache[text];
+    console.log(data);
+    var $container = this.$suggest_container;
+    $container.children().remove(); // Clear old and then add new.
+    data.forEach(function(item) {
+        $container.append(that.renderItem(item));
+    });
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+suggest.renderItem = function(item) {
+    return $("<li></li>").html(item[this.label_key]);
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
