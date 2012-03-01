@@ -194,11 +194,32 @@ nb.Block.__B_cache = {};
 //  Блок имеет доступ (через этот метод) только к data-атрибутам с префиксом `nb-`.
 //  Как следствие, атрибут `data-nb` недоступен -- он определяет тип блока
 //  и менять его не рекомендуется в любом случае.
+//
+//  Если вызвать метод без аргументов, то он вернет объект со всеми data-атрибутами.
 nb.Block.prototype.data = function(key, value) {
-    if (value !== undefined) {
-        this.node.setAttribute('data-nb-' + key, value);
+    //  Возвращаем или меняем data-атрибут.
+    if (key) {
+        if (value !== undefined) {
+            this.node.setAttribute('data-nb-' + key, value);
+        } else {
+            return this.node.getAttribute('data-nb-' + key);
+        }
     } else {
-        return this.node.getAttribute('data-nb-' + key);
+        //  Возвращаем все data-атрибуты.
+
+        var data = {};
+        var rx = /^data-nb-(.+)/;
+
+        var attrs = this.node.attributes;
+        var r;
+        for (var i = 0, l = attrs.length; i < l; i++) {
+            var attr = attrs[i];
+            if (( r = rx.exec(attr.name) )) {
+                data[ r[1] ] = attr.value;
+            }
+        }
+
+        return data;
     }
 };
 
