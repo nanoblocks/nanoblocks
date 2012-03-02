@@ -191,8 +191,9 @@ suggest._showFor = function(text) {
         if (!this._opened) {
             this.popup.trigger('open', {
                 where: this.node,
-                data: {
-                    dir: 'bottom'
+                how: {
+                    where: 'left bottom',
+                    what: 'left top'
                 }
             });
             this._opened = true;
