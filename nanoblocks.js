@@ -215,16 +215,18 @@ nb.Block.prototype.data = function(key, value) {
         }
     } else {
         //  Возвращаем все data-атрибуты.
-
         var data = {};
-        var rx = /^data-nb-(.+)/;
 
         var attrs = this.node.attributes;
         var r;
         for (var i = 0, l = attrs.length; i < l; i++) {
             var attr = attrs[i];
-            if (( r = rx.exec(attr.name) )) {
-                data[ r[1] ] = attr.value;
+            if (( r = /^data-nb-(.+)/.exec(attr.name) )) {
+                var value = attr.value;
+                if (value.charAt(0) === '[' || value.charAt(0) === '{') {
+                    value = eval( '(' + value + ')' );
+                }
+                data[ r[1] ] = value;
             }
         }
 
@@ -702,30 +704,43 @@ nb.node = {};
 //          dir: 'top' // 'left', 'right', 'bottom'
 //      }
 //
-nb.node.position = function(what, where, dir) {
+nb.node.position = function(what, where, how) {
     var dir_where, dir_what;
 
     //  В зависимости от того, как именно задана схема открытия,
     //  выставляем `dir_what` и `dir_where`.
-    if (dir.dir) {
-        dir_where = dir.dir;
+    if (how.dir) {
+        dir_where = how.dir;
         dir_what = nb.vec.flipDir[ dir_where ];
     } else {
-        dir_where = dir.where;
-        dir_what = dir.what;
+        dir_where = how.where;
+        dir_what = how.what;
     }
-
-    var $what = $(what);
-    var $where = $(where);
 
     var add = nb.vec.add;
     var mul = nb.vec.mul;
 
-    //  Начинаем с левого верхнего угла `where`.
-    var A = getOrig($where);
-    var AB = getDiag($where);
+    var C;
+
     //  "Порорачиваем" AB в зависимости от направления `dir_where`.
-    var BC = mul( AB, nb.vec.dir2vector(dir_where) );
+    var BC_dir = nb.vec.dir2vector(dir_where);
+
+    if (where instanceof Array) {
+        C = where;
+    } else {
+        var $where = $(where);
+
+        //  Начинаем с левого верхнего угла `where`.
+        var A = getOrig($where);
+        var AB = getDiag($where);
+
+        var BC = mul(AB, BC_dir);
+
+        //  C := A + AB + BC
+        C = add( add(A, AB), BC );
+    }
+
+    var $what = $(what);
 
     var ED = getDiag($what);
     //  "Поворачиваем" ED в зависимости от направления `dir_what`.
@@ -733,12 +748,17 @@ nb.node.position = function(what, where, dir) {
     var CD = mul( mul( ED, nb.vec.dir2vector(dir_what) ), [ -1, -1 ] );
     var DE = mul( ED, [ -1, -1 ] );
 
-    //  E := A + AB + BC + CD + DE
-    var E = add( add( add( add(A, AB), BC ), CD ), DE );
+    //  E := C + CD + DE
+    var E = add( add(C, CD), DE );
 
     //  Если был задан вектор с дополнительным смещением, добавляем и его.
-    if (dir.offset) {
-        E = add(E, dir.offset);
+    var offset = how.offset;
+    if (offset) {
+        //  Если это число, то смещаем на это значение вдоль направления открытия.
+        if (typeof offset === 'number') {
+            offset = mul( BC_dir, [ offset, offset ] );
+        }
+        E = add(E, offset);
     }
 
     //  Двигаем ноду в нужное место.
@@ -755,7 +775,7 @@ nb.node.position = function(what, where, dir) {
 
     //  Возвращает вектор от левого верхнего угла до центра прямоугольника.
     function getDiag($o) {
-        return [ $o.width() / 2, $o.height() / 2 ];
+        return [ $o.outerWidth() / 2, $o.outerHeight() / 2 ];
     }
 
 };
@@ -772,7 +792,7 @@ nb.vec.add = function(a, b) {
 //  "Умножает" два вектора.
 nb.vec.mul = function(a, b) {
     return [ a[0] * b[0], a[1] * b[1] ];
-}
+};
 
 //  Превращаем строку направления вида в соответствующий вектор.
 //  Например, 'right top' -> (1, -1)
@@ -788,6 +808,8 @@ nb.vec.mul = function(a, b) {
 //  (l, b)       (c, b)      (r, b)
 //
 nb.vec.dir2vector = function(dir) {
+    dir = dir || '';
+
     var parts;
     switch (dir) {
         //  Если направление не задано, считаем, что это 'center center'.
