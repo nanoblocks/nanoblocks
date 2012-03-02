@@ -2,7 +2,6 @@
 (function($, doc){
 
 /* TODO
-    []  hide, if no variants
     []  keyboard navigation in items
     []? item template in page: data-nb-item-template="<selector here>"
     []  make renderItem() method rewritable
@@ -135,7 +134,7 @@ suggest._createRequest = function(text) {
     };
 
     request.retry = function() {
-        if (this.retries == 0) {
+        if (this.retries === 0) {
             // Clear old request. Maybe at some moment we can get needed data.
             delete that._requests[this.text];
 
@@ -176,23 +175,28 @@ suggest._showFor = function(text) {
     }
 
     var that = this;
-    var data = this._cache[text];
 
     var $container = this.$suggest_container;
     $container.children().remove(); // Clear old and then add new ones.
 
-    data.forEach(function(item) {
-        $container.append(that.renderItem(item));
-    });
+    var data = this._cache[text];
 
-    if (!this._opened) {
-        this.popup.trigger('open', {
-            where: this.node,
-            data: {
-                dir: 'bottom'
-            }
+    if (data.length <= 0) {
+        this.popup.trigger('close');
+    } else {
+        data.forEach(function(item) {
+            $container.append(that.renderItem(item));
         });
-        this._opened = true;
+
+        if (!this._opened) {
+            this.popup.trigger('open', {
+                where: this.node,
+                data: {
+                    dir: 'bottom'
+                }
+            });
+            this._opened = true;
+        }
     }
 };
 
