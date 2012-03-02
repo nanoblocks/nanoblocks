@@ -2,6 +2,7 @@
 (function($, doc){
 
 /* TODO
+    []  hide, if no variants
     []  keyboard navigation in items
     []? item template in page: data-nb-item-template="<selector here>"
     []  make renderItem() method rewritable
@@ -37,6 +38,7 @@ suggest.events = {
 suggest.onInit = function() {
     // Get params from data().
     this.delay = this.data('delay') || 300;
+    this.delay = +this.delay;
 
     this.min_length = +this.data('min_length') || 1;
     this.max_items = this.data('max_items') || -1; // -1 means no max.
@@ -52,6 +54,8 @@ suggest.onInit = function() {
     this._requests = {};
     this._cache = {};
     this._opened = false;
+
+    this._requestDataTimeout = null;
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -76,14 +80,34 @@ suggest.onTextChange = function(evt) {
         return;
     }
 
+    var that = this;
     var text = this._text = this.$input.val().trim();
-    this._createRequest(text);
+
+    if (this._requestDataTimeout) {
+        // Do not request intermediate strings.
+        clearTimeout(this._requestDataTimeout);
+    }
+    this._requestDataTimeout = setTimeout(function() { that._requestData(text); }, this.delay);
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
 suggest.onClose = function() {
     this.popup.trigger('close');
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+suggest._requestData = function(text) {
+    if (text in this._cache) {
+        this._showFor(text);
+        return;
+    }
+
+    if (!(text in this._requests)) {
+        this._createRequest(text);
+    }
+    this._requests[text].retry();
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -95,9 +119,7 @@ suggest.onClose = function() {
 suggest._createRequest = function(text) {
     var that = this;
 
-    if (text in this._cache) {
-        // We have it in the cache - display it!
-        that._showFor(text);
+    if (text in this._requests) {
         return;
     }
 
@@ -108,7 +130,6 @@ suggest._createRequest = function(text) {
     };
 
     var request = {
-        'xhr': null,
         'retries': 3, // TODO make a setting
         'retry': null
     };
@@ -139,7 +160,6 @@ suggest._createRequest = function(text) {
     };
 
     this._requests[text] = request;
-    setTimeout(function() { request.retry(); }, this.delay);
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
