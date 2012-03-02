@@ -21,6 +21,11 @@ popup.oninit = function() {
         this.modal = true;
     }
 
+    //  У попапа есть "хвостик".
+    if ( $(this.node).find('.popup__tail')[0] ) {
+        this.hasTail = true;
+    }
+
     //  FIXME: Может быть это нужно делать не тут, а где-нибудь в _show()?
     //  Переносим ноду попапа в самый конец документа,
     //  чтобы избежать разных проблем с css.
@@ -31,7 +36,7 @@ popup.oninit = function() {
 
 popup.onopen = function(e, params) {
     var where = params.where;
-    var dir = params.data.dir || 'bottom';
+    var how = params.how;
 
     //  FIXME: Нужно сделать отдельный флаг this.visible.
     if (this.where) {
@@ -41,7 +46,7 @@ popup.onopen = function(e, params) {
             this.trigger('close');
         } else {
             //  На другой ноде. Передвигаем его в нужное место.
-            this._move(where, dir);
+            this._move(where, how);
         }
     } else {
         //  Попап закрыт. Будем открывать.
@@ -50,7 +55,7 @@ popup.onopen = function(e, params) {
         nb.trigger('popup-close');
 
         //  Передвигаем попап.
-        this._move(where, dir);
+        this._move(where, how);
         //  Вешаем события, чтобы попап закрывался по нажатие ESC и клику вне попапа.
         this._bindClose();
 
@@ -107,15 +112,7 @@ popup.hide = function() {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-//  В какую сторону смещать попап для каждого из направлений.
-var dirs = {
-    'top': [ 0, -1 ],
-    'left': [ -1, 0 ],
-    'bottom': [ 0, 1 ],
-    'right': [ 1, 0 ]
-};
-
-popup._move = function(where, dir) {
+popup._move = function(where, how) {
     //  FIXME: Не нужно это делать в _move().
     //  Запоминаем, на какой ноде мы открываем попап.
     this.where = where;
@@ -125,81 +122,19 @@ popup._move = function(where, dir) {
         return;
     }
 
-    //  Дефолтное направление -- вниз.
-    dir = dir || 'bottom';
+    how = how || { dir: 'bottom' };
 
-    //  Выставляем нужный модификатор для "хвостика" попапа.
-    this.setMod('popup_to', dir);
+    if (this.hasTail) {
+        var dir = how.dir;
 
-    //  Позиционируем попап.
+        //  Выставляем нужный модификатор для "хвостика" попапа.
+        this.setMod('popup_to', dir);
 
-    //  Картинка. Попап (popup) открывается вниз под нодой where.
-    //
-    //      A-------- where
-    //      |   B   |
-    //      ---------
-    //          ^
-    //  D---------------- popup
-    //  |               |
-    //  |               |
-    //  |       C       |
-    //  |               |
-    //  |               |
-    //  -----------------
-    //
-    //  Нам нужно получить координаты левого верхнего угла попапа. Т.е. точку D.
-
-    var $where = $(where);
-    var $popup = $(this.node);
-
-    //  Начинаем мы из левого верхнего угла where -- ноды, на которой мы открываем попап (место клика обычно).
-    var A = getOrig($where);
-
-    //  Вектора AB и DC.
-    var AB = getDiag($where);
-    var DC = getDiag($popup);
-
-    //  Вектор BC -- это вектор-смещение от центра where до центра popup.
-    //  Направление его берется из объекта dirs, а длина --
-    //  это сумма полувысот where и popup (либо полуширин, если открываем вбок).
-    //  Вектор [ 12, 10 ] -- это зазор для "хвостика". По высоте он чуть меньше, чем по ширине.
-    //  FIXME: когда открываем попап вверх, нужно его смещать чуть больше, чем когда вниз.
-    var BC = mul( add( add(AB, DC), [ 12, 10 ] ), dirs[dir] );
-
-    //  Вектор CD = -DC.
-    var CD = mul( DC, [ -1, -1 ] );
-
-    //  D := A + AB + BC + CD.
-    var D = add( add( add(A, AB), BC), CD );
-
-    //  Устанавливаем нужные координаты.
-    $popup.css({
-        left: D[0],
-        top: D[1]
-    });
-
-    //  Служебные функции для работы с векторами.
-
-    //  Возвращает вектор с левым верхним углом прямоугольника.
-    function getOrig($o) {
-        var pos = $o.offset();
-        return [ pos.left, pos.top ];
+        //  FIXME: Смещение вверх и вниз должны быть разные.
+        how.offset = 10;
     }
 
-    //  Возвращает вектор от левого верхнего угла до центра прямоугольника.
-    function getDiag($o) {
-        return [ $o.width() / 2, $o.height() / 2 ];
-    }
-
-    //  Складывает два вектора.
-    function add(a, b) {
-        return [ a[0] + b[0], a[1] + b[1] ];
-    }
-
-    //  "Умножает" два вектора.
-    function mul(a, b) {
-        return [ a[0] * b[0], a[1] * b[1] ];
-    }
+    nb.node.position(this.node, where, how);
 
 };
 
@@ -227,7 +162,7 @@ popup._bindClose = function() {
 
     this._onclick = function(e) {
         //  Проверяем, что клик случился не внутри попапа и не на ноде, на которой попап открыт (если открыт).
-        if ( !$.contains(that.node, e.target) && !(that.where && $.contains(that.where, e.target)) ) {
+        if ( !$.contains(that.node, e.target) && !(that.where && !(that.where instanceof Array) && $.contains(that.where, e.target)) ) {
             that.trigger('close');
         }
     };
@@ -263,7 +198,7 @@ nb.define('popup-toggler', {
     },
 
     'onclick': function() {
-        var data = this.data();
+        var data = this.data()['popup-toggler'];
 
         //  Находим соответствующий попап.
         //  Соответствие задается атрибутом `id`.
@@ -271,10 +206,13 @@ nb.define('popup-toggler', {
 
         if (popup) {
             popup.trigger('open', {
-                //  Открываем его на текущей ноде.
-                where: this.node,
-                //  Передаем всю data, в частности, data['dir'] может указывать на направление открытия попапа.
-                data: data
+                //  Относительно чего позиционировать попап.
+                //  Если заданы точные координаты в `data.where`, то по ним.
+                //  Иначе относительно ноды этого блока.
+                where: data.where || this.node,
+
+                //  Как позиционировать попап.
+                how: data.how
             });
 
             return false;

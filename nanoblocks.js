@@ -215,16 +215,18 @@ nb.Block.prototype.data = function(key, value) {
         }
     } else {
         //  Возвращаем все data-атрибуты.
-
         var data = {};
-        var rx = /^data-nb-(.+)/;
 
         var attrs = this.node.attributes;
         var r;
         for (var i = 0, l = attrs.length; i < l; i++) {
             var attr = attrs[i];
-            if (( r = rx.exec(attr.name) )) {
-                data[ r[1] ] = attr.value;
+            if (( r = /^data-nb-(.+)/.exec(attr.name) )) {
+                var value = attr.value;
+                if (value.charAt(0) === '[' || value.charAt(0) === '{') {
+                    value = eval( '(' + value + ')' );
+                }
+                data[ r[1] ] = value;
             }
         }
 
@@ -664,6 +666,197 @@ nb.find = function(id) {
         return nb.block(node);
     }
 };
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+nb.node = {};
+
+//  Сдвигаем ноду `what` относительно `where` так, чтобы, например
+//  левый нижний угол `what` совпадал с верхним правым углом where.
+//
+//                                 what
+//                          E----------------
+//                          |               |
+//                          |               |
+//                          |       D       |
+//                          |               |
+//            where         |               |
+//  A-----------------------C----------------
+//  |                       |
+//  |                       |
+//  |                       |
+//  |           B           |
+//  |                       |
+//  |                       |
+//  |                       |
+//  -------------------------
+
+//  В `dir` может быть объект вида:
+//
+//      {
+//          what: 'left bottom',
+//          where: 'right top'
+//      }
+//
+//  или
+//
+//      {
+//          dir: 'top' // 'left', 'right', 'bottom'
+//      }
+//
+nb.node.position = function(what, where, how) {
+    var dir_where, dir_what;
+
+    //  В зависимости от того, как именно задана схема открытия,
+    //  выставляем `dir_what` и `dir_where`.
+    if (how.dir) {
+        dir_where = how.dir;
+        dir_what = nb.vec.flipDir[ dir_where ];
+    } else {
+        dir_where = how.where;
+        dir_what = how.what;
+    }
+
+    var add = nb.vec.add;
+    var mul = nb.vec.mul;
+
+    var C;
+
+    //  "Порорачиваем" AB в зависимости от направления `dir_where`.
+    var BC_dir = nb.vec.dir2vector(dir_where);
+
+    if (where instanceof Array) {
+        C = where;
+    } else {
+        var $where = $(where);
+
+        //  Начинаем с левого верхнего угла `where`.
+        var A = getOrig($where);
+        var AB = getDiag($where);
+
+        var BC = mul(AB, BC_dir);
+
+        //  C := A + AB + BC
+        C = add( add(A, AB), BC );
+    }
+
+    var $what = $(what);
+
+    var ED = getDiag($what);
+    //  "Поворачиваем" ED в зависимости от направления `dir_what`.
+    //  После чего отражаем его.
+    var CD = mul( mul( ED, nb.vec.dir2vector(dir_what) ), [ -1, -1 ] );
+    var DE = mul( ED, [ -1, -1 ] );
+
+    //  E := C + CD + DE
+    var E = add( add(C, CD), DE );
+
+    //  Если был задан вектор с дополнительным смещением, добавляем и его.
+    var offset = how.offset;
+    if (offset) {
+        //  Если это число, то смещаем на это значение вдоль направления открытия.
+        if (typeof offset === 'number') {
+            offset = mul( BC_dir, [ offset, offset ] );
+        }
+        E = add(E, offset);
+    }
+
+    //  Двигаем ноду в нужное место.
+    $what.css({
+        left: E[0],
+        top: E[1]
+    });
+
+    //  Возвращает вектор с левым верхним углом прямоугольника.
+    function getOrig($o) {
+        var pos = $o.offset();
+        return [ pos.left, pos.top ];
+    }
+
+    //  Возвращает вектор от левого верхнего угла до центра прямоугольника.
+    function getDiag($o) {
+        return [ $o.outerWidth() / 2, $o.outerHeight() / 2 ];
+    }
+
+};
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+nb.vec = {};
+
+//  Складывает два вектора.
+nb.vec.add = function(a, b) {
+    return [ a[0] + b[0], a[1] + b[1] ];
+};
+
+//  "Умножает" два вектора.
+nb.vec.mul = function(a, b) {
+    return [ a[0] * b[0], a[1] * b[1] ];
+};
+
+//  Превращаем строку направления вида в соответствующий вектор.
+//  Например, 'right top' -> (1, -1)
+//
+//  (l, t)       (c, t)      (r, t)
+//         -----------------
+//         |               |
+//         |               |
+//  (l, c) |     (c, c)    | (r, c)
+//         |               |
+//         |               |
+//         -----------------
+//  (l, b)       (c, b)      (r, b)
+//
+nb.vec.dir2vector = function(dir) {
+    dir = dir || '';
+
+    var parts;
+    switch (dir) {
+        //  Если направление не задано, считаем, что это 'center center'.
+        case '':
+            parts = [ 'center', 'center' ];
+            break;
+
+        //  Если задано только одно направление, второе выставляем в 'center'.
+        case 'left':
+        case 'right':
+        case 'center':
+            parts = [ dir, 'center' ];
+            break;
+
+        case 'top':
+        case 'bottom':
+            parts = [ 'center', dir ];
+            break;
+
+        //  FIXME: Сейчас 'top right' будет преобразовано неправильно.
+        //  Возможно, сперва нужно переставить местами части: 'top right' -> 'right top'.
+        default:
+            parts = dir.split(/\s+/);
+
+    }
+
+    var dirs = nb.vec.dirs;
+
+    return [ dirs[ parts[0] ], dirs[ parts[1] ] ];
+}
+
+nb.vec.dirs = {
+    left: -1,
+    center: 0,
+    right: 1,
+    top: -1,
+    bottom: 1
+};
+
+//  FIXME: Добавить всяких 'left top' тоже?
+nb.vec.flipDir = {
+    left: 'right',
+    right: 'left',
+    top: 'bottom',
+    bottom: 'top'
+};
+
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
