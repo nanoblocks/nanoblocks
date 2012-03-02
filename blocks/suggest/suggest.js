@@ -138,7 +138,7 @@ suggest._createRequest = function(text) {
     request.retry = function() {
         if (this.retries === 0) {
             // Clear old request. Maybe at some moment we can get needed data.
-            delete that._requests[this.text];
+            delete that._requests[text];
 
             // Sorry, no more retries.
             // TODO error logging?
