@@ -42,6 +42,7 @@ suggest.onInit = function() {
     this.ignore_case = this.data('ignore_case') || false;
     this.label_key = this.data('label-key') || 'label';
     this.source_url = this.data('source-url');
+    this.response_timeout = +this.data('timeout') || 10000;
 
     this._createPopup();
     this.$input = $(this.node);
@@ -136,7 +137,7 @@ suggest._createRequest = function(text) {
     };
 
     request.retry = function() {
-        if (this.retries === 0) {
+        if (request.retries === 0) {
             // Clear old request. Maybe at some moment we can get needed data.
             delete that._requests[text];
 
@@ -154,10 +155,13 @@ suggest._createRequest = function(text) {
                 that._cache[text] = that._parseData(data);
                 that._showFor(text);
             },
-            'error': function() { request.retry(); }
+            'error': function() {
+                request.retry();
+            },
+            'timeout': that.response_timeout
         });
 
-        this.retries--;
+        request.retries--;
     };
 
     this._requests[text] = request;
