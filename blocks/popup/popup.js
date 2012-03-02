@@ -15,18 +15,25 @@ popup.events = {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 popup.oninit = function() {
+    var data = this.data();
+
+    if ('modal' in data) {
+        this.modal = true;
+    }
+
+    //  FIXME: Может быть это нужно делать не тут, а где-нибудь в _show()?
     //  Переносим ноду попапа в самый конец документа,
     //  чтобы избежать разных проблем с css.
-    $('body').append( $(this.node) );
+    $('body').append(this.node);
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
 popup.onopen = function(e, params) {
     var where = params.where;
-    var data = params.data;
-    var dir = data.dir || 'bottom';
+    var dir = params.data.dir || 'bottom';
 
+    //  FIXME: Нужно сделать отдельный флаг this.visible.
     if (this.where) {
         //  Попап уже открыт
         if (where === this.where) {
@@ -46,6 +53,7 @@ popup.onopen = function(e, params) {
         this._move(where, dir);
         //  Вешаем события, чтобы попап закрывался по нажатие ESC и клику вне попапа.
         this._bindClose();
+
         //  Показываем.
         this.show();
     }
@@ -62,6 +70,43 @@ popup.onclose = function() {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
+//  FIXME: Паранджа, наверное, должна быть общедоступным компонентом.
+
+var _$paranja;
+
+var $paranja = function() {
+    if (!_$paranja) {
+        _$paranja = $('<div class="paranja paranja_theme_dark"></div>').hide();
+        $('body').append( _$paranja );
+    }
+
+    return _$paranja;
+}
+
+popup.show = function() {
+    //  Включаем паранджу, если нужно.
+    if (this.modal) {
+        //  Ноду блока переносим внутрь паранджи.
+        $paranja().append(this.node).show();
+    }
+
+    this.super.show.call(this);
+
+};
+
+popup.hide = function() {
+    if (this.modal) {
+        $paranja().hide();
+        //  Выносим блок из паранджи.
+        //  FIXME: А может это и не нужно. Ну и пусть все модальные диалоги копятся в ней.
+        $('body').append(this.node);
+    }
+
+    this.super.hide.call(this);
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
 //  В какую сторону смещать попап для каждого из направлений.
 var dirs = {
     'top': [ 0, -1 ],
@@ -71,11 +116,17 @@ var dirs = {
 };
 
 popup._move = function(where, dir) {
-    //  Дефолтное направление -- вниз.
-    dir = dir || 'bottom';
-
+    //  FIXME: Не нужно это делать в _move().
     //  Запоминаем, на какой ноде мы открываем попап.
     this.where = where;
+
+    //  Модальный попап двигать не нужно.
+    if (this.modal) {
+        return;
+    }
+
+    //  Дефолтное направление -- вниз.
+    dir = dir || 'bottom';
 
     //  Выставляем нужный модификатор для "хвостика" попапа.
     this.setMod('popup_to', dir);
@@ -190,7 +241,7 @@ popup._bindClose = function() {
 //  Снимаем все события, повешенные в `_bindClose`.
 popup._unbindClose = function() {
     if (this.where) {
-        $(document).off('keypress', this._onkeypress);
+        $(document).off('keydown', this._onkeypress);
         $(document).off('click', this._onclick);
         nb.off('popup-close', this._onpopupclose);
     }
