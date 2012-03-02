@@ -36,10 +36,8 @@ suggest.events = {
 
 suggest.onInit = function() {
     // Get params from data().
-    this.delay = this.data('delay') || 300;
-    this.delay = +this.delay;
-
-    this.min_length = +this.data('min_length') || 1;
+    this.delay = +this.data('delay') || 300; // Delay before displaying suggest.
+    this.min_length = +this.data('min_length') || 1; // minimal length, before autocomplete starts.
     this.max_items = this.data('max_items') || -1; // -1 means no max.
     this.ignore_case = this.data('ignore_case') || false;
     this.label_key = this.data('label-key') || 'label';
@@ -81,6 +79,11 @@ suggest.onTextChange = function(evt) {
 
     var that = this;
     var text = this._text = this.$input.val().trim();
+
+    if (text.length < this.min_length) {
+        this.popup.trigger('close');
+        return;
+    }
 
     if (this._requestDataTimeout) {
         // Do not request intermediate strings.
@@ -124,7 +127,6 @@ suggest._createRequest = function(text) {
 
     var data = {
         'text': text,
-        'min': this.min_length,
         'max': this.max_items
     };
 

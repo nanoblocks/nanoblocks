@@ -2,3 +2,4 @@
 *.esproj
 .DS_Store
 tags
+.jshintrc
