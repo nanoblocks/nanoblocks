@@ -50,7 +50,7 @@ test("Do not request while typing. Only after specified delay.", function() {
 });
 
 test("Retry request data in case of fail", function() {
-    expect(5);
+    expect(4);
 
     /* Init */
     // Fake time.
@@ -64,9 +64,6 @@ test("Retry request data in case of fail", function() {
     var $input = $('<input type="text" data-nb="suggest" data-nb-source-url="/get-suggest" data-nb-delay="500" />').appendTo(document.body);
     var suggest = nb.block($input[0]); // init new suggest block
     $input.trigger(jQuery.Event("focusin")); // on this event suggest will initialized.
-
-    // Check suggest block init was called.
-    ok(!!suggest.popup, "suggest ready");
 
     /* Scenario */
     $input.val("f").keyup();    // Type first letter.
@@ -89,9 +86,35 @@ test("Retry request data in case of fail", function() {
 });
 
 test("After text changed - make more retries", function() {
+    expect(2);
+
     /* Init */
+    // Fake time.
+    var time = sinon.useFakeTimers();
+
+    // Fake server.
+    var server = sinon.fakeServer.create();
+    server.respondWith([ 503, {}, "" ]);
+
+    // Init suggest.
+    var $input = $('<input type="text" data-nb="suggest" data-nb-source-url="/get-suggest" data-nb-delay="500" />').appendTo(document.body);
+    var suggest = nb.block($input[0]); // init new suggest block
+    $input.trigger(jQuery.Event("focusin")); // on this event suggest will initialized.
 
     /* Scenario */
+    $input.val("f").keyup();    // Type first letter.
+    time.tick(550);             // Wait more then delay for request to be started.
+    server.respond();           // Server respond with 503 first time.
+    $input.val("").keyup();     // User removes current text.
+    $input.val("f").keyup();    // And reinput the same string again.
+    time.tick(550);             // Wait more then delay for request to be started.
+    server.respond();           // Server respond with 503 first time again.
 
     /* Checks */
+    equal(server.requests.length, 6, "there must be 2 x 3 requests done");
+    equal(Object.keys(suggest._requests).length, 0, "and internal request autoremoved again");
+
+    /* Restore */
+    server.restore();
+    time.restore();
 });
