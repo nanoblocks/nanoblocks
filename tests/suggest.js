@@ -46,3 +46,19 @@ test("Do not request while typing. Only after specified delay.", function() {
     server.restore();
     time.restore();
 });
+
+test("Retry request data in case of fail", function() {
+    /* Init */
+
+    /* Scenario */
+
+    /* Checks */
+});
+
+test("After text changed - make more retries", function() {
+    /* Init */
+
+    /* Scenario */
+
+    /* Checks */
+});
