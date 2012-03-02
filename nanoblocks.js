@@ -667,6 +667,177 @@ nb.find = function(id) {
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
+nb.node = {};
+
+//  Сдвигаем ноду `what` относительно `where` так, чтобы, например
+//  левый нижний угол `what` совпадал с верхним правым углом where.
+//
+//                                 what
+//                          E----------------
+//                          |               |
+//                          |               |
+//                          |       D       |
+//                          |               |
+//            where         |               |
+//  A-----------------------C----------------
+//  |                       |
+//  |                       |
+//  |                       |
+//  |           B           |
+//  |                       |
+//  |                       |
+//  |                       |
+//  -------------------------
+
+//  В `dir` может быть объект вида:
+//
+//      {
+//          what: 'left bottom',
+//          where: 'right top'
+//      }
+//
+//  или
+//
+//      {
+//          dir: 'top' // 'left', 'right', 'bottom'
+//      }
+//
+nb.node.position = function(what, where, dir) {
+    var dir_where, dir_what;
+
+    //  В зависимости от того, как именно задана схема открытия,
+    //  выставляем `dir_what` и `dir_where`.
+    if (dir.dir) {
+        dir_where = dir.dir;
+        dir_what = nb.vec.flipDir[ dir_where ];
+    } else {
+        dir_where = dir.where;
+        dir_what = dir.what;
+    }
+
+    var $what = $(what);
+    var $where = $(where);
+
+    var add = nb.vec.add;
+    var mul = nb.vec.mul;
+
+    //  Начинаем с левого верхнего угла `where`.
+    var A = getOrig($where);
+    var AB = getDiag($where);
+    //  "Порорачиваем" AB в зависимости от направления `dir_where`.
+    var BC = mul( AB, nb.vec.dir2vector(dir_where) );
+
+    var ED = getDiag($what);
+    //  "Поворачиваем" ED в зависимости от направления `dir_what`.
+    //  После чего отражаем его.
+    var CD = mul( mul( ED, nb.vec.dir2vector(dir_what) ), [ -1, -1 ] );
+    var DE = mul( ED, [ -1, -1 ] );
+
+    //  E := A + AB + BC + CD + DE
+    var E = add( add( add( add(A, AB), BC ), CD ), DE );
+
+    //  Если был задан вектор с дополнительным смещением, добавляем и его.
+    if (dir.offset) {
+        E = add(E, dir.offset);
+    }
+
+    //  Двигаем ноду в нужное место.
+    $what.css({
+        left: E[0],
+        top: E[1]
+    });
+
+    //  Возвращает вектор с левым верхним углом прямоугольника.
+    function getOrig($o) {
+        var pos = $o.offset();
+        return [ pos.left, pos.top ];
+    }
+
+    //  Возвращает вектор от левого верхнего угла до центра прямоугольника.
+    function getDiag($o) {
+        return [ $o.width() / 2, $o.height() / 2 ];
+    }
+
+};
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+nb.vec = {};
+
+//  Складывает два вектора.
+nb.vec.add = function(a, b) {
+    return [ a[0] + b[0], a[1] + b[1] ];
+};
+
+//  "Умножает" два вектора.
+nb.vec.mul = function(a, b) {
+    return [ a[0] * b[0], a[1] * b[1] ];
+}
+
+//  Превращаем строку направления вида в соответствующий вектор.
+//  Например, 'right top' -> (1, -1)
+//
+//  (l, t)       (c, t)      (r, t)
+//         -----------------
+//         |               |
+//         |               |
+//  (l, c) |     (c, c)    | (r, c)
+//         |               |
+//         |               |
+//         -----------------
+//  (l, b)       (c, b)      (r, b)
+//
+nb.vec.dir2vector = function(dir) {
+    var parts;
+    switch (dir) {
+        //  Если направление не задано, считаем, что это 'center center'.
+        case '':
+            parts = [ 'center', 'center' ];
+            break;
+
+        //  Если задано только одно направление, второе выставляем в 'center'.
+        case 'left':
+        case 'right':
+        case 'center':
+            parts = [ dir, 'center' ];
+            break;
+
+        case 'top':
+        case 'bottom':
+            parts = [ 'center', dir ];
+            break;
+
+        //  FIXME: Сейчас 'top right' будет преобразовано неправильно.
+        //  Возможно, сперва нужно переставить местами части: 'top right' -> 'right top'.
+        default:
+            parts = dir.split(/\s+/);
+
+    }
+
+    var dirs = nb.vec.dirs;
+
+    return [ dirs[ parts[0] ], dirs[ parts[1] ] ];
+}
+
+nb.vec.dirs = {
+    left: -1,
+    center: 0,
+    right: 1,
+    top: -1,
+    bottom: 1
+};
+
+//  FIXME: Добавить всяких 'left top' тоже?
+nb.vec.flipDir = {
+    left: 'right',
+    right: 'left',
+    top: 'bottom',
+    bottom: 'top'
+};
+
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
 //  Инициализация библиотеки
 //  ------------------------
 
