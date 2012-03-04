@@ -2,7 +2,7 @@
 (function($, doc){
 
 /* TODO
-    []  keyboard navigation in items
+    []  item selection on click
     []  no item selected reaction
     []? item template in page: data-nb-item-template="<selector here>"
     []  make renderItem() method rewritable
@@ -10,6 +10,7 @@
     []? cache rendered suggest items
     []  popup long items fade
     []  scroll height
+    []  up key - cursor is going to the left and then - to the right
  */
 
 /**
@@ -74,6 +75,17 @@ suggest._createPopup = function() {
     this.popup.on('close', function() {
         that._popup_opened = false;
     });
+
+    // Init mouse events.
+    this.$suggest_container
+        .delegate('li', 'mouseenter', function(evt) {
+            var $item = $(evt.target).closest('li');
+            $item.toggleClass('current', true);
+        })
+        .delegate('li', 'mouseleave', function(evt) {
+            var $item = $(evt.target).closest('li');
+            $item.toggleClass('current', false);
+        });
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -85,11 +97,15 @@ suggest.onKeyUp = function(evt) {
     }
 
     if (evt.keyCode == 38) { // UP
+        evt.preventDefault();
+        evt.stopPropagation();
         this.selectItem(-1);
         return;
     }
 
     if (evt.keyCode == 40) { // DOWN
+        evt.preventDefault();
+        evt.stopPropagation();
         this.selectItem(1);
         return;
     }
@@ -207,7 +223,11 @@ suggest._showFor = function(text) {
         this.popup.trigger('close');
     } else {
         data.forEach(function(item) {
-            $container.append(that.renderItem(item));
+            var $item = that.renderItem(item);
+            if (!$item.is('li')) { // renderItem() can be overriden. So, we wrap rendered item with <li/> if needed.
+                $item.wrap('li');
+            }
+            $container.append($item);
         });
 
         if (!this._popup_opened) {
@@ -225,6 +245,12 @@ suggest._showFor = function(text) {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+ * This method can be overriden.
+ * We need this method to return <li/> item.
+ * So we will check it later, when rendering all items.
+ * @param {Object} item Data item to render.
+ */
 suggest.renderItem = function(item) {
     return $("<li></li>").html(item[this.label_key]);
 };
