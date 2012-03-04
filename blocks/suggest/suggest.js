@@ -2,9 +2,6 @@
 (function($, doc){
 
 /* TODO
-    []  no item selected reaction
-    []? item template in page: data-nb-item-template="<selector here>"
-    []  make renderItem() method rewritable
     []  show found substring
     []? cache rendered suggest items
     []  popup long items fade
@@ -52,6 +49,7 @@ suggest.onInit = function() {
 
     // Internal state.
     this._text = null;
+    this._suggest_text = null; // Showen suggest is for this text.
     this._requests = {};
     this._cache = {};
     this._selected = null;
@@ -238,6 +236,7 @@ suggest._showFor = function(text) {
             }
             $container.append($item);
         });
+        this._suggest_text = text;
 
         this.showSuggest();
     }
@@ -301,7 +300,7 @@ suggest.setCurrent = function(dir) {
             this.$input.val(this.getText(0));
         }
         else if ($selected.next('li').length === 0) {
-            this.$input.val(this._text);
+            this.$input.val(this._suggest_text);
         }
         else {
             $selected.next('li').addClass('current');
@@ -313,7 +312,7 @@ suggest.setCurrent = function(dir) {
             this.$input.val(this.getText($items.index($item)));
         }
         else if ($selected.prev('li').length === 0) {
-            this.$input.val(this._text);
+            this.$input.val(this._suggest_text);
         }
         else {
             $selected.prev('li').addClass('current');
@@ -329,7 +328,7 @@ suggest.setCurrent = function(dir) {
  * @param {number} index Item index.
  */
 suggest.getText = function(index) {
-    var data_item = this._cache[this._text];
+    var data_item = this._cache[this._suggest_text];
     return !!data_item ? data_item[index][this.label_key] : '';
 };
 
@@ -338,11 +337,16 @@ suggest.getText = function(index) {
 suggest.selectItem = function($item) {
     var $suggest = this.$suggest_container;
     $item = $item || $suggest.find('li.current');
-    var index = $suggest.find('li').index($item);
-    this._selected = this._cache[this._text][index];
-    this.popup.trigger('close');
 
-    this.$input.val(this.getText(index));
+    if ($item.length === 0) {
+        this._selected = { label: this.$input.val() };
+    } else {
+        var index = $suggest.find('li').index($item);
+        this._selected = this._cache[this._suggest_text][index];
+        this.$input.val(this.getText(index));
+    }
+
+    this.popup.trigger('close');
     this.trigger('selected', this._selected);
 };
 
