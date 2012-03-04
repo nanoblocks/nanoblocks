@@ -3,10 +3,13 @@
 
 /* TODO
     []  keyboard navigation in items
+    []  no item selected reaction
     []? item template in page: data-nb-item-template="<selector here>"
     []  make renderItem() method rewritable
     []  show found substring
     []? cache rendered suggest items
+    []  popup long items fade
+    []  scroll height
  */
 
 /**
@@ -28,7 +31,7 @@ var suggest = {};
 
 suggest.events = {
     'init': 'onInit',
-    'keyup': 'onTextChange',
+    'keyup': 'onKeyUp',
     'focusout': 'onClose'
 };
 
@@ -44,14 +47,15 @@ suggest.onInit = function() {
     this.source_url = this.data('source-url');
     this.response_timeout = +this.data('timeout') || 10000;
 
-    this._createPopup();
     this.$input = $(this.node);
 
     // Internal state.
     this._text = null;
     this._requests = {};
     this._cache = {};
-    this._opened = false;
+
+    this._createPopup();
+    this._popup_opened = false;
 
     this._requestDataTimeout = null;
 };
@@ -60,21 +64,33 @@ suggest.onInit = function() {
 
 suggest._createPopup = function() {
     var that = this;
-    this.$popup = $('<div class="popup _hidden" data-nb="popup"/>')
+
+    this.$popup = $('<div class="popup suggest-popup _hidden" data-nb="popup"/>')
         .appendTo(doc.body)
         .html('<ul></ul>');
     this.$suggest_container = this.$popup.find('ul');
+
     this.popup = nb.block(this.$popup[0]);
     this.popup.on('close', function() {
-        that._opened = false;
+        that._popup_opened = false;
     });
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-suggest.onTextChange = function(evt) {
-    if (evt.keyCode == 27) {
+suggest.onKeyUp = function(evt) {
+    if (evt.keyCode == 27) { // ESC
         // Do not react on special keys.
+        return;
+    }
+
+    if (evt.keyCode == 38) { // UP
+        this.selectItem(-1);
+        return;
+    }
+
+    if (evt.keyCode == 40) { // DOWN
+        this.selectItem(1);
         return;
     }
 
@@ -194,7 +210,7 @@ suggest._showFor = function(text) {
             $container.append(that.renderItem(item));
         });
 
-        if (!this._opened) {
+        if (!this._popup_opened) {
             this.popup.trigger('open', {
                 where: this.node,
                 how: {
@@ -202,7 +218,7 @@ suggest._showFor = function(text) {
                     what: 'left top'
                 }
             });
-            this._opened = true;
+            this._popup_opened = true;
         }
     }
 };
@@ -211,6 +227,56 @@ suggest._showFor = function(text) {
 
 suggest.renderItem = function(item) {
     return $("<li></li>").html(item[this.label_key]);
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+/**
+ *
+ * @param {number} dir +1 - select next item, -1 - select previous item.
+ */
+suggest.selectItem = function(dir) {
+    var $suggest = this.$suggest_container;
+    var $selected = $('li.current', $suggest);
+    var $items = $suggest.find('li');
+
+    if (dir > 0) {
+        if ($selected.length === 0) {
+            $('li:first', $suggest).addClass('current');
+            this.$input.val(this.getText(0));
+        }
+        else if ($selected.next('li').length === 0) {
+            this.$input.val(this._text);
+        }
+        else {
+            $selected.next('li').addClass('current');
+            this.$input.val(this.getText($items.index($selected) + 1));
+        }
+    } else {
+        if ($selected.length === 0) {
+            var $item = $('li:last', $suggest).addClass('current');
+            this.$input.val(this.getText($items.index($item)));
+        }
+        else if ($selected.prev('li').length === 0) {
+            this.$input.val(this._text);
+        }
+        else {
+            $selected.prev('li').addClass('current');
+            this.$input.val(this.getText($items.index($selected) - 1));
+        }
+    }
+    $selected.toggleClass('current', false);
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+/**
+ * Returns text by data item index.
+ * @param {number} index Item index.
+ */
+suggest.getText = function(index) {
+    var data_item = this._cache[this._text];
+    return !!data_item ? data_item[index][this.label_key] : '';
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
