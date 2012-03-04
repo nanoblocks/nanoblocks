@@ -1,0 +1,15 @@
+.suggest-popup ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.suggest-popup ul li {
+    padding: 0.2em;
+    margin: 0;
+}
+
+.suggest-popup ul li.current {
+    background-color: #EEE;
+    cursor: pointer;
+}
