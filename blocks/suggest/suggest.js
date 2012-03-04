@@ -2,12 +2,12 @@
 (function($, doc){
 
 /* TODO
+    []  scroll selected into view
+    []  popup long items fade
+    []  up key - cursor is going to the left and then - to the right
+    []  show current selection as highlighted?
     []  show found substring
     []? cache rendered suggest items
-    []  popup long items fade
-    []  scroll height
-    []  up key - cursor is going to the left and then - to the right
-    []  keep selection?
  */
 
 /**
@@ -44,6 +44,7 @@ suggest.onInit = function() {
     this.label_key = this.data('label-key') || 'label';
     this.source_url = this.data('source-url');
     this.response_timeout = +this.data('timeout') || 10000;
+    this.scroll_min = +this.data('scroll-min') || -1;
 
     this.$input = $(this.node);
 
@@ -229,6 +230,8 @@ suggest._showFor = function(text) {
     if (data.length <= 0) {
         this.popup.trigger('close');
     } else {
+        this.showSuggest();
+
         data.forEach(function(item) {
             var $item = that.renderItem(item);
             if (!$item.is('li')) { // renderItem() can be overriden. So, we wrap rendered item with <li/> if needed.
@@ -236,9 +239,25 @@ suggest._showFor = function(text) {
             }
             $container.append($item);
         });
+        this.$popup.css({
+            'max-height': '',
+            'overflow': ''
+        });
+
+        if (this.scroll_min > 0 && data.length > this.scroll_min) {
+            var height = 0;
+            var $items = this.$suggest_container.find('li');
+            for (var i = 0; i < this.scroll_min; i++) {
+                height += $($items[i]).outerHeight();
+            }
+            this.$popup.css({
+                'max-height': height,
+                'overflow-y': 'scroll'
+            });
+        }
+
         this._suggest_text = text;
 
-        this.showSuggest();
     }
 };
 
