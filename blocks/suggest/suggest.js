@@ -2,7 +2,6 @@
 (function($, doc){
 
 /* TODO
-    []  item selection on click
     []  no item selected reaction
     []? item template in page: data-nb-item-template="<selector here>"
     []  make renderItem() method rewritable
@@ -11,6 +10,7 @@
     []  popup long items fade
     []  scroll height
     []  up key - cursor is going to the left and then - to the right
+    []  keep selection?
  */
 
 /**
@@ -54,6 +54,7 @@ suggest.onInit = function() {
     this._text = null;
     this._requests = {};
     this._cache = {};
+    this._selected = null;
 
     this._createPopup();
     this._popup_opened = false;
@@ -85,6 +86,10 @@ suggest._createPopup = function() {
         .delegate('li', 'mouseleave', function(evt) {
             var $item = $(evt.target).closest('li');
             $item.toggleClass('current', false);
+        })
+        .delegate('li', 'click', function(evt) {
+            var $item = $(evt.target).closest('li');
+            that.selectItem($item);
         });
 };
 
@@ -98,15 +103,19 @@ suggest.onKeyUp = function(evt) {
 
     if (evt.keyCode == 38) { // UP
         evt.preventDefault();
-        evt.stopPropagation();
-        this.selectItem(-1);
+        this.setCurrent(-1);
         return;
     }
 
     if (evt.keyCode == 40) { // DOWN
         evt.preventDefault();
-        evt.stopPropagation();
-        this.selectItem(1);
+        this.setCurrent(1);
+        return;
+    }
+
+    if (evt.keyCode == 13) { // ENTER
+        evt.preventDefault();
+        this.selectItem();
         return;
     }
 
@@ -230,17 +239,30 @@ suggest._showFor = function(text) {
             $container.append($item);
         });
 
-        if (!this._popup_opened) {
-            this.popup.trigger('open', {
-                where: this.node,
-                how: {
-                    where: 'left bottom',
-                    what: 'left top'
-                }
-            });
-            this._popup_opened = true;
-        }
+        this.showSuggest();
     }
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+/**
+ * @returns {boolean} Whether popup was shown.
+ */
+suggest.showSuggest = function() {
+    if (!this._popup_opened) {
+        this.popup.trigger('open', {
+            where: this.node,
+            how: {
+                where: 'left bottom',
+                what: 'left top'
+            }
+        });
+        this._popup_opened = true;
+
+        return true;
+    }
+
+    return false;
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -261,10 +283,17 @@ suggest.renderItem = function(item) {
  *
  * @param {number} dir +1 - select next item, -1 - select previous item.
  */
-suggest.selectItem = function(dir) {
+suggest.setCurrent = function(dir) {
     var $suggest = this.$suggest_container;
     var $selected = $('li.current', $suggest);
     var $items = $suggest.find('li');
+
+    // Clear previous selection.
+    $selected.toggleClass('current', false);
+
+    if (this.showSuggest()) { // Do nothing, if popup was hidden.
+        return;
+    }
 
     if (dir > 0) {
         if ($selected.length === 0) {
@@ -291,7 +320,6 @@ suggest.selectItem = function(dir) {
             this.$input.val(this.getText($items.index($selected) - 1));
         }
     }
-    $selected.toggleClass('current', false);
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -307,6 +335,19 @@ suggest.getText = function(index) {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
+suggest.selectItem = function($item) {
+    var $suggest = this.$suggest_container;
+    $item = $item || $suggest.find('li.current');
+    var index = $suggest.find('li').index($item);
+    this._selected = this._cache[this._text][index];
+    this.popup.trigger('close');
+
+    this.$input.val(this.getText(index));
+    this.trigger('selected', this._selected);
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
 nb.define('suggest', suggest);
 
-}(jQuery, document));
+})(jQuery, document);
