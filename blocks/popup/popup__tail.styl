@@ -6,34 +6,33 @@
 
     width: 1em;
     height: 1em;
-    margin: -1em;
     clip: rect(0,0,0,0); /* Hide until mode set */
 
     .popup_to_bottom > & {
         top: 0;
         left: 50%;
-        margin-left: -.5em;
+        margin: -1em -.5em;
         clip: rect(-99em, 99em, auto, -99em)
     }
 
     .popup_to_top > & {
         bottom: 0;
         left: 50%;
-        margin-left: -.5em;
+        margin: -1em -.5em;
         clip: rect(0, 99em, 99em, -99em)
     }
 
     .popup_to_left > & {
         top: 50%;
         right: 0;
-        margin-top: -.5em;
+        margin: -.5em -1em;
         clip: rect(-99em, 99em, 99em, 0)
     }
 
     .popup_to_right > & {
         top: 50%;
         left: 0;
-        margin-top: -.5em;
+        margin: -.5em -1em;
         clip: rect(-99em, auto, 99em, -99em)
     }
 
