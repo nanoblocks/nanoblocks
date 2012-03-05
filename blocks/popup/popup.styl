@@ -1,5 +1,7 @@
+popup = prefix + 'popup'
+
 /* Popup */
-.popup {
+{popup} {
     z-index: 1073741823;
     position: absolute;
 
@@ -26,25 +28,26 @@
 
         /* Find out if it needs to be an extra class, not multiclass one */
         /* Also, all the color/decoration things could go somewhere else? */
-        &.link {
-            display: block;
+        if link {
+            &{link} {
+                display: block;
 
-            white-space: nowrap; /* Inline-only, can be  */
+                white-space: nowrap; /* Inline-only, can be  */
 
-            line-height: 1.5em;
+                line-height: 1.5em;
 
-            /* Blocky hover dropdown style */
-            .popup_theme_blocky & {
-                text-decoration: none;
+                /* Blocky hover dropdown style */
+                {popup}_theme_blocky & {
+                    text-decoration: none;
 
-                color: #000;
-            }
+                    color: #000;
+                }
 
-            .popup_theme_blocky &:hover {
-                background-color: #85CDFF;
+                {popup}_theme_blocky &:hover {
+                    background-color: #85CDFF;
+                }
             }
         }
-
     }
 
     /* Popup's separator */
@@ -61,4 +64,5 @@
     &_dropdown {
         padding: 3px 0;
     }
+
 }
