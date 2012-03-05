@@ -45,6 +45,7 @@ suggest.onInit = function() {
     this.source_url = this.data('source-url');
     this.response_timeout = +this.data('timeout') || 10000;
     this.scroll_min = +this.data('scroll-min') || -1;
+    this.expand_to_input = (this.data('expand-to-input') || '').toLowerCase() === 'true';
 
     this.$input = $(this.node);
 
@@ -69,6 +70,11 @@ suggest._createPopup = function() {
     this.$popup = $('<div class="popup suggest-popup _hidden" data-nb="popup"/>')
         .appendTo(doc.body)
         .html('<ul></ul>');
+
+    if (this.expand_to_input) {
+        this.$popup.css('width', this.$input.outerWidth());
+    }
+
     this.$suggest_container = this.$popup.find('ul');
 
     this.popup = nb.block(this.$popup[0]);
@@ -338,6 +344,9 @@ suggest.setCurrent = function(dir) {
             this.$input.val(this.getText($items.index($selected) - 1));
         }
     }
+
+    // Scroll current into view.
+
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
