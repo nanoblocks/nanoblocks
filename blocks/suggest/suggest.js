@@ -5,13 +5,13 @@
     []  scroll selected into view
     []  suggest-popup remove?
     []  когда что-то выпало - повторный клик внутри поля ввода не должен закрывать саджест
-    []  если есть данные для текущего введённого текста - показывать сразу
     []  on re - we have 2 rows! how about this?
     []  popup long items fade
     []  up key - cursor is going to the left and then - to the right
     []  show current selection as highlighted?
     []  show found substring
     []? cache rendered suggest items
+    [x]  если есть данные для текущего введённого текста - показывать сразу
  */
 
 /**
@@ -164,7 +164,14 @@ suggest.onKeyUp = function(evt) {
         // Do not request intermediate strings.
         clearTimeout(this._requestDataTimeout);
     }
-    this._requestDataTimeout = setTimeout(function() { that._requestData(text); }, this.delay);
+
+    if (text in this._cache) {
+        // Immediate display suggest for present data.
+        this._showFor(text);
+    } else {
+        // Go get data after delay.
+        this._requestDataTimeout = setTimeout(function() { that._requestData(text); }, this.delay);
+    }
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -176,11 +183,6 @@ suggest.onClose = function() {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 suggest._requestData = function(text) {
-    if (text in this._cache) {
-        this._showFor(text);
-        return;
-    }
-
     if (!(text in this._requests)) {
         this._createRequest(text);
     }
