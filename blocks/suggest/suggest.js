@@ -2,15 +2,15 @@
 (function($, doc){
 
 /* TODO
-    []  scroll selected into view
-    []  on re - we have 2 rows! how about this?
-    []  popup long items fade
     []  up key - cursor is going to the left and then - to the right
+    []  popup long items fade
+    []  on re - we have 2 rows! how about this?
     []  show current selection as highlighted?
     []  show found substring
     []? cache rendered suggest items
     [x] если есть данные для текущего введённого текста - показывать сразу
     [x] когда что-то выпало - повторный клик внутри поля ввода не должен закрывать саджест (это делает сам popup из-за кривой проверки contains())
+    [x] scroll selected into view
  */
 
 /**
@@ -380,8 +380,7 @@ suggest.setCurrent = function(dir) {
         }
     }
 
-    // Scroll current into view.
-
+    this.scrollCurrentIntoView();
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -424,6 +423,31 @@ suggest.showLoader = function() {
 suggest.hideLoader = function() {
     if (this.$loader) {
         this.$loader.toggleClass('_hidden', true);
+    }
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+suggest.scrollCurrentIntoView = function() {
+    var dy = 3; // XXX это padding...
+    var $current = this.$suggest_container.find('li.current');
+    if (!!$current.length) {
+        var wrapper = this.$popup_wrapper[0];
+        var top = wrapper.scrollTop + dy;
+        var height = this.$popup_wrapper.outerHeight();
+        var bottom = top + height;
+
+        var cur_top = wrapper.scrollTop + $current.position().top;
+        var cur_height = $current.outerHeight();
+        var cur_bottom = cur_top + cur_height;
+
+        if (cur_bottom > bottom) {
+            wrapper.scrollTop = cur_bottom - height - dy;
+        }
+
+        if (cur_top < top) {
+            wrapper.scrollTop = cur_top - dy;
+        }
     }
 };
 
