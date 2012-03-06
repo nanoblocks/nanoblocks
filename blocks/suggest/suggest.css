@@ -13,3 +13,9 @@
     background-color: #EEE;
     cursor: pointer;
 }
+
+.loader {
+    background: url('http://assets.tumblr.com/images/loading.gif') no-repeat center center;
+    height: 16px;
+    padding: 3px;
+}

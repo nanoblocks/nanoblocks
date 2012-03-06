@@ -3,6 +3,10 @@
 
 /* TODO
     []  scroll selected into view
+    []  show loader
+    []  когда что-то выпало - повторный клик внутри поля ввода не должен закрывать саджест
+    []  если есть данные для текущего введённого текста - показывать сразу
+    []  on re - we have 2 rows! how about this?
     []  popup long items fade
     []  up key - cursor is going to the left and then - to the right
     []  show current selection as highlighted?
@@ -37,15 +41,16 @@ suggest.events = {
 
 suggest.onInit = function() {
     // Get params from data().
-    this.delay = +this.data('delay') || 300; // Delay before displaying suggest.
-    this.min_length = +this.data('min_length') || 1; // minimal length, before autocomplete starts.
-    this.max_items = this.data('max_items') || -1; // -1 means no max.
-    this.ignore_case = this.data('ignore_case') || false;
-    this.label_key = this.data('label-key') || 'label';
-    this.source_url = this.data('source-url');
-    this.response_timeout = +this.data('timeout') || 10000;
-    this.scroll_min = +this.data('scroll-min') || -1;
-    this.expand_to_input = (this.data('expand-to-input') || '').toLowerCase() === 'true';
+    this.delay = this.getDataNumber('delay', 300); // Delay before displaying suggest.
+    this.min_length = this.getDataNumber('min_length', 1); // minimal length, before autocomplete starts.
+    this.max_items = this.getDataNumber('max_items', -1); // -1 means no max.
+    this.ignore_case = this.getDataBool('ignore_case');
+    this.label_key = this.getDataString('label-key', 'label');
+    this.source_url = this.getDataString('source-url');
+    this.response_timeout = this.getDataNumber('timeout', 10000);
+    this.scroll_min = this.getDataNumber('scroll-min', -1);
+    this.expand_to_input = this.getDataBool('expand-popup-to-input');
+    this.show_loader = this.getDataBool('show-loader');
 
     this.$input = $(this.node);
 
@@ -64,18 +69,38 @@ suggest.onInit = function() {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
+suggest.getDataNumber = function(key, default_value) {
+    return +this.data(key) || default_value;
+};
+
+suggest.getDataBool = function(key) {
+    return (this.data(key) || '').toLowerCase() === 'true';
+};
+
+suggest.getDataString = function(key, default_value) {
+    return this.data(key) || default_value;
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
 suggest._createPopup = function() {
     var that = this;
 
+    var html = '<ul></ul>';
+    if (this.show_loader) {
+        html = '<div class="loader _hidden"></div>' + html;
+    }
+
     this.$popup = $('<div class="popup suggest-popup _hidden" data-nb="popup"/>')
         .appendTo(doc.body)
-        .html('<ul></ul>');
+        .html(html);
 
     if (this.expand_to_input) {
         this.$popup.css('width', this.$input.outerWidth());
     }
 
     this.$suggest_container = this.$popup.find('ul');
+    this.$loader = this.$popup.find('.loader');
 
     this.popup = nb.block(this.$popup[0]);
     this.popup.on('close', function() {
@@ -184,6 +209,8 @@ suggest._createRequest = function(text) {
 
     request.retry = function() {
         if (request.retries === 0) {
+            that.hideLoader();
+
             // Clear old request. Maybe at some moment we can get needed data.
             delete that._requests[text];
 
@@ -191,6 +218,8 @@ suggest._createRequest = function(text) {
             // TODO error logging?
             return;
         }
+
+        that.showLoader();
 
         $.ajax({
             'url': that.source_url,
@@ -200,6 +229,7 @@ suggest._createRequest = function(text) {
             'success': function(data) {
                 that._cache[text] = that._parseData(data);
                 that._showFor(text);
+                that.hideLoader();
             },
             'error': function() {
                 request.retry();
@@ -376,6 +406,16 @@ suggest.selectItem = function($item) {
 
     this.popup.trigger('close');
     this.trigger('selected', this._selected);
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+suggest.showLoader = function() {
+    this.$loader.toggleClass('_hidden', false);
+};
+
+suggest.hideLoader = function() {
+    this.$loader.toggleClass('_hidden', true);
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
