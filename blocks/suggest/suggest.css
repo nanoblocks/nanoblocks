@@ -1,21 +1,24 @@
-.suggest-popup ul {
+.popup__scrollbox ul {
     list-style-type: none;
     padding: 0;
     margin: 0;
 }
 
-.suggest-popup ul li {
+.popup__scrollbox ul li {
     padding: 0.2em;
     margin: 0;
 }
 
-.suggest-popup ul li.current {
+.popup__scrollbox ul li.current {
     background-color: #EEE;
     cursor: pointer;
 }
 
 .loader {
     background: url('http://assets.tumblr.com/images/loading.gif') no-repeat center center;
+    width: 16px;
     height: 16px;
     padding: 3px;
+    vertical-align: middle;
+    display: inline-block;
 }
