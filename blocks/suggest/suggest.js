@@ -3,15 +3,14 @@
 
 /* TODO
     []  scroll selected into view
-    []  suggest-popup remove?
-    []  когда что-то выпало - повторный клик внутри поля ввода не должен закрывать саджест
     []  on re - we have 2 rows! how about this?
     []  popup long items fade
     []  up key - cursor is going to the left and then - to the right
     []  show current selection as highlighted?
     []  show found substring
     []? cache rendered suggest items
-    [x]  если есть данные для текущего введённого текста - показывать сразу
+    [x] если есть данные для текущего введённого текста - показывать сразу
+    [x] когда что-то выпало - повторный клик внутри поля ввода не должен закрывать саджест (это делает сам popup из-за кривой проверки contains())
  */
 
 /**
