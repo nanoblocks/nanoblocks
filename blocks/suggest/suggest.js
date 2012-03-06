@@ -3,7 +3,7 @@
 
 /* TODO
     []  scroll selected into view
-    []  show loader
+    []  suggest-popup remove?
     []  когда что-то выпало - повторный клик внутри поля ввода не должен закрывать саджест
     []  если есть данные для текущего введённого текста - показывать сразу
     []  on re - we have 2 rows! how about this?
@@ -86,21 +86,24 @@ suggest.getDataString = function(key, default_value) {
 suggest._createPopup = function() {
     var that = this;
 
-    var html = '<ul></ul>';
-    if (this.show_loader) {
-        html = '<div class="loader _hidden"></div>' + html;
-    }
+    this.$popup = $(
+        '<div class="popup popup_dropdown popup_theme_blocky popup_to_top _hidden" data-nb="popup">' +
+            '<div class="popup__scrollbox">' +
+                '<ul></ul>' +
+            '</div>' +
+        '</div>')
+        .appendTo(doc.body);
 
-    this.$popup = $('<div class="popup suggest-popup _hidden" data-nb="popup"/>')
-        .appendTo(doc.body)
-        .html(html);
+    if (this.show_loader) {
+        this.$loader = $('<div class="loader _hidden"></div>').insertAfter(this.$popup);
+    }
 
     if (this.expand_to_input) {
         this.$popup.css('width', this.$input.outerWidth());
     }
 
+    this.$popup_wrapper = this.$popup.find('.popup__scrollbox');
     this.$suggest_container = this.$popup.find('ul');
-    this.$loader = this.$popup.find('.loader');
 
     this.popup = nb.block(this.$popup[0]);
     this.popup.on('close', function() {
@@ -275,7 +278,7 @@ suggest._showFor = function(text) {
             }
             $container.append($item);
         });
-        this.$popup.css({
+        this.$popup_wrapper.css({
             'max-height': '',
             'overflow': ''
         });
@@ -286,7 +289,7 @@ suggest._showFor = function(text) {
             for (var i = 0; i < this.scroll_min; i++) {
                 height += $($items[i]).outerHeight();
             }
-            this.$popup.css({
+            this.$popup_wrapper.css({
                 'max-height': height,
                 'overflow-y': 'scroll'
             });
@@ -328,6 +331,7 @@ suggest.showSuggest = function() {
  * @param {Object} item Data item to render.
  */
 suggest.renderItem = function(item) {
+    // <a href="#" class="popup__line link">Улучшенное меню</a>
     return $("<li></li>").html(item[this.label_key]);
 };
 
@@ -411,11 +415,15 @@ suggest.selectItem = function($item) {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 suggest.showLoader = function() {
-    this.$loader.toggleClass('_hidden', false);
+    if (this.$loader) {
+        this.$loader.toggleClass('_hidden', false);
+    }
 };
 
 suggest.hideLoader = function() {
-    this.$loader.toggleClass('_hidden', true);
+    if (this.$loader) {
+        this.$loader.toggleClass('_hidden', true);
+    }
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
