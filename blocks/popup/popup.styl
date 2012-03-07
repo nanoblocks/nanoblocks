@@ -1,7 +1,7 @@
 popup = prefix + 'popup'
 
 /* Popup */
-{popup} {
+.{popup} {
     z-index: 1073741823;
     position: absolute;
 
@@ -29,7 +29,7 @@ popup = prefix + 'popup'
         /* Find out if it needs to be an extra class, not multiclass one */
         /* Also, all the color/decoration things could go somewhere else? */
         if link {
-            &{link} {
+            &.{link} {
                 display: block;
 
                 white-space: nowrap; /* Inline-only, can be  */
@@ -37,13 +37,13 @@ popup = prefix + 'popup'
                 line-height: 1.5em;
 
                 /* Blocky hover dropdown style */
-                {popup}_theme_blocky & {
+                .{popup}_theme_blocky & {
                     text-decoration: none;
 
                     color: #000;
                 }
 
-                {popup}_theme_blocky &:hover {
+                .{popup}_theme_blocky &:hover {
                     background-color: #85CDFF;
                 }
             }
