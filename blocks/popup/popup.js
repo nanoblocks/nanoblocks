@@ -122,19 +122,111 @@ popup._move = function(where, how) {
         return;
     }
 
+    //  Дефолтное направление открытия.
     how = how || { dir: 'bottom' };
 
-    if (this.hasTail) {
-        var dir = how.dir;
+    //  Если направление задано через dir, пересчитываем это в what/where.
 
-        //  Выставляем нужный модификатор для "хвостика" попапа.
-        this.setMod('popup_to', dir);
-
-        //  FIXME: Смещение вверх и вниз должны быть разные.
-        how.offset = 10;
+    var whatDir, whereDir;
+    if (how.dir) {
+        //  Скажем, если dir === 'bottom', то where === 'bottom', а what === 'top'.
+        //  nb.vev.flipDir возвращает противоположное направление.
+        whatDir = nb.vec.flipDir[ how.dir ];
+        whereDir = how.dir;
+    } else {
+        whatDir = how.what;
+        whereDir = how.where;
     }
 
-    nb.node.position(this.node, where, how);
+    whatDir = normalizeDir(whatDir);
+    whereDir = normalizeDir(whereDir);
+
+    var adjusted = nb.rect.adjust( nb.rect(this.node), nb.rect(where), { what: whatDir, where: whereDir } );
+
+    var transforms = {
+        'left bottom':  [ [  1,  0 ], [  0,  1 ] ],
+        'right bottom': [ [ -1,  0 ], [  0,  1 ] ],
+        'top left':     [ [  0,  1 ], [ -1,  0 ] ],
+        'bottom left':  [ [  0, -1 ], [ -1,  0 ] ],
+        'right top':    [ [ -1,  0 ], [  0, -1 ] ],
+        'left top':     [ [  1,  0 ], [  0, -1 ] ],
+        'bottom right': [ [  0, -1 ], [  1,  0 ] ],
+        'top right':    [ [  0,  1 ], [  1,  0 ] ]
+    };
+
+    if (this.hasTail) {
+        var tailDir = tailDirs(whatDir, whereDir);
+        var transform = transforms[ tailDir.join(' ') ];
+        console.log(transform);
+    }
+
+    function normalizeDir(dir) {
+        dir = dir || '';
+
+        var parts;
+        switch (dir) {
+            //  Если направление не задано, считаем, что это 'center center'.
+            case '':
+                parts = [ 'center', 'center' ];
+                break;
+
+            //  Если задано только одно направление, второе выставляем в 'center'.
+            case 'left':
+            case 'right':
+            case 'center':
+                parts = [ dir, 'center' ];
+                break;
+
+            case 'top':
+            case 'bottom':
+                parts = [ 'center', dir ];
+                break;
+
+            default:
+                parts = dir.split(/\s+/);
+
+                //  В случае 'top right' и т.д. переставляем части местами.
+                //  Одного сравнения недостаточно, потому что может быть 'top center' или 'center left'.
+                if ( /^(?:left|right)/.test( parts[1] ) || /^(?:top|bottom)/.test( parts[0] ) ) {
+                    parts = [ parts[1], parts[0] ];
+                }
+        }
+
+        return parts;
+    }
+
+    function tailDirs(what, where) {
+
+        if ( what[0] === where[0] && nb.vec.flipDir[ what[1] ] === where[1] ) {
+            return where;
+        }
+
+        if ( what[1] === where[1] && nb.vec.flipDir[ what[0] ] === where[0] ) {
+            return [ where[1], where[0] ];
+        }
+
+    };
+
+    var pos = adjusted[0];
+
+    $(this.node).css({
+        left: pos[0],
+        top: pos[1]
+    });
+/*
+
+if (this.hasTail) {
+    var dir = how.dir;
+
+    //  Выставляем нужный модификатор для "хвостика" попапа.
+    this.setMod('popup_to', dir);
+
+    //  FIXME: Смещение вверх и вниз должны быть разные.
+    how.offset = 10;
+}
+
+nb.node.position(this.node, where, how);
+*/
 
 };
 
@@ -220,4 +312,6 @@ nb.define('popup-toggler', {
     }
 
 });
+
+//  ---------------------------------------------------------------------------------------------------------------  //
 
