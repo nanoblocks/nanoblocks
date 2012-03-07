@@ -22,3 +22,23 @@
     vertical-align: middle;
     display: inline-block;
 }
+
+.loader_new {
+    position: absolute;
+    display: inline-block;
+    background: url('http://assets.tumblr.com/images/loading.gif') no-repeat center center;
+    width: 16px;
+    height: 16px;
+    padding: 0px;
+    margin-top: 2px;
+
+    opacity: 0;
+
+    -webkit-transition-property: opacity;
+    -webkit-transition-duration: 0.3s;
+    transition-timing-function: default;
+}
+
+.loader_new__show {
+    opacity: 1;
+}

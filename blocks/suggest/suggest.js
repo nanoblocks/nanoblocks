@@ -94,7 +94,18 @@ suggest._createPopup = function() {
         .appendTo(doc.body);
 
     if (this.show_loader) {
-        this.$loader = $('<div class="loader _hidden"></div>').insertAfter(this.$popup);
+        var $input = this.$input;
+        var offset = $input.offset();
+        var width = $input.outerWidth();
+
+        this.$loader = $('<div class="loader_new"></div>')
+            .insertBefore(this.$popup);
+
+        var loader_width = this.$loader.outerWidth();
+        this.$loader.css({
+            'left': offset.left + width - loader_width,
+            'top': offset.top
+        });
     }
 
     if (this.expand_to_input) {
@@ -416,13 +427,13 @@ suggest.selectItem = function($item) {
 
 suggest.showLoader = function() {
     if (this.$loader) {
-        this.$loader.toggleClass('_hidden', false);
+        this.$loader.toggleClass('loader_new__show', true);
     }
 };
 
 suggest.hideLoader = function() {
     if (this.$loader) {
-        this.$loader.toggleClass('_hidden', true);
+        this.$loader.toggleClass('loader_new__show', false);
     }
 };
 
