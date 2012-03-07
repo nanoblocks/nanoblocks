@@ -22,9 +22,8 @@ popup.oninit = function() {
     }
 
     //  У попапа есть "хвостик".
-    if ( $(this.node).find('.popup__tail')[0] ) {
-        this.hasTail = true;
-    }
+    this.$tail = $(this.node).find('.popup__tail');
+    this.hasTail = !!this.$tail.length;
 
     //  FIXME: Может быть это нужно делать не тут, а где-нибудь в _show()?
     //  Переносим ноду попапа в самый конец документа,
@@ -122,19 +121,191 @@ popup._move = function(where, how) {
         return;
     }
 
-    how = how || { dir: 'bottom' };
+    how = normalizeHow(how);
 
-    if (this.hasTail) {
-        var dir = how.dir;
+    //  Изначальные прямоугольники для what и where.
+    var orig_what = nb.rect(this.node);
+    var where = nb.rect(where);
 
-        //  Выставляем нужный модификатор для "хвостика" попапа.
-        this.setMod('popup_to', dir);
+    //  Adjusted what -- т.е. мы what передвинули так, чтобы точки привязки what и where совпадали.
+    //  adj_what -- это объект с двумя свойствами:
+    //
+    //    * rect -- это собственно сдвинутый what.
+    //    * point -- это точка привязки, куда мы его сдвинули.
+    //
+    var adj_what = nb.rect.adjust(orig_what, where, how);
+    var what = adj_what.rect;
 
-        //  FIXME: Смещение вверх и вниз должны быть разные.
-        how.offset = 10;
+    var tailDir;
+    var needTail = this.hasTail && (( tailDir = tailDirs(how.what, how.where) ));
+
+    if (needTail) {
+        //  Показываем "хвост" с нужной стороны попапа.
+        this.setMod( 'popup_to', tailDir[1] );
+
+        //  Позиционируем "хвост", если он должен быть не по-центру попапа.
+        if ( tailDir[0] !== 'center' ) {
+            //  Сдвиг, который делает точку привязки началом координат.
+            var offset2origin = nb.vec.scale(adj_what.point, -1);
+
+            //  Преобразование в "положение 1".
+            var transform = transforms[ tailDir.join(' ') ];
+
+            var t_what = nb.rect.trans( nb.rect.move(what, offset2origin), transform );
+            var t_where = nb.rect.trans( nb.rect.move(where, offset2origin), transform );
+
+            //  После этих преобразований мы получаем, что точка привязки сместилась в начало координат,
+            //  левый нижний угол where в начале координат, левый верхний угол what в начале координат.
+            //
+            //  -------------
+            //  |   where   |
+            //  |           |
+            //  *-------------------
+            //  |       what       |
+            //  |                  |
+            //  |                  |
+            //  |                  |
+            //  --------------------
+            //
+
+            //  Слевы положение "хвоста" ограничено некой константой.
+            var MIN_LEFT = 27;
+            //  Справа -- минимумом из середин what и where.
+            var r = Math.min( t_what[1][0] / 2, t_where[1][0] / 2);
+
+            var x;
+            if (MIN_LEFT <= r) {
+                //  Для "хвоста" достаточно места.
+
+                x = r;
+            } else {
+                //  "Хвост" не влезает, поэтому необходимо подвинуть и сам попап.
+
+                x = MIN_LEFT;
+                t_what = nb.rect.move( t_what, [ r - MIN_LEFT, 0 ] );
+            }
+
+            //  Зазор для "хвоста".
+            t_what = nb.rect.move( t_what, [ 0, 10 ] );
+
+            what = nb.rect.move( nb.rect.trans( nb.rect.trans( nb.rect.trans( t_what, transform ), transform ), transform ), adj_what.point );
+
+            var tailOffset = nb.vec.mulM( transform, nb.vec.mulM( transform, nb.vec.mulM( transform, [ x, 0] ) ) );
+
+            var x = tailOffset[0], y = tailOffset[1];
+            var css;
+            if (x) {
+                if (x > 0) {
+                    css = { left: x, right: 'auto' };
+                } else {
+                    css = { left: 'auto', right: -x };
+                }
+            } else {
+                if (y > 0) {
+                    css = { top: y, bottom: 'auto' };
+                } else {
+                    css = { top: 'auto', bottom: -y };
+                }
+            }
+
+            this.$tail.css(css);
+
+        } else {
+            //  "Хвост" позиционируется через стили, заданные в css.
+            this.$tail.css({ left: 'auto', right: 'auto' });
+        }
+
+        this.$tail.show();
+    } else {
+        this.$tail.hide();
     }
 
-    nb.node.position(this.node, where, how);
+    $(this.node).css({
+        left: what[0][0],
+        top: what[0][1]
+    });
+
+};
+
+function normalizeHow(how) {
+    //  Дефолтное направление открытия.
+    how = how || { dir: 'bottom' };
+
+    var what, where;
+
+    //  Если направление задано через dir, пересчитываем это в what/where.
+    if (how.dir) {
+        //  Скажем, если dir === 'bottom', то where === 'bottom', а what === 'top'.
+        //  nb.vev.flipDir возвращает противоположное направление.
+        what = nb.vec.flipDir[ how.dir ];
+        where = how.dir;
+    } else {
+        what = how.what;
+        where = how.where;
+    }
+
+    return {
+        what: normalizeDir(what),
+        where: normalizeDir(where)
+    };
+}
+
+
+var transforms = {
+    'left bottom':  [ [  1,  0 ], [  0,  1 ] ],
+    'right bottom': [ [ -1,  0 ], [  0,  1 ] ],
+    'top left':     [ [  0,  1 ], [ -1,  0 ] ],
+    'bottom left':  [ [  0, -1 ], [ -1,  0 ] ],
+    'right top':    [ [ -1,  0 ], [  0, -1 ] ],
+    'left top':     [ [  1,  0 ], [  0, -1 ] ],
+    'bottom right': [ [  0, -1 ], [  1,  0 ] ],
+    'top right':    [ [  0,  1 ], [  1,  0 ] ]
+};
+
+function normalizeDir(dir) {
+    dir = dir || '';
+
+    var parts;
+    switch (dir) {
+        //  Если направление не задано, считаем, что это 'center center'.
+        case '':
+            parts = [ 'center', 'center' ];
+            break;
+
+        //  Если задано только одно направление, второе выставляем в 'center'.
+        case 'left':
+        case 'right':
+        case 'center':
+            parts = [ dir, 'center' ];
+            break;
+
+        case 'top':
+        case 'bottom':
+            parts = [ 'center', dir ];
+            break;
+
+        default:
+            parts = dir.split(/\s+/);
+
+            //  В случае 'top right' и т.д. переставляем части местами.
+            //  Одного сравнения недостаточно, потому что может быть 'top center' или 'center left'.
+            if ( /^(?:left|right)/.test( parts[1] ) || /^(?:top|bottom)/.test( parts[0] ) ) {
+                parts = [ parts[1], parts[0] ];
+            }
+    }
+
+    return parts;
+}
+
+function tailDirs(what, where) {
+
+    if ( what[0] === where[0] && nb.vec.flipDir[ what[1] ] === where[1] ) {
+        return where;
+    }
+
+    if ( what[1] === where[1] && nb.vec.flipDir[ what[0] ] === where[0] ) {
+        return [ where[1], where[0] ];
+    }
 
 };
 
@@ -220,4 +391,6 @@ nb.define('popup-toggler', {
     }
 
 });
+
+//  ---------------------------------------------------------------------------------------------------------------  //
 
