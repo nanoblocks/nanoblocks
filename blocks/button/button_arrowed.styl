@@ -72,33 +72,34 @@
 
         transform: scale(0.65, 1.04) rotate(45deg);
 
-        .{button}_arrowed:focus > & {
-            box-shadow: 0 0 2px 0 rgba(255,229,131,.6), 0 0 2px 0 rgba(255,229,131,.6);
-        }
+    }
 
-        .{button}_arrowed:active > & {
-            background-image: -webkit-linear-gradient(-45deg,rgba(216,216,216,.66),rgba(251,251,251,.8)),\
-            -webkit-linear-gradient(-45deg,rgba(91,91,91,.6),rgba(91,91,91,.6)),\
-            -webkit-linear-gradient(-45deg,rgba(109,109,109,.4),rgba(109,109,109,.4));
-            background-image: -moz-linear-gradient(-45deg,rgba(216,216,216,.66),rgba(251,251,251,.8)),\
-            -moz-linear-gradient(-45deg,rgba(91,91,91,.6),rgba(91,91,91,.6)),\
-            -moz-linear-gradient(-45deg,rgba(109,109,109,.4),rgba(109,109,109,.4));
-            background-image: -o-linear-gradient(-45deg,rgba(216,216,216,.66),rgba(251,251,251,.8)),\
-            -o-linear-gradient(-45deg,rgba(91,91,91,.6),rgba(91,91,91,.6)),\
-            -o-linear-gradient(-45deg,rgba(109,109,109,.4),rgba(109,109,109,.4));
-            background-image: linear-gradient(-45deg,rgba(216,216,216,.66),rgba(251,251,251,.8)),\
-            linear-gradient(-45deg,rgba(91,91,91,.6),rgba(91,91,91,.6)),\
-            linear-gradient(-45deg,rgba(109,109,109,.4),rgba(109,109,109,.4));
-            background-position: 0 0, 0 0, 100% 0;
-        }
+    .{button}_arrowed:focus > &:before {
+        box-shadow: 0 0 2px 0 rgba(255,229,131,.6), 0 0 2px 0 rgba(255,229,131,.6);
+    }
 
-        .{button}_arrowed:active > & {
-            box-shadow: inset 0 1px 4px rgba(0,0,0,.4);
-        }
+    .{button}_arrowed:active > &:before {
+        background-image: -webkit-linear-gradient(-45deg,rgba(216,216,216,.66),rgba(251,251,251,.8)),\
+        -webkit-linear-gradient(-45deg,rgba(91,91,91,.6),rgba(91,91,91,.6)),\
+        -webkit-linear-gradient(-45deg,rgba(109,109,109,.4),rgba(109,109,109,.4));
+        background-image: -moz-linear-gradient(-45deg,rgba(216,216,216,.66),rgba(251,251,251,.8)),\
+        -moz-linear-gradient(-45deg,rgba(91,91,91,.6),rgba(91,91,91,.6)),\
+        -moz-linear-gradient(-45deg,rgba(109,109,109,.4),rgba(109,109,109,.4));
+        background-image: -o-linear-gradient(-45deg,rgba(216,216,216,.66),rgba(251,251,251,.8)),\
+        -o-linear-gradient(-45deg,rgba(91,91,91,.6),rgba(91,91,91,.6)),\
+        -o-linear-gradient(-45deg,rgba(109,109,109,.4),rgba(109,109,109,.4));
+        background-image: linear-gradient(-45deg,rgba(216,216,216,.66),rgba(251,251,251,.8)),\
+        linear-gradient(-45deg,rgba(91,91,91,.6),rgba(91,91,91,.6)),\
+        linear-gradient(-45deg,rgba(109,109,109,.4),rgba(109,109,109,.4));
+        background-position: 0 0, 0 0, 100% 0;
+    }
 
-        .{button}_arrowed:focus:active > & {
-            box-shadow: inset 1px 1px 4px rgba(0,0,0,.2), 0 0 2px 0 rgba(255,229,131,.6), 0 0 2px 0 rgba(255,229,131,.6);
-        }
+    .{button}_arrowed:active > &:before {
+        box-shadow: inset 0 1px 4px rgba(0,0,0,.4);
+    }
+
+    .{button}_arrowed:focus:active > &:before {
+        box-shadow: inset 1px 1px 4px rgba(0,0,0,.2), 0 0 2px 0 rgba(255,229,131,.6), 0 0 2px 0 rgba(255,229,131,.6);
     }
 }
 

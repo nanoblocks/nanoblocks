@@ -26,28 +26,29 @@ popup ?= prefix + 'popup'
     &__line {
         display: block;
         padding: 3px 12px;
+    }
 
-        /* Find out if it needs to be an extra class, not multiclass one */
-        /* Also, all the color/decoration things could go somewhere else? */
-        &.{link} {
-            display: block;
+    /* Find out if it needs to be an extra class, not multiclass one */
+    /* Also, all the color/decoration things could go somewhere else? */
+    &__line.{link} {
+        display: block;
 
-            white-space: nowrap; /* Inline-only, can be  */
+        white-space: nowrap; /* Inline-only, can be  */
 
-            line-height: 1.5em;
+        line-height: 1.5em;
 
-            /* Blocky hover dropdown style */
-            .{popup}_theme_blocky & {
-                text-decoration: none;
+        /* Blocky hover dropdown style */
+        .{popup}_theme_blocky & {
+            text-decoration: none;
 
-                color: #000;
-            }
+            color: #000;
+        }
 
-            .{popup}_theme_blocky &:hover {
-                background-color: #85CDFF;
-            }
+        .{popup}_theme_blocky &:hover {
+            background-color: #85CDFF;
         }
     }
+
 
     /* Popup's separator */
     &__hr {

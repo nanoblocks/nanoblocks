@@ -5,10 +5,11 @@
     &:active {
         padding: 2px 8px 0px;
 
-        input&:hover,
-        button&:hover, x:-o-prefocus {
-            padding: 1px 9px 1px 7px;
-        }
+    }
+
+    input&:active:hover,
+    button&:active:hover{o-selector-hack} {
+        padding: 1px 9px 1px 7px;
     }
 
     & > .{button}__arrow {
@@ -31,11 +32,13 @@
     &:active {
         padding: 4px 12px 2px;
 
-        input&:hover,
-        button&:hover, x:-o-prefocus {
-            padding: 3px 13px 3px 11px;
-        }
     }
+
+    input&:active:hover,
+    button&:active:hover{o-selector-hack} {
+        padding: 3px 13px 3px 11px;
+    }
+
     & > .{button}__arrow {
         width: 16px;
         height: 16px;
