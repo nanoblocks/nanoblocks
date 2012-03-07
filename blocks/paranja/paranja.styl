@@ -1,5 +1,5 @@
-paranja = prefix + 'paranja'
-
+popup ?= prefix + 'popup'
+paranja ?= prefix + 'paranja'
 
 /* Layer to fade out the page or a block */
 .{paranja} {
@@ -45,15 +45,11 @@ paranja = prefix + 'paranja'
         background: rgba(0,0,0,0.3);
     }
 
-    /* Contextual styles*/
+    /* Modal centered popup */
+    & > .{popup} {
+        position: relative;
 
-    if popup {
-        /* Modal centered popup */
-        & > .{popup} {
-            position: relative;
-
-            display: inline-block;
-            vertical-align: middle;
-        }
+        display: inline-block;
+        vertical-align: middle;
     }
 }
