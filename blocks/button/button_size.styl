@@ -7,20 +7,20 @@
 
     }
 
-    input&:active:hover,
-    button&:active:hover{o-selector-hack} {
-        padding: 1px 9px 1px 7px;
-    }
-
     & > .{button}__arrow {
-        width: 11px;
-        height: 11px;
+        width: .85em;
+        height: .85em;
     }
 
     &.{button}_arrowed,
     &.{button}_arrowed:active {
         padding-right: 7px;
         margin-right: 6px;
+    }
+
+    button&.{button}_arrowed:active:hover{o-selector-hack} {
+        padding-left: 8px;
+        padding-right: 7px;
     }
 }
 
@@ -31,21 +31,16 @@
 
     &:active {
         padding: 4px 12px 2px;
-
     }
 
-    input&:active:hover,
-    button&:active:hover{o-selector-hack} {
-        padding: 3px 13px 3px 11px;
+    button&.{button}_arrowed:active:hover{o-selector-hack} {
+        padding-right: 11px;
+        padding-left: 12px;
     }
 
     & > .{button}__arrow {
-        width: 16px;
-        height: 16px;
-
-        &:before {
-            top: 3px;
-        }
+        width: 1.07em;
+        height: 1.07em;
     }
 
     &.{button}_arrowed,
