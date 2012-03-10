@@ -1,24 +1,24 @@
 popup ?= prefix + 'popup'
 paranja ?= prefix + 'paranja'
 
-/* Layer to fade out the page or a block */
+// Layer to fade out the page or a block
 .{paranja} {
     z-index: 1073741823;
-    position: fixed; /* Need to add iOS/IE6 fallback */
+    position: fixed; // Need to add iOS/IE6 fallback
     top: 0;
     left: 0;
 
-    /* Can be replaced with padding+bottom+right */
+    // Can be replaced with padding+bottom+right
     width: 100%;
     height: 100%;
 
-    overflow: auto; /* So big popups could be scrolled */
+    overflow: auto; // So big popups could be scrolled
 
     text-align: center;
     white-space: nowrap;
 
-    /* Need transparent clickable background (for IE clickable) */
-    /* Tranparent by default so we could create unclickable layer */
+    // Need transparent clickable background (for IE clickable)
+    // Tranparent by default so we could create unclickable layer
 
     &:after {
         content: "";
@@ -29,12 +29,12 @@ paranja ?= prefix + 'paranja'
         vertical-align: middle;
     }
 
-    /* Contextual paranja */
+    // Contextual paranja
     &_contextual {
         position: absolute;
     }
 
-    /* Paranja theming */
+    // Paranja theming
     &_theme_light {
         background: #B3B3B3;
         background: rgba(255,255,255,0.9);
@@ -45,7 +45,7 @@ paranja ?= prefix + 'paranja'
         background: rgba(0,0,0,0.3);
     }
 
-    /* Modal centered popup */
+    // Modal centered popup
     & > .{popup} {
         position: relative;
 

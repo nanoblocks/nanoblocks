@@ -7,8 +7,8 @@ button ?= prefix + 'button'
 
     display: inline-block;
     vertical-align: middle;
-    overflow: hidden; /* Active state won't make baseline jumps */
-    overflow: visible; if _ie /* IE padding fix */
+    overflow: hidden; // Active state won't make baseline jumps
+    overflow: visible; if _ie // IE padding fix
 
     padding: 2px 10px;
     margin: -3px 0 0;
@@ -43,7 +43,7 @@ button ?= prefix + 'button'
 
     border-radius: 3px;
 
-    /* Pseudo-elements to better state styling */
+    // Pseudo-elements to better state styling
     &:before {
         content: "";
         position: absolute;
@@ -97,7 +97,7 @@ button ?= prefix + 'button'
         box-shadow: 0 0 3px 1px rgba(255,229,131,.8);
     }
 
-    /* Fixing mozilla's inner paddings */
+    // Fixing mozilla's inner paddings
     &::-moz-focus-inner {
         padding: 0;
         border: none;

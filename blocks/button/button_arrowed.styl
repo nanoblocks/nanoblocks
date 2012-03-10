@@ -1,16 +1,16 @@
-/* Crazy arrowed button mode */
+// Crazy arrowed button mode
 
-/* TODO:
-   1. hover pointer
-   2. fix everything in Fx
-   3. adjust paddings
-   4. add more sizes
-*/
+// TODO:
+//   1. hover pointer
+//   2. fix everything in Fx
+//   3. adjust paddings
+//   4. add more sizes
+
 
 .{button}_arrowed {
     &,
     &:active {
-        vertical-align: top; /* Active state won't make baseline jumps */
+        vertical-align: top; // Active state won't make baseline jumps
         overflow: visible;
 
         border-right: 0;
@@ -24,8 +24,8 @@
         padding-right: 9px;
     }
 
-    /* Crazy focus/active states */
-    /* FIXME: Buggy in Fx*/
+    // Crazy focus/active states
+    // FIXME: Buggy in Fx
     &:before {
         left: -10px;
         clip: rect(-99em, 99em, 99em, 10px);
