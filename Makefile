@@ -1,6 +1,9 @@
 all:
 	$(MAKE) -C blocks/s
 
+popup link:
+	$(MAKE) -C blocks $@
+
 test-tools:
 	test -x "$(shell which stylus)"
 	test -x "$(shell which uglifyjs)"
