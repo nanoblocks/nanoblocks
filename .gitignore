@@ -3,3 +3,5 @@
 .DS_Store
 tags
 .jshintrc
+# Sublime Text Project files
+*.sublime-workspace
