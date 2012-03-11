@@ -118,3 +118,22 @@ test("After text changed - make more retries", function() {
     server.restore();
     time.restore();
 });
+
+module("Internals");
+
+test("Highlight matches", function() {
+    /* Init */
+    var input_html = '<input type="text" class="init" data-nb="suggest" data-nb-source-url="/get-suggest" data-nb-delay="500" />';
+    var suggest = nb.block($(input_html)[0]);
+
+    /* Checks */
+    equal(suggest.hightlightMatches('abc', 'a'), '<span class="match">a</span><span>bc</span>', 'First a');
+    equal(suggest.hightlightMatches('abc', 'b'), '<span>a</span><span class="match">b</span><span>c</span>', 'Inner b');
+    equal(suggest.hightlightMatches('abc', 'c'), '<span>ab</span><span class="match">c</span>', 'Last c');
+
+    // Multiple matches.
+    equal(suggest.hightlightMatches('abcb', 'b'), '<span>a</span><span class="match">b</span><span>c</span><span class="match">b</span>', 'Middle and last b');
+    equal(suggest.hightlightMatches('abac', 'a'), '<span class="match">a</span><span>b</span><span class="match">a</span><span>c</span>', 'First and middle a');
+    equal(suggest.hightlightMatches('abca', 'a'), '<span class="match">a</span><span>bc</span><span class="match">a</span>', 'First and last a');
+    equal(suggest.hightlightMatches('dabac', 'a'), '<span>d</span><span class="match">a</span><span>b</span><span class="match">a</span><span>c</span>', '2 middle As');
+});

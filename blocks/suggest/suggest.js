@@ -54,6 +54,7 @@ suggest.onInit = function() {
     this.expand_to_input = this.getDataBool('expand-popup-to-input');
     this.show_loader = this.getDataBool('show-loader');
     this.show_fade = this.getDataBool('show-fade');
+    this.highlight_match = this.getDataBool('highlight-matches');
 
     this.$input = $(this.node);
 
@@ -280,20 +281,20 @@ suggest._parseData = function(raw) {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 suggest._showFor = function(text) {
+    var that = this;
+    var $container = this.$suggest_container;
+
     if (this.$input.val() !== text) { // Only show suggest, if text was not changed after request has been sent.
         return;
     }
 
-    var that = this;
-
-    var $container = this.$suggest_container;
     $container.children().remove(); // Clear old and then add new ones.
-
     var data = this._cache[text];
 
     if (data.length <= 0) {
         this.popup.trigger('close');
     } else {
+        this._suggest_text = text;
         this.showSuggest();
 
         data.forEach(function(item) {
@@ -321,7 +322,6 @@ suggest._showFor = function(text) {
             });
         }
 
-        this._suggest_text = text;
     }
 };
 
@@ -358,11 +358,50 @@ suggest.showSuggest = function() {
 suggest.renderItem = function(item) {
     // <a href="#" class="popup__line link">Улучшенное меню</a>
     var label = item[this.label_key];
-    var $item = $("<li></li>").attr('title', label).html(label);
+    var label_html;
+
+    if (this.highlight_match) {
+        label_html = this.hightlightMatches(label, this._suggest_text);
+    } else {
+        label_html = '<span>' + label + '</span>';
+    }
+
+    var $item = $("<li></li>").attr('title', label).html(label_html);
     if (this.show_fade) {
         $item.append('<div class="fader"></div>');
     }
     return $item;
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+/**
+ * Returns a html string with highlighted match parts.
+ * @param {string} text Text to be highlighted.
+ * @param {string} match A substring to be found.
+ */
+suggest.hightlightMatches = function(text, match) {
+    var index;
+    var text_low = text.toLowerCase();
+    var text_length = text.length;
+    var match_low = match.toLowerCase();
+    var match_length = match.length;
+    var cur_index = 0;
+    var parts = [];
+
+    while ((index = text_low.indexOf(match_low, cur_index)) >= 0) {
+        if (index > cur_index) {
+            parts.push('<span>' + text.substring(cur_index, index) + '</span>');
+        }
+        parts.push('<span class="match">' + text.substring(index, index + match_length) + '</span>');
+        cur_index = index + match_length;
+    }
+
+    if (cur_index < text_length) {
+        parts.push('<span>' + text.substring(cur_index, text_length) + '</span>');
+    }
+
+    return parts.join('');
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //

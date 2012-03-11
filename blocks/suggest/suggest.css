@@ -12,8 +12,12 @@
     position: relative;
 }
 
+.popup__scrollbox ul li span.match {
+    background: #FFE500;
+}
+
 .popup__scrollbox ul li.current {
-    background-color: rgba(238,238,238,1);
+    background-color: #EEE;
     cursor: pointer;
 }
 
