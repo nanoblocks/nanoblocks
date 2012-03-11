@@ -769,7 +769,7 @@ nb.rect = function(node) {
 
     return [
         [ offset.left, offset.top ],
-        [ $node.width(), $node.height() ]
+        [ $node.outerWidth(), $node.outerHeight() ]
     ];
 };
 
