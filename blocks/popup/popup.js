@@ -143,6 +143,8 @@ popup._move = function(where, how) {
         //  Показываем "хвост" с нужной стороны попапа.
         this.setMod( 'popup_to', tailDir[1] );
 
+        var css = { left: '', right: '', top: '', bottom: '' };
+
         //  Позиционируем "хвост", если он должен быть не по-центру попапа.
         if ( tailDir[0] !== 'center' ) {
             //  Сдвиг, который делает точку привязки началом координат.
@@ -188,38 +190,35 @@ popup._move = function(where, how) {
             //  Зазор для "хвоста".
             t_what = nb.rect.move( t_what, [ 0, 10 ] );
 
+            //  Делаем обратное преобразование попапа...
             what = nb.rect.move( nb.rect.trans( nb.rect.trans( nb.rect.trans( t_what, transform ), transform ), transform ), adj_what.point );
-
+            //  ...и смещения для "хвоста".
             var tailOffset = nb.vec.mulM( transform, nb.vec.mulM( transform, nb.vec.mulM( transform, [ x, 0] ) ) );
 
+            //  Позиционируем "хвост".
             var x = tailOffset[0], y = tailOffset[1];
-            var css;
-            if (x) {
-                if (x > 0) {
-                    css = { left: x, right: 'auto' };
-                } else {
-                    css = { left: 'auto', right: -x };
-                }
+            var AUTO = 'auto';
+            if (x > 0) {
+                css.left = x;
+                css.right = AUTO;
+            } else if (x < 0) {
+                css.left = AUTO;
+                css.right = -x;
+            } else if (y > 0) {
+                css.top = y;
+                css.bottom = AUTO;
             } else {
-                if (y > 0) {
-                    css = { top: y, bottom: 'auto' };
-                } else {
-                    css = { top: 'auto', bottom: -y };
-                }
+                css.top = AUTO;
+                css.bottom = -y;
             }
-
-            this.$tail.css(css);
-
-        } else {
-            //  "Хвост" позиционируется через стили, заданные в css.
-            this.$tail.css({ left: 'auto', right: 'auto' });
         }
 
-        this.$tail.show();
+        this.$tail.css(css).show();
     } else {
         this.$tail.hide();
     }
 
+    //  Позиционируем попап.
     $(this.node).css({
         left: what[0][0],
         top: what[0][1]
