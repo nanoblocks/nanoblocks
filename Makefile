@@ -1,6 +1,6 @@
 all:
 	$(MAKE) -C blocks/s
-	cat src/nb.common.js src/nb.events.js src/nb.blocks.js src/nb.geometry.js > nanoblocks.js
+	cat src/nb.common.js src/nb.events.js src/nb.node.js src/nb.blocks.js src/nb.geometry.js > nanoblocks.js
 
 test-tools:
 	test -x "$(shell which stylus)"

@@ -50,35 +50,8 @@ nb.Block.__B_cache = {};
 //
 //  Если вызвать метод без аргументов, то он вернет объект со всеми data-атрибутами.
 //
-//  FIXME: Унести это в nb.node.*
-//
 nb.Block.prototype.data = function(key, value) {
-    //  Возвращаем или меняем data-атрибут.
-    if (key) {
-        if (value !== undefined) {
-            this.node.setAttribute('data-nb-' + key, value);
-        } else {
-            return this.node.getAttribute('data-nb-' + key);
-        }
-    } else {
-        //  Возвращаем все data-атрибуты.
-        var data = {};
-
-        var attrs = this.node.attributes;
-        var r;
-        for (var i = 0, l = attrs.length; i < l; i++) {
-            var attr = attrs[i];
-            if (( r = /^data-nb-(.+)/.exec(attr.name) )) {
-                var value = attr.value;
-                if (value.charAt(0) === '[' || value.charAt(0) === '{') {
-                    value = eval( '(' + value + ')' );
-                }
-                data[ r[1] ] = value;
-            }
-        }
-
-        return data;
-    }
+    return nb.node.data(this.node, key, value);
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //
@@ -95,36 +68,19 @@ nb.Block.prototype.hide = function() {
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-// FIXME: Сделать отдельные методы, работающие с нодами, а не с блоками.
-
 //  Получить модификатор.
 nb.Block.prototype.getMod = function(name) {
-    return this.setMod(name);
+    return nb.node.setMod(this.node, name);
 };
 
 //  Установить модификатор.
 nb.Block.prototype.setMod = function(name, value) {
-    var rx = new RegExp('(?:^|\\s+)' + name + '_([\\w-]+)'); // FIXME: Кэшировать regexp?
-
-    var className = this.node.className;
-    if (value === undefined) {
-        // getMod
-        var r = rx.exec(className);
-        return (r) ? r[1] : '';
-    } else {
-        // delMod
-        className = className.replace(rx, '').trim();
-        if (value !== null) {
-            // setMod
-            className += ' ' + name + '_' + value;
-        }
-        this.node.className = className;
-    }
+    nb.node.setMod(this.node, name, value);
 };
 
 //  Удалить модификатор.
 nb.Block.prototype.delMod = function(name) {
-    this.setMod(name, null);
+    nb.node.setMod(this.node, name, false);
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //

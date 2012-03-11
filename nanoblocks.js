@@ -144,6 +144,97 @@ nb.Events.trigger = function(name, params) {
 //  Общий канал для общения, не привязанный к конкретным экземплярам блоков.
 nb.extend(nb, nb.Events);
 
+//  nb.node
+//  -------
+
+nb.node = {};
+
+(function() {
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+nb.node.data = function(node, key, value) {
+    //  Возвращаем или меняем data-атрибут.
+    if (key) {
+        if (value !== undefined) {
+            node.setAttribute('data-nb-' + key, value);
+        } else {
+            return parseValue( node.getAttribute('data-nb-' + key) );
+        }
+    } else {
+        //  Возвращаем все data-атрибуты.
+        var data = {};
+
+        var attrs = node.attributes;
+        var r;
+        for (var i = 0, l = attrs.length; i < l; i++) {
+            var attr = attrs[i];
+            if (( r = /^data-nb-(.+)/.exec(attr.name) )) {
+                data[ r[1] ] = parseValue(attr.value);
+            }
+        }
+
+        return data;
+    }
+
+    function parseValue(value) {
+        var ch = value.charAt(0);
+        return (ch === '[' || ch === '{') ? eval( '(' + value + ')' ) : value;
+    }
+};
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+//  Работа с модификаторами.
+
+//  Получить модификатор.
+nb.node.getMod = function(node, name) {
+    return nb.node.setMod(node, name);
+};
+
+var modCache = {};
+
+//  Установить/получить/удалить модификатор.
+nb.node.setMod = function(node, name, value) {
+    //  Например, name равно popup_to. В bem-терминах это значит, что имя блока popup, а модификатора to.
+    //  Ищем строки вида popup_to_left и popup_to (в этом случае, значение модификатора -- true).
+    var rx = modCache[name] || (( modCache[name] = RegExp('(?:^|\\s+)' + name + '(?:_([\\w-]+))?(?:$|\\s+)') ));
+
+    var className = node.className;
+
+    if (value === undefined) {
+        //  Получаем модификатор.
+
+        var r = rx.exec(className);
+        //  Если !r (т.е. r === null), значит модификатора нет вообще, возвращаем '' (FIXME: или нужно возвращать null?).
+        //  Если r[1] === undefined, это значит модификатор со значением true.
+        return (r) ? ( (r[1] === undefined) ? true : r[1] ) : '';
+
+    } else {
+        //  Удаляем старый модификатор, если он там был.
+        className = className.replace(rx, '').trim();
+
+        //  Тут недостаточно просто if (value) { ... },
+        //  потому что value может быть нулем.
+        if (value !== false && value !== '') {
+            //  Устанавливаем новое значение.
+            //  При этом, если значение true, то просто не добавляем часть после _.
+            className += ' ' + name + ( (value === true) ? '' : '_' + value );
+        }
+        node.className = className;
+
+    }
+};
+
+//  Удалить модификатор.
+nb.node.delMod = function(node, name) {
+    nb.node.setMod(node, name, false);
+};
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+})();
+
 //  nb.Block
 //  --------
 
@@ -196,35 +287,8 @@ nb.Block.__B_cache = {};
 //
 //  Если вызвать метод без аргументов, то он вернет объект со всеми data-атрибутами.
 //
-//  FIXME: Унести это в nb.node.*
-//
 nb.Block.prototype.data = function(key, value) {
-    //  Возвращаем или меняем data-атрибут.
-    if (key) {
-        if (value !== undefined) {
-            this.node.setAttribute('data-nb-' + key, value);
-        } else {
-            return this.node.getAttribute('data-nb-' + key);
-        }
-    } else {
-        //  Возвращаем все data-атрибуты.
-        var data = {};
-
-        var attrs = this.node.attributes;
-        var r;
-        for (var i = 0, l = attrs.length; i < l; i++) {
-            var attr = attrs[i];
-            if (( r = /^data-nb-(.+)/.exec(attr.name) )) {
-                var value = attr.value;
-                if (value.charAt(0) === '[' || value.charAt(0) === '{') {
-                    value = eval( '(' + value + ')' );
-                }
-                data[ r[1] ] = value;
-            }
-        }
-
-        return data;
-    }
+    return nb.node.data(this.node, key, value);
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //
@@ -241,36 +305,19 @@ nb.Block.prototype.hide = function() {
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-// FIXME: Сделать отдельные методы, работающие с нодами, а не с блоками.
-
 //  Получить модификатор.
 nb.Block.prototype.getMod = function(name) {
-    return this.setMod(name);
+    return nb.node.setMod(this.node, name);
 };
 
 //  Установить модификатор.
 nb.Block.prototype.setMod = function(name, value) {
-    var rx = new RegExp('(?:^|\\s+)' + name + '_([\\w-]+)'); // FIXME: Кэшировать regexp?
-
-    var className = this.node.className;
-    if (value === undefined) {
-        // getMod
-        var r = rx.exec(className);
-        return (r) ? r[1] : '';
-    } else {
-        // delMod
-        className = className.replace(rx, '').trim();
-        if (value !== null) {
-            // setMod
-            className += ' ' + name + '_' + value;
-        }
-        this.node.className = className;
-    }
+    nb.node.setMod(this.node, name, value);
 };
 
 //  Удалить модификатор.
 nb.Block.prototype.delMod = function(name) {
-    this.setMod(name, null);
+    nb.node.setMod(this.node, name, false);
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //
