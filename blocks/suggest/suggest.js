@@ -2,12 +2,14 @@
 (function($, doc){
 
 /* TODO
-    []  up key - cursor is going to the left and then - to the right
     []  popup long items fade
     []  on re - we have 2 rows! how about this?
     []  show current selection as highlighted?
     []  show found substring
     []? cache rendered suggest items
+    []  когда нажимаешь вниз - выпадает список, но в нём не выделен текущий выбранный текст + может быть надо сбрасывать
+        подсказки - показывать подсказки для текущего, введённого текста...
+    [x] up key - cursor is going to the left and then - to the right
     [x] если есть данные для текущего введённого текста - показывать сразу
     [x] когда что-то выпало - повторный клик внутри поля ввода не должен закрывать саджест (это делает сам popup из-за кривой проверки contains())
     [x] scroll selected into view
@@ -32,6 +34,7 @@ var suggest = {};
 
 suggest.events = {
     'init': 'onInit',
+    'keydown': 'onKeyDown',
     'keyup': 'onKeyUp',
     'focusout': 'onClose'
 };
@@ -134,6 +137,15 @@ suggest._createPopup = function() {
             var $item = $(evt.target).closest('li');
             that.selectItem($item);
         });
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+suggest.onKeyDown = function(evt) {
+    if (evt.keyCode == 38) { // UP
+        evt.preventDefault(); // So cursor will not jump to text start in input.
+        return;
+    }
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
