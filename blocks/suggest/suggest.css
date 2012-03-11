@@ -7,10 +7,13 @@
 .popup__scrollbox ul li {
     padding: 0.2em;
     margin: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
 }
 
 .popup__scrollbox ul li.current {
-    background-color: #EEE;
+    background-color: rgba(238,238,238,1);
     cursor: pointer;
 }
 
@@ -41,4 +44,17 @@
 
 .loader_new__show {
     opacity: 1;
+}
+
+.fader {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 20px;
+    height: 100%;
+    background: -webkit-linear-gradient(0, rgba(255,255,255,0), rgba(255,255,255,1.0));
+}
+
+.popup__scrollbox ul li.current .fader {
+    background: -webkit-linear-gradient(0, rgba(238,238,238,0), rgba(238,238,238,1.0));
 }

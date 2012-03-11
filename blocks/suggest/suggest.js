@@ -2,13 +2,14 @@
 (function($, doc){
 
 /* TODO
-    []  popup long items fade
+    []  animation не работает для spiner...
     []  on re - we have 2 rows! how about this?
     []  show current selection as highlighted?
     []  show found substring
     []? cache rendered suggest items
     []  когда нажимаешь вниз - выпадает список, но в нём не выделен текущий выбранный текст + может быть надо сбрасывать
         подсказки - показывать подсказки для текущего, введённого текста...
+    [x] popup long items fade
     [x] up key - cursor is going to the left and then - to the right
     [x] если есть данные для текущего введённого текста - показывать сразу
     [x] когда что-то выпало - повторный клик внутри поля ввода не должен закрывать саджест (это делает сам popup из-за кривой проверки contains())
@@ -53,6 +54,7 @@ suggest.onInit = function() {
     this.scroll_min = this.getDataNumber('scroll-min', -1);
     this.expand_to_input = this.getDataBool('expand-popup-to-input');
     this.show_loader = this.getDataBool('show-loader');
+    this.show_fade = this.getDataBool('show-fade');
 
     this.$input = $(this.node);
 
@@ -307,6 +309,7 @@ suggest._showFor = function(text) {
             'overflow': ''
         });
 
+        // Adjust popup and suggest container style.
         if (this.scroll_min > 0 && data.length > this.scroll_min) {
             var height = 0;
             var $items = this.$suggest_container.find('li');
@@ -320,7 +323,6 @@ suggest._showFor = function(text) {
         }
 
         this._suggest_text = text;
-
     }
 };
 
@@ -356,7 +358,12 @@ suggest.showSuggest = function() {
  */
 suggest.renderItem = function(item) {
     // <a href="#" class="popup__line link">Улучшенное меню</a>
-    return $("<li></li>").html(item[this.label_key]);
+    var label = item[this.label_key];
+    var $item = $("<li></li>").attr('title', label).html(label);
+    if (this.show_fade) {
+        $item.append('<div class="fader"></div>');
+    }
+    return $item;
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
