@@ -1,0 +1,25 @@
+{
+    "folders":
+    [
+        {
+            "path": "blocks",
+            "file_exclude_patterns": ["*.css"]
+        }
+    ],
+
+    "settings":
+    {
+        // Code style
+        "tab_size": 4
+    ,   "translate_tabs_to_spaces": true
+    ,   "trim_trailing_white_space_on_save": true
+    ,   "ensure_newline_at_eof_on_save": true
+
+        // Hayaku settings
+    ,   "hayaku_CSS_whitespace_after_colon": " "
+    ,   "hayaku_CSS_whitespace_block_start_before": " "
+    ,   "hayaku_CSS_whitespace_block_start_after": "\n\t"
+    ,   "hayaku_CSS_whitespace_block_end_before": "\n"
+    ,   "hayaku_CSS_whitespace_block_end_after": ""
+    }
+}

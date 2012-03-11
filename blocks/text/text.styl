@@ -1,0 +1,76 @@
+text ?= prefix + 'text'
+
+.{text} {
+    font: 16px/1.5em Calibri, "Helvetica Neue", Arial, sans-serif;
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: Calibri, Helvetica, Arial, sans-serif;
+
+        padding: 0;
+        margin: 0;
+        font-weight: normal;
+    }
+
+    h1 {
+        font-size: 2.5em;
+        line-height: 1.2em;
+        padding: .2em 0 .4em;
+    }
+
+    h2 {
+        font-size: 2.0em;
+        line-height: 1.125em;
+        padding: 0.4375em 0 0.6875em;
+    }
+
+    h3 {
+        font-size: 1.5em;
+        line-height: 1em;
+        padding: 0.875em 0 0.625em;
+    }
+
+    h4 {
+        font-size: 1.25em;
+        line-height: 1.2em;
+        padding: 0.6em 0;
+    }
+
+    // Need styles for h5 & h6
+
+    p, ul, ol {
+        padding: 0;
+        margin: 0 0 1.5em;
+    }
+
+    li {
+        list-style: none; unless _ie
+
+        padding: 0 0 0 1.5em;
+    }
+
+    li:before {
+        content: "— ";
+
+        position: absolute;
+
+        width: 1.1em;
+        padding: 0 0.4em 0 0;
+        margin-left: -1.5em;
+
+        text-align: right;
+    }
+
+    ol {
+        counter-reset: list_item;
+    }
+
+    ol > li:before {
+        content: counter(list_item) ".";
+        counter-increment: list_item;
+    }
+
+    li, li > p {
+        margin: 0 0 0.75em;
+    }
+
+}
