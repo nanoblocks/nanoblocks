@@ -3,10 +3,10 @@
 
 /* TODO
     []  show current selection as highlighted?
-    []  show found substring
-    []? cache rendered suggest items
     []  когда нажимаешь вниз - выпадает список, но в нём не выделен текущий выбранный текст + может быть надо сбрасывать
         подсказки - показывать подсказки для текущего, введённого текста...
+    [x] cache rendered suggest items
+    [x] show found substring
     [x] on re - we have 2 rows! white-space: nowrap set!
     [x] popup long items fade
     [x] up key - cursor is going to the left and then - to the right
@@ -64,6 +64,7 @@ suggest.onInit = function() {
     this._requests = {};
     this._cache = {};
     this._selected = null;
+    this._html = {}; // Rendered suggest lists.
 
     this._createPopup();
     this._popup_opened = false;
@@ -92,9 +93,7 @@ suggest._createPopup = function() {
 
     this.$popup = $(
         '<div class="popup popup_dropdown popup_theme_blocky popup_to_top _hidden" data-nb="popup">' +
-            '<div class="popup__scrollbox">' +
-                '<ul></ul>' +
-            '</div>' +
+            '<div class="popup__scrollbox"></div>' +
         '</div>')
         .appendTo(doc.body);
 
@@ -118,7 +117,6 @@ suggest._createPopup = function() {
     }
 
     this.$popup_wrapper = this.$popup.find('.popup__scrollbox');
-    this.$suggest_container = this.$popup.find('ul');
 
     this.popup = nb.block(this.$popup[0]);
     this.popup.on('close', function() {
@@ -126,7 +124,7 @@ suggest._createPopup = function() {
     });
 
     // Init mouse events.
-    this.$suggest_container
+    this.$popup_wrapper
         .delegate('li', 'mouseenter', function(evt) {
             var $item = $(evt.target).closest('li');
             $item.toggleClass('current', true);
@@ -281,48 +279,74 @@ suggest._parseData = function(raw) {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 suggest._showFor = function(text) {
-    var that = this;
-    var $container = this.$suggest_container;
-
     if (this.$input.val() !== text) { // Only show suggest, if text was not changed after request has been sent.
         return;
     }
 
-    $container.children().remove(); // Clear old and then add new ones.
     var data = this._cache[text];
 
     if (data.length <= 0) {
         this.popup.trigger('close');
-    } else {
-        this._suggest_text = text;
-        this.showSuggest();
+        return;
+    }
 
-        data.forEach(function(item) {
-            var $item = that.renderItem(item);
-            if (!$item.is('li')) { // renderItem() can be overriden. So, we wrap rendered item with <li/> if needed.
-                $item.wrap('li');
-            }
-            $container.append($item);
+    this._suggest_text = text;
+    this.showSuggest(); // Show before rendering: so we can calculate valid sizes.
+    var suggest = this.renderSuggest(text, data);
+    this.$suggest_container = suggest.container;
+    this.$suggest_container.find('li.current').toggleClass('current', false);
+
+    if (suggest.scroll_height) {
+        this.$popup_wrapper.css({
+            'max-height': suggest.scroll_height,
+            'overflow-y': 'scroll'
         });
+    }
+    else {
         this.$popup_wrapper.css({
             'max-height': '',
             'overflow': ''
         });
+    }
+};
 
-        // Adjust popup and suggest container style.
-        if (this.scroll_min > 0 && data.length > this.scroll_min) {
-            var height = 0;
-            var $items = this.$suggest_container.find('li');
-            for (var i = 0; i < this.scroll_min; i++) {
-                height += $($items[i]).outerHeight();
-            }
-            this.$popup_wrapper.css({
-                'max-height': height,
-                'overflow-y': 'scroll'
-            });
+// ----------------------------------------------------------------------------------------------------------------- //
+
+suggest.renderSuggest = function(text, data) {
+    var that = this;
+    var suggest = this._html[text];
+
+    $('ul', this.$popup_wrapper).remove(); // Remove previous suggest items.
+    if (suggest) {
+        this.$popup_wrapper.append(suggest.container);
+        return suggest;
+    }
+
+    var $container = $('<ul/>');
+    this.$popup_wrapper.append($container);
+
+    data.forEach(function(item) {
+        var $item = that.renderItem(item);
+        if (!$item.is('li')) { // renderItem() can be overriden. So, we wrap rendered item with <li/> if needed.
+            $item.wrap('li');
         }
 
+        $container.append($item);
+    });
+
+    // Calculate scroll height.
+    var scroll_height;
+    if (this.scroll_min > 0 && data.length > this.scroll_min) {
+        var $items = $container.find('li');
+        scroll_height = 0;
+        for (var i = 0; i < this.scroll_min; i++) {
+            scroll_height += $($items[i]).outerHeight();
+        }
     }
+
+    suggest = { container: $container, scroll_height: scroll_height };
+    this._html[text] = suggest;
+    return suggest;
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
