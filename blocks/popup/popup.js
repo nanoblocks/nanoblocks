@@ -212,7 +212,8 @@ popup._move = function(where, how) {
                 css.bottom = -y;
             }
         } else {
-            //  FIXME: Добавить зазор для "хвоста".
+            //  Зазор для "хвоста".
+            what = nb.rect.move( what, nb.vec.scale( nb.vec.dir2vec(how.where), 10 ) );
         }
 
         this.$tail.css(css).show();
