@@ -2,13 +2,12 @@
 (function($, doc){
 
 /* TODO
-    []  animation не работает для spiner...
-    []  on re - we have 2 rows! how about this?
     []  show current selection as highlighted?
     []  show found substring
     []? cache rendered suggest items
     []  когда нажимаешь вниз - выпадает список, но в нём не выделен текущий выбранный текст + может быть надо сбрасывать
         подсказки - показывать подсказки для текущего, введённого текста...
+    [x] on re - we have 2 rows! white-space: nowrap set!
     [x] popup long items fade
     [x] up key - cursor is going to the left and then - to the right
     [x] если есть данные для текущего введённого текста - показывать сразу
