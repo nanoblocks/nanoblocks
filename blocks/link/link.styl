@@ -1,7 +1,7 @@
-link = prefix + 'link'
+link ?= prefix + 'link'
 
-/* Basic styles */
-{link} {
+// Basic styles
+.{link} {
     cursor: pointer;
 
     color: #1A3DC1;
@@ -10,11 +10,11 @@ link = prefix + 'link'
         color: #F00;
     }
 
-    /* Awfully useful wrapper link (also, all pseudo-links are made as wrappers) */
+    // Awfully useful wrapper link (also, all pseudo-links are made as wrappers)
     &_wrapper {
         display: inline-block;
 
-        white-space: nowrap; /* Would be a class for multiline links */
+        white-space: nowrap; // Would be a class for multiline links
         text-decoration: none;
 
         & .ico {
@@ -30,7 +30,7 @@ link = prefix + 'link'
         text-decoration: underline;
     }
 
-    /* Pseudo-link (can be only in wrapper)  */
+    // Pseudo-link (can be only in wrapper)
     &_pseudo,
     &_pseudo&_wrapper &__inner {
         text-decoration: none;

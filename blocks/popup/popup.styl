@@ -1,7 +1,8 @@
-popup = prefix + 'popup'
+link ?= prefix + 'link'
+popup ?= prefix + 'popup'
 
-/* Popup */
-{popup} {
+// Popup
+.{popup} {
     z-index: 1073741823;
     position: absolute;
 
@@ -12,45 +13,44 @@ popup = prefix + 'popup'
 
     box-shadow: 0 3px 7px -1px rgba(0,0,0,0.6);
 
-    /* Custom content goes here. If there is a need in popup-wide things, drop it. */
+    // Custom content goes here. If there is a need in popup-wide things, drop it.
     &__content {
         display: block;
 
         padding: 6px 12px;
 
-        white-space: normal; /* Doubled to fix IE bug */
+        white-space: normal; // Doubled to fix IE bug
     }
 
-    /* Popup's line (like for dropdowns) */
+    // Popup's line (like for dropdowns)
     &__line {
         display: block;
         padding: 3px 12px;
+    }
 
-        /* Find out if it needs to be an extra class, not multiclass one */
-        /* Also, all the color/decoration things could go somewhere else? */
-        if link {
-            &{link} {
-                display: block;
+    // Find out if it needs to be an extra class, not multiclass one
+    // Also, all the color/decoration things could go somewhere else?
+    &__line.{link} {
+        display: block;
 
-                white-space: nowrap; /* Inline-only, can be  */
+        white-space: nowrap; // Inline-only
 
-                line-height: 1.5em;
+        line-height: 1.5em;
 
-                /* Blocky hover dropdown style */
-                {popup}_theme_blocky & {
-                    text-decoration: none;
+        // Blocky hover dropdown style
+        .{popup}_theme_blocky & {
+            text-decoration: none;
 
-                    color: #000;
-                }
+            color: #000;
+        }
 
-                {popup}_theme_blocky &:hover {
-                    background-color: #85CDFF;
-                }
-            }
+        .{popup}_theme_blocky &:hover {
+            background-color: #85CDFF;
         }
     }
 
-    /* Popup's separator */
+
+    // Popup's separator
     &__hr {
         margin: 3px 0;
         height: 1px;
@@ -58,9 +58,9 @@ popup = prefix + 'popup'
         overflow: hidden;
     }
 
-    /* Popup modes */
+    // Popup modes
 
-    /* Dropdowny popups */
+    // Dropdowny popups
     &_dropdown {
         padding: 3px 0;
     }
