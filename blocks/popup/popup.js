@@ -211,6 +211,8 @@ popup._move = function(where, how) {
                 css.top = AUTO;
                 css.bottom = -y;
             }
+        } else {
+            //  FIXME: Добавить зазор для "хвоста".
         }
 
         this.$tail.css(css).show();
