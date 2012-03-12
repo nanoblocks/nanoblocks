@@ -2,10 +2,10 @@
 (function($, doc){
 
 /* TODO
-    []  show current selection as highlighted?
-    []  #36 научиться экономить запросы к серверу: фильтровать данные на клиенте
     []  static array as source of items...
-    []  по Cmd+Tab (переключение на другой таб) - выполняется запрос и отображается suggest по возврату назад на этот таб.
+    []  #36 научиться экономить запросы к серверу: фильтровать данные на клиенте
+    []  click - show Suggest (option?)
+    [x] по Cmd+Tab (переключение на другой таб) - выполняется запрос и отображается suggest по возврату назад на этот таб.
     [x] когда нажимаешь вниз - выпадает список, но в нём не выделен текущий выбранный текст + может быть надо сбрасывать
         подсказки - показывать подсказки для текущего, введённого текста...
     [x] cache rendered suggest items
@@ -178,8 +178,13 @@ suggest.onKeyUp = function(evt) {
         return;
     }
 
-    this._text = this.$input.val().trim();
-    this.suggest(this._text);
+    var text = this.$input.val().trim();
+    if (text === this._text) { // Prevents some hot keys, like Cmd + Tab to switch tab.
+        return;
+    }
+
+    this._text = text;
+    this.suggest(text);
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
