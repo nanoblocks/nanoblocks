@@ -212,7 +212,7 @@ nb.node.setMod = function(node, name, value) {
 
     } else {
         //  Удаляем старый модификатор, если он там был.
-        className = className.replace(rx, '').trim();
+        className = className.replace(rx, ' ').trim();
 
         //  Тут недостаточно просто if (value) { ... },
         //  потому что value может быть нулем.
