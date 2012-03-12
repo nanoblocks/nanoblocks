@@ -13,7 +13,7 @@ nb.node.data = function(node, key, value) {
         if (value !== undefined) {
             node.setAttribute('data-nb-' + key, value);
         } else {
-            return parseValue( node.getAttribute('data-nb-' + key) );
+            return parseValue( node.getAttribute('data-nb-' + key) || '' );
         }
     } else {
         //  Возвращаем все data-атрибуты.
@@ -66,7 +66,7 @@ nb.node.setMod = function(node, name, value) {
 
     } else {
         //  Удаляем старый модификатор, если он там был.
-        className = className.replace(rx, '').trim();
+        className = className.replace(rx, ' ').trim();
 
         //  Тут недостаточно просто if (value) { ... },
         //  потому что value может быть нулем.
