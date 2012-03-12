@@ -482,6 +482,10 @@ $(function() {
     //  Навешиваем на документ обработчики всех событий,
     //  использующихся хоть в каких-нибудь блоках.
     nb.Block.__B_domEvents.forEach(function(event) {
+        //  FIXME: Чтобы работал mouseenter/mouseleave/hover нужно добавить в .on() селектор, например, *[data-nb]:
+        //
+        //      $(document).on(event, '*[data-nb]', function(e) {
+        //
         $(document).on(event, function(e) {
             var node = e.target;
 

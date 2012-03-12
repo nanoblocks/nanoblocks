@@ -13,7 +13,7 @@ nb.node.data = function(node, key, value) {
         if (value !== undefined) {
             node.setAttribute('data-nb-' + key, value);
         } else {
-            return parseValue( node.getAttribute('data-nb-' + key) );
+            return parseValue( node.getAttribute('data-nb-' + key) || '' );
         }
     } else {
         //  Возвращаем все data-атрибуты.
