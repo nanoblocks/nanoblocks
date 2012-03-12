@@ -2,12 +2,12 @@
 (function($, doc){
 
 /* TODO
-    []  когда нажимаешь вниз - выпадает список, но в нём не выделен текущий выбранный текст + может быть надо сбрасывать
-        подсказки - показывать подсказки для текущего, введённого текста...
     []  show current selection as highlighted?
     []  #36 научиться экономить запросы к серверу: фильтровать данные на клиенте
     []  static array as source of items...
     []  по Cmd+Tab (переключение на другой таб) - выполняется запрос и отображается suggest по возврату назад на этот таб.
+    [x] когда нажимаешь вниз - выпадает список, но в нём не выделен текущий выбранный текст + может быть надо сбрасывать
+        подсказки - показывать подсказки для текущего, введённого текста...
     [x] cache rendered suggest items
     [x] show found substring
     [x] on re - we have 2 rows! white-space: nowrap set!
@@ -178,21 +178,29 @@ suggest.onKeyUp = function(evt) {
         return;
     }
 
-    var that = this;
-    var text = this._text = this.$input.val().trim();
+    this._text = this.$input.val().trim();
+    this.suggest(this._text);
+};
 
+// ----------------------------------------------------------------------------------------------------------------- //
+
+suggest.suggest = function(text) {
+    var that = this;
+
+    // Do not request intermediate strings.
+    if (this._requestDataTimeout) {
+        clearTimeout(this._requestDataTimeout);
+    }
+
+    // Do not request anything because user has not supplied minimal input.
+    // Hide suggest.
     if (text.length < this.min_length) {
         this.popup.trigger('close');
         return;
     }
 
-    if (this._requestDataTimeout) {
-        // Do not request intermediate strings.
-        clearTimeout(this._requestDataTimeout);
-    }
-
     if (text in this._cache) {
-        // Immediate display suggest for present data.
+        // Immediate display suggest if data present.
         this._showFor(text);
     } else {
         // Go get data after delay.
@@ -452,9 +460,8 @@ suggest.setCurrent = function(dir) {
     // Clear previous selection.
     $selected.toggleClass('current', false);
 
-    if (!this._popup_opened) { // If popup hidden: show it.
-        this._showFor(this._text);
-        // TODO set current?
+    if (!this._popup_opened) {
+        this.suggest(this._text);
         return;
     }
 
