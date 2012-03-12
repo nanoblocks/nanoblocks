@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+  <head>
+    <title>CodeMirror: HTML5 preview</title>
+    <meta charset="utf-8">
+    <script src="https://raw.github.com/marijnh/CodeMirror2/master/lib/codemirror.js"></script>
+    <script src="https://raw.github.com/marijnh/CodeMirror2/master/mode/xml/xml.js"></script>
+    <script src="https://raw.github.com/marijnh/CodeMirror2/master/mode/javascript/javascript.js"></script>
+    <script src="https://raw.github.com/marijnh/CodeMirror2/master/mode/css/css.js"></script>
+    <script src="https://raw.github.com/marijnh/CodeMirror2/master/mode/htmlmixed/htmlmixed.js"></script>
+
+    <link rel="stylesheet" href="../external/codemirror/codemirror.css">
+    <link rel="stylesheet" href="../external/codemirror/docs.css">
+
+    <style type=text/css>
+      .CodeMirror {
+        float: left;
+        width: 50%;
+        height: 500px;
+        border: 1px solid black;
+      }
+
+      .CodeMirror-scroll {
+        height: 500px;
+      }
+
+      iframe {
+        width: 49%;
+        float: left;
+        height: 500px;
+        border: 1px solid black;
+        border-left: 0px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Suggest</h1>
+    <textarea id=code name=code>
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Suggest</title>
+    <link rel="stylesheet" href="suggest.css" />
+    <link rel="stylesheet" href="../s/all.css">
+    <script type="text/javascript" src="http://yandex.st/jquery/1.7.1/jquery.js"></script>
+    <script type="text/javascript" src="../../nanoblocks.js"></script>
+    <script type="text/javascript" src="../popup/popup.js"></script>
+    <script type="text/javascript" src="suggest.js"></script>
+</head>
+<body>
+    <input type="text"
+        class="suggest"
+        data-nb="suggest"
+        data-nb-source-url="http://falling-meadow-9826.herokuapp.com"
+        data-nb-delay="200"
+        data-nb-min_length="1"
+        data-nb-timeout="5000"
+        data-nb-scroll-min="5"
+        data-nb-expand-popup-to-input="true"
+        data-nb-show-loader="true"
+        data-nb-show-fade="true"
+        data-nb-highlight-matches="true"
+    />
+    <br/>
+    <br/>
+</body>
+</html>
+</textarea>
+    <iframe id=preview></iframe>
+    <script>
+      var delay;
+      // Initialize CodeMirror editor with a nice html5 canvas demo.
+      var editor = CodeMirror.fromTextArea(document.getElementById('code'), {
+        mode: 'text/html',
+        tabMode: 'indent',
+        onChange: function() {
+          clearTimeout(delay);
+          delay = setTimeout(updatePreview, 300);
+        }
+      });
+
+      function updatePreview() {
+        var previewFrame = document.getElementById('preview');
+        var preview =  previewFrame.contentDocument ||  previewFrame.contentWindow.document;
+        preview.open();
+        preview.write(editor.getValue());
+        preview.close();
+      }
+      setTimeout(updatePreview, 300);
+    </script>
+  </body>
+</html>
