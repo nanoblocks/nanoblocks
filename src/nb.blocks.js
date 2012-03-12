@@ -1,3 +1,17 @@
+//  TODO
+//  ----
+//
+//    * Не вешать сразу на документ обработчики для всех событий.
+//      Вешать только на те, которые используют зарегистрированные блоки.
+//      При регистрации новых блоков, довешивать то, чего не хватает.
+//
+//    * Возможно, какие-то DOM-события (которые не баблятся)
+//      нужно вешать на ноду блока, а не на документ.
+//
+//    * Возможно, сделать отдельный метод для инициализации всей библиотеки.
+//
+
+
 //  nb.Block
 //  --------
 
@@ -15,7 +29,9 @@ nb.Block.__B_classes = {};
 nb.Block.__B_eventHandlers = {};
 
 //  Список всех поддерживаемых DOM-событий.
-nb.Block.__B_domEvents = [ 'click', 'dblclick', 'mouseup', 'mousedown', 'keydown', 'keypress', 'keyup' ]; // FIXME: Еще чего-нибудь добавить.
+//  FIXME: Еще чего-нибудь добавить.
+nb.Block.__B_domEvents = [ 'click', 'dblclick', 'mouseup', 'mousedown', 'keydown', 'keypress', 'keyup', 'mouseenter', 'mouseleave' ];
+
 //  Regexp для строк вида `click .foo`.
 nb.Block.__B_rx_domEvents = new RegExp( '^(' + nb.Block.__B_domEvents.join('|') + ')\\b\\s*(.*)?$' );
 
@@ -479,34 +495,22 @@ $(function() {
     //  Инициализируем все неленивые блоки.
     nb.init();
 
-    //  Навешиваем на документ обработчики всех событий,
-    //  использующихся хоть в каких-нибудь блоках.
+    //  Навешиваем на документ обработчики всех DOM-событий.
     nb.Block.__B_domEvents.forEach(function(event) {
-        //  FIXME: Чтобы работал mouseenter/mouseleave/hover нужно добавить в .on() селектор, например, *[data-nb]:
-        //
-        //      $(document).on(event, '*[data-nb]', function(e) {
-        //
-        $(document).on(event, function(e) {
-            var node = e.target;
+        //  Ловим события только на блоках, для чего передаем селектор *[data-nb].
+        $(document).on(event, '*[data-nb]', function(e) {
+            var node = e.currentTarget;
 
-            var block, parent;
-
-            //  Идем вверх по DOM'у и ищем ноды, являющиеся блоками.
-            //  Отсутствие parentNode означает, что node === document.
-            while (( parent = node.parentNode )) {
-                //  Пытаемся создать блок на ноде.
-                block = nb.block(node);
-                if (block) {
-                    //  Проверяем, что у блока есть обработчик соответствующего события.
-                    var method = '__B_on' + event;
-                    if  ( block[method] ) {
-                        if ( block[method](e) === false ) {
-                            //  Если обработчик вернул false, то выше не баблимся.
-                            return false;
-                        }
+            var block = nb.block(node);
+            if (block) {
+                //  Проверяем, что у блока есть обработчик соответствующего события.
+                var method = '__B_on' + event;
+                if  ( block[method] ) {
+                    if ( block[method](e) === false ) {
+                        //  Если обработчик вернул false, то выше не баблимся.
+                        return false;
                     }
                 }
-                node = parent;
             }
         });
     });
