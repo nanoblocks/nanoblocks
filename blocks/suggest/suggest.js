@@ -2,9 +2,11 @@
 (function($, doc){
 
 /* TODO
-    []  show current selection as highlighted?
     []  когда нажимаешь вниз - выпадает список, но в нём не выделен текущий выбранный текст + может быть надо сбрасывать
         подсказки - показывать подсказки для текущего, введённого текста...
+    []  show current selection as highlighted?
+    []  #36 научиться экономить запросы к серверу: фильтровать данные на клиенте
+    []  static array as source of items...
     [x] cache rendered suggest items
     [x] show found substring
     [x] on re - we have 2 rows! white-space: nowrap set!
@@ -124,6 +126,7 @@ suggest._createPopup = function() {
     });
 
     // Init mouse events.
+    // TODO вешать через nb.Block?
     this.$popup_wrapper
         .delegate('li', 'mouseenter', function(evt) {
             var $item = $(evt.target).closest('li');
@@ -152,7 +155,7 @@ suggest.onKeyDown = function(evt) {
 
 suggest.onKeyUp = function(evt) {
     if (evt.keyCode == 27) { // ESC
-        // Do not react on special keys.
+        this._reset();
         return;
     }
 
@@ -194,6 +197,12 @@ suggest.onKeyUp = function(evt) {
         // Go get data after delay.
         this._requestDataTimeout = setTimeout(function() { that._requestData(text); }, this.delay);
     }
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+suggest._reset = function() {
+    this.$input.val(this._text);
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -442,7 +451,9 @@ suggest.setCurrent = function(dir) {
     // Clear previous selection.
     $selected.toggleClass('current', false);
 
-    if (this.showSuggest()) { // Do nothing, if popup was hidden.
+    if (!this._popup_opened) { // If popup hidden: show it.
+        this._showFor(this._text);
+        // TODO set current?
         return;
     }
 
@@ -491,14 +502,21 @@ suggest.getText = function(index) {
 suggest.selectItem = function($item) {
     var $suggest = this.$suggest_container;
     $item = $item || $suggest.find('li.current');
+    var $input = this.$input;
+    var text;
 
     if ($item.length === 0) {
-        this._selected = { label: this.$input.val() };
+        text = $input.val();
+        this._selected = { label: text };
     } else {
         var index = $suggest.find('li').index($item);
+
+        text = this.getText(index);
+        $input.val(text);
+
         this._selected = this._cache[this._suggest_text][index];
-        this.$input.val(this.getText(index));
     }
+    this._text = text; // save like in keyup handler
 
     this.popup.trigger('close');
     this.trigger('selected', this._selected);
