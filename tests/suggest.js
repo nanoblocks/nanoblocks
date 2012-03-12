@@ -119,9 +119,45 @@ test("After text changed - make more retries", function() {
     time.restore();
 });
 
+test("Do not request data after user removed his input", function() {
+    expect(1);
+
+    /* Init */
+    // Fake time.
+    var time = sinon.useFakeTimers();
+
+    // Fake server.
+    var server = sinon.fakeServer.create();
+    server.respondWith([ 503, {}, "" ]);
+
+    // Init suggest.
+    var $input = $('<input type="text" data-nb="suggest" data-nb-min_length="2" data-nb-delay="300" data-nb-source-url="/get-suggest" />').appendTo(document.body);
+    var suggest = nb.block($input[0]); // init new suggest block
+    $input.trigger(jQuery.Event("focusin")); // on this event suggest will initialized.
+
+    /* Scenario */
+    $input.val("f").keyup();    // User inputs first letter.
+    time.tick(250);             // Wait less, then delay.
+    server.respond();           // No requests.
+    $input.val("fa").keyup();   // User appends next letter. Now we can request.
+    time.tick(270);             // Wait again less than delay.
+    $input.val("f").keyup();    // User removes one letter!
+    time.tick(350);             // Wait more, then delay, so, that request could be sent (if not min_length value!).
+    server.respond();           // No requests.
+
+    /* Checks */
+    equal(server.requests.length, 0, "There was no requests at all");
+
+    /* Restore */
+    server.restore();
+    time.restore();
+});
+
 module("Internals");
 
 test("Highlight matches", function() {
+    expect(7);
+
     /* Init */
     var input_html = '<input type="text" class="init" data-nb="suggest" data-nb-source-url="/get-suggest" data-nb-delay="500" />';
     var suggest = nb.block($(input_html)[0]);
