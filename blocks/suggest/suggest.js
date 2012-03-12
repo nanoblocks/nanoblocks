@@ -4,7 +4,7 @@
 /* TODO
     []  static array as source of items...
     []  #36 научиться экономить запросы к серверу: фильтровать данные на клиенте
-    []  click - show Suggest (option?)
+    [x] click - show Suggest (option?)
     [x] по Cmd+Tab (переключение на другой таб) - выполняется запрос и отображается suggest по возврату назад на этот таб.
     [x] когда нажимаешь вниз - выпадает список, но в нём не выделен текущий выбранный текст + может быть надо сбрасывать
         подсказки - показывать подсказки для текущего, введённого текста...
@@ -39,7 +39,9 @@ suggest.events = {
     'init': 'onInit',
     'keydown': 'onKeyDown',
     'keyup': 'onKeyUp',
-    'focusout': 'onClose'
+    'focusout': 'onClose',
+    'click': 'onFocusIn',
+    'focusin': 'onFocusIn'
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -58,6 +60,7 @@ suggest.onInit = function() {
     this.show_loader = this.getDataBool('show-loader');
     this.show_fade = this.getDataBool('show-fade');
     this.highlight_match = this.getDataBool('highlight-matches');
+    this.focusin_show = this.getDataBool('focusin-show');
 
     this.$input = $(this.node);
 
@@ -87,6 +90,14 @@ suggest.getDataBool = function(key) {
 
 suggest.getDataString = function(key, default_value) {
     return this.data(key) || default_value;
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+suggest.onFocusIn = function(evt) {
+    if (this.focusin_show && !this._popup_opened && !!this._text) {
+        this.suggest(this._text);
+    }
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
