@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
-  <head>
-    <title>CodeMirror: HTML5 preview</title>
+<head>
+    <title>Live editor / Suggest</title>
     <meta charset="utf-8">
     <script src="https://raw.github.com/marijnh/CodeMirror2/master/lib/codemirror.js"></script>
     <script src="https://raw.github.com/marijnh/CodeMirror2/master/mode/xml/xml.js"></script>
@@ -13,29 +13,39 @@
     <link rel="stylesheet" href="../external/codemirror/docs.css">
 
     <style type=text/css>
-      .CodeMirror {
-        float: left;
-        width: 50%;
-        height: 500px;
-        border: 1px solid black;
-      }
+        body {
+            margin: 0;
+            padding: 1em;
+            max-width: 100%;
+        }
 
-      .CodeMirror-scroll {
-        height: 500px;
-      }
+        h1 {
+            font-size: 2em;
+        }
 
-      iframe {
-        width: 49%;
-        float: left;
-        height: 500px;
-        border: 1px solid black;
-        border-left: 0px;
-      }
+        .CodeMirror {
+            float: left;
+            width: 59%;
+            height: 500px;
+            border: 1px solid #DDD;
+        }
+
+        .CodeMirror-scroll {
+            height: 500px;
+        }
+
+        iframe {
+            width: 40%;
+            float: left;
+            height: 500px;
+            border: 1px solid #DDD;
+            border-left: 0px;
+        }
     </style>
-  </head>
-  <body>
-    <h1>Suggest</h1>
-    <textarea id=code name=code>
+</head>
+<body>
+<h1>Suggest</h1>
+<textarea id=code name=code>
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -49,6 +59,7 @@
     <script type="text/javascript" src="suggest.js"></script>
 </head>
 <body>
+
     <input type="text"
         class="suggest"
         data-nb="suggest"
@@ -62,32 +73,31 @@
         data-nb-show-fade="true"
         data-nb-highlight-matches="true"
     />
-    <br/>
-    <br/>
+
 </body>
 </html>
 </textarea>
-    <iframe id=preview></iframe>
-    <script>
-      var delay;
-      // Initialize CodeMirror editor with a nice html5 canvas demo.
-      var editor = CodeMirror.fromTextArea(document.getElementById('code'), {
+<iframe id=preview></iframe>
+<script>
+    var delay;
+    // Initialize CodeMirror editor with a nice html5 canvas demo.
+    var editor = CodeMirror.fromTextArea(document.getElementById('code'), {
         mode: 'text/html',
         tabMode: 'indent',
         onChange: function() {
-          clearTimeout(delay);
-          delay = setTimeout(updatePreview, 300);
+            clearTimeout(delay);
+            delay = setTimeout(updatePreview, 300);
         }
-      });
+    });
 
-      function updatePreview() {
+    function updatePreview() {
         var previewFrame = document.getElementById('preview');
         var preview =  previewFrame.contentDocument ||  previewFrame.contentWindow.document;
         preview.open();
         preview.write(editor.getValue());
         preview.close();
-      }
-      setTimeout(updatePreview, 300);
-    </script>
-  </body>
+    }
+    setTimeout(updatePreview, 300);
+</script>
+</body>
 </html>

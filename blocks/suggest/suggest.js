@@ -7,6 +7,7 @@
     []  show current selection as highlighted?
     []  #36 научиться экономить запросы к серверу: фильтровать данные на клиенте
     []  static array as source of items...
+    []  по Cmd+Tab (переключение на другой таб) - выполняется запрос и отображается suggest по возврату назад на этот таб.
     [x] cache rendered suggest items
     [x] show found substring
     [x] on re - we have 2 rows! white-space: nowrap set!
