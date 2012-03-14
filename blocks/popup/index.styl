@@ -1,0 +1,8 @@
+unless prefix is defined
+    @import '../s/conf'
+
+link ?= prefix + 'link'
+popup ?= prefix + 'popup'
+
+@import 'popup'
+@import 'popup__tail'
