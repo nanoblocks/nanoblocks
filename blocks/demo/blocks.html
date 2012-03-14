@@ -1,16 +1,18 @@
 <!doctype html>
 <html>
 <head>
-    <title>Live editor / Suggest</title>
+    <title>Live editor / Blocks</title>
     <meta charset="utf-8">
+    <script type="text/javascript" src="http://yandex.st/jquery/1.7.1/jquery.js"></script>
+
     <script src="https://raw.github.com/marijnh/CodeMirror2/master/lib/codemirror.js"></script>
     <script src="https://raw.github.com/marijnh/CodeMirror2/master/mode/xml/xml.js"></script>
     <script src="https://raw.github.com/marijnh/CodeMirror2/master/mode/javascript/javascript.js"></script>
     <script src="https://raw.github.com/marijnh/CodeMirror2/master/mode/css/css.js"></script>
     <script src="https://raw.github.com/marijnh/CodeMirror2/master/mode/htmlmixed/htmlmixed.js"></script>
 
-    <link rel="stylesheet" href="../external/codemirror/codemirror.css">
-    <link rel="stylesheet" href="../external/codemirror/docs.css">
+    <link rel="stylesheet" href="codemirror/codemirror.css">
+    <link rel="stylesheet" href="codemirror/docs.css">
 
     <style type=text/css>
         body {
@@ -21,6 +23,10 @@
 
         h1 {
             font-size: 2em;
+        }
+
+        .file-select {
+            margin-bottom: 0.5em;
         }
 
         .CodeMirror {
@@ -44,45 +50,23 @@
     </style>
 </head>
 <body>
-<h1>Suggest</h1>
-<textarea id=code name=code>
-<!DOCTYPE HTML>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Suggest</title>
-    <link rel="stylesheet" href="suggest.css" />
-    <link rel="stylesheet" href="../s/all.css">
-    <script type="text/javascript" src="http://yandex.st/jquery/1.7.1/jquery.js"></script>
-    <script type="text/javascript" src="../../nanoblocks.js"></script>
-    <script type="text/javascript" src="../popup/popup.js"></script>
-    <script type="text/javascript" src="suggest.js"></script>
-</head>
-<body>
+<h1>Blocks</h1>
 
-    <input type="text"
-        class="suggest"
-        data-nb="suggest"
-        data-nb-source-url="http://falling-meadow-9826.herokuapp.com"
-        data-nb-delay="200"
-        data-nb-min_length="1"
-        data-nb-timeout="5000"
-        data-nb-scroll-min="5"
-        data-nb-expand-popup-to-input="true"
-        data-nb-show-loader="true"
-        data-nb-show-fade="true"
-        data-nb-highlight-matches="true"
-        data-nb-focusin-show="true"
-    />
+<div class="file-select">
+    <select>
+        <option value="/blocks/suggest/suggest.html">suggest</option>
+        <option value="/blocks/button/index.html">button</option>
+    </select>
+</div>
 
-</body>
-</html>
-</textarea>
+<textarea id=code name=code></textarea>
 <iframe id=preview></iframe>
 <script>
     var delay;
+    var $code = $("#code");
+
     // Initialize CodeMirror editor with a nice html5 canvas demo.
-    var editor = CodeMirror.fromTextArea(document.getElementById('code'), {
+    var editor = CodeMirror.fromTextArea($code[0], {
         mode: 'text/html',
         tabMode: 'indent',
         onChange: function() {
@@ -99,6 +83,24 @@
         preview.close();
     }
     setTimeout(updatePreview, 300);
+
+    // File select.
+    var loadFile = function(file_path) {
+        $.ajax({
+            url: '/reps/nanoblocks/' + file_path,
+            type: "GET",
+            dataType: "html",
+            success: function(html) {
+                editor.setValue(html);
+            },
+            error: function() { debugger; }
+        });
+    };
+    var $file_select = $("select");
+    $file_select.bind("change", function() {
+        loadFile($file_select.val());
+    });
+    $file_select.trigger("change");
 </script>
 </body>
 </html>
