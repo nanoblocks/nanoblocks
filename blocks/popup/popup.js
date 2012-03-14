@@ -94,7 +94,7 @@ popup.show = function() {
         $paranja().append(this.node).show();
     }
 
-    this.super.show.call(this);
+    this.super_.show.call(this);
 
 };
 
@@ -106,7 +106,7 @@ popup.hide = function() {
         $('body').append(this.node);
     }
 
-    this.super.hide.call(this);
+    this.super_.hide.call(this);
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //

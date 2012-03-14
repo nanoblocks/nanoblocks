@@ -25,7 +25,7 @@ nb.inherit = function(child, parent) {
     var F = function() {};
     F.prototype = parent.prototype;
     child.prototype = new F();
-    child.prototype.super = parent.prototype;
+    child.prototype.super_ = parent.prototype;
     child.prototype.constructor = child;
 };
 
