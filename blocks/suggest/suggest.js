@@ -142,12 +142,7 @@ suggest._createPopup = function() {
     // TODO вешать через nb.Block?
     this.$popup_wrapper
         .delegate('li', 'mouseenter', function(evt) {
-            var $item = $(evt.target).closest('li');
-            $item.toggleClass('current', true);
-        })
-        .delegate('li', 'mouseleave', function(evt) {
-            var $item = $(evt.target).closest('li');
-            $item.toggleClass('current', false);
+            that.setCurrent(evt.target);
         })
         .delegate('li', 'click', function(evt) {
             var $item = $(evt.target).closest('li');
@@ -174,13 +169,13 @@ suggest.onKeyUp = function(evt) {
 
     if (evt.keyCode == 38) { // UP
         evt.preventDefault();
-        this.setCurrent(-1);
+        this.changeCurrent(-1);
         return;
     }
 
     if (evt.keyCode == 40) { // DOWN
         evt.preventDefault();
-        this.setCurrent(1);
+        this.changeCurrent(1);
         return;
     }
 
@@ -465,11 +460,18 @@ suggest.hightlightMatches = function(text, match) {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
+suggest.setCurrent = function(node) {
+    $('li.current', this.$suggest_container).toggleClass('current', false);
+    $(node).closest('li').toggleClass('current', true);
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
 /**
  *
  * @param {number} dir +1 - select next item, -1 - select previous item.
  */
-suggest.setCurrent = function(dir) {
+suggest.changeCurrent = function(dir) {
     var $suggest = this.$suggest_container;
     var $selected = $('li.current', $suggest);
     var $items = $suggest.find('li');
