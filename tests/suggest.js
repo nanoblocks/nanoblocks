@@ -71,14 +71,14 @@ test("Retry request data in case of fail", function() {
 
     // Before first request.
     equal(server.requests.length, 1, 'Now request was sent');
-    var req = suggest._requests['f'];
-    equal(req.retries, 2, '2 retries left');
+    var req = suggest._data.requests['f'];
+    equal(req.retries_left, 2, '2 retries left');
 
     server.respond(); // Server respond with 503 first time.
 
     /* Checks */
     equal(server.requests.length, 3, "there must be 3 request, that were sent");
-    equal(Object.keys(suggest._requests).length, 0, "there must be no requests: after allowed number of fails request will be removed");
+    equal(Object.keys(suggest._data.requests).length, 0, "there must be no requests: after allowed number of fails request will be removed");
 
     /* Restore */
     server.restore();
@@ -112,7 +112,7 @@ test("After text changed - make more retries", function() {
 
     /* Checks */
     equal(server.requests.length, 6, "there must be 2 x 3 requests done");
-    equal(Object.keys(suggest._requests).length, 0, "and internal request autoremoved again");
+    equal(Object.keys(suggest._data.requests).length, 0, "and internal request autoremoved again");
 
     /* Restore */
     server.restore();
