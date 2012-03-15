@@ -545,6 +545,12 @@ suggest.scrollCurrentIntoView = function() {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
+suggest.setData = function(ar, key_name) {
+    this._data = new nb.suggest.arrayDS(ar, key_name);
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
 nb.define('suggest', suggest);
 
 })(jQuery, document);
