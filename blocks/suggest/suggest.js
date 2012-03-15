@@ -2,9 +2,9 @@
 (function($, doc){
 
 /* TODO
-    []  при выделении текущего элемента с клавиатуры + мышкой - появляется два текущих элемента
     []  static array as source of items...
     []  #36 научиться экономить запросы к серверу: фильтровать данные на клиенте
+    [x] при выделении текущего элемента с клавиатуры + мышкой - появляется два текущих элемента
     [x] click - show Suggest (option?)
     [x] по Cmd+Tab (переключение на другой таб) - выполняется запрос и отображается suggest по возврату назад на этот таб.
     [x] когда нажимаешь вниз - выпадает список, но в нём не выделен текущий выбранный текст + может быть надо сбрасывать
@@ -68,15 +68,22 @@ suggest.onInit = function() {
     // Internal state.
     this._text = null;
     this._suggest_text = null; // Showen suggest is for this text.
-    this._requests = {};
-    this._cache = {};
     this._selected = null;
     this._html = {}; // Rendered suggest lists.
 
     this._createPopup();
     this._popup_opened = false;
 
-    this._requestDataTimeout = null;
+    // Data.
+    if (this.source_url) {
+        this._data = new nb.suggest.ajaxDS({
+            url: this.source_url,
+            retry_count: 3,
+            max_items: this.max_items,
+            timeout: this.response_timeout
+        });
+    }
+    this._getDataTimeout = null;
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -200,8 +207,8 @@ suggest.suggest = function(text) {
     var that = this;
 
     // Do not request intermediate strings.
-    if (this._requestDataTimeout) {
-        clearTimeout(this._requestDataTimeout);
+    if (this._getDataTimeout) {
+        clearTimeout(this._getDataTimeout);
     }
 
     // Do not request anything because user has not supplied minimal input.
@@ -211,12 +218,12 @@ suggest.suggest = function(text) {
         return;
     }
 
-    if (text in this._cache) {
+    if (this._data.has(text)) {
         // Immediate display suggest if data present.
         this._showFor(text);
     } else {
         // Go get data after delay.
-        this._requestDataTimeout = setTimeout(function() { that._requestData(text); }, this.delay);
+        this._getDataTimeout = setTimeout(function() { that._requestData(text); }, this.delay);
     }
 };
 
@@ -235,75 +242,20 @@ suggest.onClose = function() {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 suggest._requestData = function(text) {
-    if (!(text in this._requests)) {
-        this._createRequest(text);
-    }
-    this._requests[text].retry();
-};
-
-// ----------------------------------------------------------------------------------------------------------------- //
-
-/**
- * Create a new request for user entered text.
- * @param {string} text User entered text to find suggestions for.
- */
-suggest._createRequest = function(text) {
     var that = this;
-
-    if (text in this._requests) {
-        return;
-    }
-
-    var data = {
-        'text': text,
-        'max': this.max_items
-    };
-
-    var request = {
-        'retries': 3, // TODO make a setting
-        'retry': null
-    };
-
-    request.retry = function() {
-        if (request.retries === 0) {
+    this._data.get({
+        key: text,
+        onstart: function() {
+            that.showLoader();
+        },
+        onsuccess: function() {
+            that._showFor(text);
             that.hideLoader();
-
-            // Clear old request. Maybe at some moment we can get needed data.
-            delete that._requests[text];
-
-            // Sorry, no more retries.
-            // TODO error logging?
-            return;
+        },
+        onfail: function() {
+            that.hideLoader();
         }
-
-        that.showLoader();
-
-        $.ajax({
-            'url': that.source_url,
-            'type': 'GET',
-            'data': data,
-            'dataType': 'jsonp',
-            'success': function(data) {
-                that._cache[text] = that._parseData(data);
-                that._showFor(text);
-                that.hideLoader();
-            },
-            'error': function() {
-                request.retry();
-            },
-            'timeout': that.response_timeout
-        });
-
-        request.retries--;
-    };
-
-    this._requests[text] = request;
-};
-
-// ----------------------------------------------------------------------------------------------------------------- //
-
-suggest._parseData = function(raw) {
-    return raw;
+    });
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -313,7 +265,7 @@ suggest._showFor = function(text) {
         return;
     }
 
-    var data = this._cache[text];
+    var data = this._data.getSync(text);
 
     if (data.length <= 0) {
         this.popup.trigger('close');
@@ -520,8 +472,11 @@ suggest.changeCurrent = function(dir) {
  * @param {number} index Item index.
  */
 suggest.getText = function(index) {
-    var data_item = this._cache[this._suggest_text];
-    return !!data_item ? data_item[index][this.label_key] : '';
+    var text = this._suggest_text;
+    if (this._data.has(text)) {
+        return this._data.getSync(text)[index][this.label_key];
+    }
+    return '';
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -541,7 +496,7 @@ suggest.selectItem = function($item) {
         text = this.getText(index);
         $input.val(text);
 
-        this._selected = this._cache[this._suggest_text][index];
+        this._selected = this._data.getSync(this._suggest_text)[index];
     }
     this._text = text; // save like in keyup handler
 
