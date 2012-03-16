@@ -29,7 +29,7 @@ var __domEvents = [
 ];
 
 //  Regexp для строк вида `click`, `click .foo`.
-var __rx_domEvents = new RegExp( '^(' + domEvents.join('|') + ')\\b\\s*(.*)?$' );
+var __rx_domEvents = new RegExp( '^(' + __domEvents.join('|') + ')\\b\\s*(.*)?$' );
 
 //  Автоинкрементный id для блоков, у которых нет атрибута id.
 var __id = 0;
@@ -67,10 +67,10 @@ Block.prototype.__bindCustomEvents = function() {
             (function(handlers) {
                 that.__bindCustomEvent(event, function(e, params) {
                     for (var i = handlers.length; i--; ) {
-                        //  FIXME: Отдельно обрабатывать результат null.
-                        if ( handlers[i].call(that, e, params) === false ) {
-                            return false;
-                        }
+                        var r = handlers[i].call(that, e, params);
+                        //  false означает, что нужно прекратить обработку и не баблиться дальше,
+                        //  а null -- что просто прекратить обработку.
+                        if (r === false || r === null) { return r; }
                     }
                 });
             })( events[event] )
@@ -102,7 +102,7 @@ Block.prototype.__bindCustomEvents = function() {
 
 //  Возвращает список обработчиков события name.
 //  Если еще ни одного обработчика не забинжено, возвращает (и сохраняет) пустой список.
-Block.prototype__getHandlers = function(name) {
+Block.prototype.__getHandlers = function(name) {
     var handlers = this.__handlers;
 
     return handlers[name] || (( handlers[name] = [] ));
@@ -110,16 +110,25 @@ Block.prototype__getHandlers = function(name) {
 
 //  Подписываем обработчик handler на событие name.
 Block.prototype.on = function(name, handler) {
-    var r = __rx_domEvents.exec(name);
-    if (r) {
-        //  DOM-событие.
-        this.__bindDOMEvent( r[1], r[2] || '', handler );
-    } else {
-        //  Кастомное событие.
-        this.__bindCustomEvent(name, handler);
+    if (typeof name === 'string') {
+        //  Вешаем только одно событие.
+
+        var r = __rx_domEvents.exec(name);
+        if (r) {
+            //  DOM-событие.
+            this.__bindDOMEvent( r[1], r[2] || '', handler );
+        } else {
+            //  Кастомное событие.
+            this.__bindCustomEvent(name, handler);
+        }
+
+        return handler;
     }
 
-    return handler;
+    //  В этом случае name -- это объект, т.е. вешаем несколько событий сразу.
+    for (var event in name) {
+        this.on( event, name[event] );
+    }
 };
 
 Block.prototype.__bindCustomEvent = function(name, handler) {
@@ -133,25 +142,38 @@ Block.prototype.__bindDOMEvent = function(type, selector, handler) {
 //  Отписываем обработчик handler от события name.
 //  Если не передать handler, то удалятся вообще все обработчики события name.
 Block.prototype.off = function(name, handler) {
-    var r = __rx_domEvents.exec(name);
-    if (r) {
-        //  DOM-событие.
-        $(this.node).off( r[1], r[2] || '', handler );
+    if (typeof name === 'string') {
+        //  Отписываем одно событие.
+
+        var r = __rx_domEvents.exec(name);
+        if (r) {
+            //  DOM-событие.
+            $(this.node).off( r[1], r[2] || '', handler );
+
+        } else {
+            if (handler) {
+                //  Кастомное событие.
+
+                var handlers = this.__getHandlers(name);
+                //  Ищем этот хэндлер среди уже забинженных обработчиков этого события.
+                var i = handlers.indexOf(handler);
+
+                //  Нашли и удаляем этот обработчик.
+                if (i !== -1) {
+                    handlers.splice(i, 1);
+                }
+            } else {
+                //  Удаляем всех обработчиков этого события.
+                this.__handlers[name] = null;
+            }
+
+        }
 
     } else {
-        //  Кастомное событие.
-        if (handler) {
-            var handlers = this.__getHandlers(name);
-            //  Ищем этот хэндлер среди уже забинженных обработчиков этого события.
-            var i = handlers.indexOf(handler);
+        //  event -- это объект, т.е. отписываем сразу несколько событий.
 
-            //  Нашли и удаляем этот обработчик.
-            if (i !== -1) {
-                handlers.splice(i, 1);
-            }
-        } else {
-            //  Удаляем всех обработчиков этого события.
-            this.__handlers[name] = null;
+        for (var event in name) {
+            this.off(event, name[event]);
         }
 
     }
@@ -160,8 +182,8 @@ Block.prototype.off = function(name, handler) {
 //  "Генерим" событие name. Т.е. вызываем по очереди (в порядке подписки) все обработчики события name.
 //  В каждый передаем name и params.
 Block.prototype.trigger = function(name, params) {
-    // Копируем список хэндлеров. Если вдруг внутри какого-то обработчика будет вызван off(),
-    // то мы не потеряем вызов следующего обработчика.
+    //  Копируем список хэндлеров. Если вдруг внутри какого-то обработчика будет вызван off(),
+    //  то мы не потеряем вызов следующего обработчика.
     var handlers = this.__getHandlers(name).slice();
 
     for (var i = 0, l = handlers.length; i < l; i++) {
@@ -217,6 +239,20 @@ Block.prototype.delMod = function(name) {
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
+Block.prototype.children = function() {
+    var children = [];
+
+    var nodes = this.node.getElementsByClassName('nb');
+    for (var i = 0, l = nodes.length; i < l; i++) {
+        var block = nb.block( nodes[i] );
+        if (block) { children.push(block); }
+    }
+
+    return children;
+};
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
 //  Factory
 //  -------
 
@@ -225,8 +261,20 @@ var Factory = function(ctor, events) {
     this._prepareEvents(events);
 };
 
-Factory.prototype.create = function(node) {
-    return new this.ctor(node);
+Factory.prototype.create = function(node, events) {
+    var block = new this.ctor(node);
+
+    //  Инициализируем блок.
+    block.__init(node);
+    block.trigger('init');
+    //  FIXME: Определить сперва nb.document.
+    //  nb.document.trigger('inited:' + id, block);
+
+    if (events) {
+        block.on(events);
+    }
+
+    return block;
 };
 
 //  Наследуем события.
@@ -258,8 +306,9 @@ Factory.prototype._extendEvents = function(base) {
 
         for (var selector in b_selectors) {
             var b_handlers = b_selectors[selector];
-            var t_handlers = t_selectors[selector] || [];
-            t_selectors[selector] = b_handlers.concat(t_handlers);
+            var t_handlers = t_selectors[selector];
+
+            t_selectors[selector] = (t_handlers === null) ? [] : b_handlers.concat( t_handlers || [] );
         }
     }
 
@@ -269,8 +318,9 @@ Factory.prototype._extendEvents = function(base) {
     //  И обработчики кастомных событий.
     for (var event in b_custom) {
         var b_handlers = b_custom[event];
-        var t_handlers = t_custom[event] || [];
-        t_custom[event] = b_handlers.concat(t_handlers);
+        var t_handlers = t_custom[event];
+
+        t_custom[event] = (t_handlers === null) ? [] : b_handlers.concat( t_handlers || [] );
     }
 };
 
@@ -343,19 +393,29 @@ Factory.prototype._prepareEvents = function(events) {
             handler = proto[handler];
         }
 
-        var handlers;
+        var handlers, key;
         if (r) {
             //  Тип DOM-события, например, `click`.
             var type = r[1];
-            var selector = r[2] || '';
 
-            var typeEvents = dom[type] || (( dom[type] = {} ));
-            handlers = ( !important && typeEvents[selector] ) || (( typeEvents[selector] = [] ));
+            handlers = dom[type] || (( dom[type] = {} ));
+            //  Селектор.
+            key = r[2] || '';
+
         } else {
-            handlers = ( !important && custom[event] ) || (( custom[event] = [] ));
+            handlers = custom;
+            key = event;
         }
 
-        handlers.push(handler);
+        if (handler === null) {
+            //  Особый случай, бывает только при наследовании блоков.
+            //  null означает, что нужно игнорировать родительские обработчики события.
+            handlers[key] = null;
+        } else {
+            handlers = ( !important && handlers[key] ) || (( handlers[key] = [] ));
+            handlers.push(handler);
+        }
+
     }
 
     this.events = [
@@ -367,61 +427,89 @@ Factory.prototype._prepareEvents = function(events) {
 
 };
 
-Factory.prototype._onevent = function(event, e) {
-    var blockNode = this.node;
+Factory.prototype._onevent = function(type, e) {
+    var blockNode = e.currentTarget;
+
+    var nodes = [];
     var node = e.target;
+    while (1) {
+        nodes.push(node);
+        if (node === blockNode) { break; }
+        node = node.parentNode;
+    }
+    var n = nodes.length;
 
     //  Для каждого миксина ищем подходящий обработчик.
-    var mixinEvents = this.__events;
-    var r;
+    var mixinEvents = this.events;
+
+    var block;
+
     for (var i = 0, l = mixinEvents.length; i < l; i++) {
-        var events = mixinEvents[i].dom[event];
+        var events = mixinEvents[i].dom[type];
+        if (!events) {
+            continue;
+        }
+
+        var matched = [];
 
         //  Идем вверх по DOM, проверяем, матчатся ли ноды на какие-нибудь
         //  селекторы из событий блока.
-        while (1) {
-            for (var selector in events) {
+        for (var j = 0; j < n; j++) {
+            node = nodes[j];
 
-                //  Проверяем, матчится ли нода на селектор.
-                //  FIXME: Случай node === blockNode нужно вынести из цикла совсем.
-                var matches = (node === blockNode) ?
-                    //  Либо это нода блока и тогда нужно, чтобы селектора не было.
-                    !selector :
-                    //  Либо это внутрення нода (нода элемента), есть селектор и нода соответствуют селектору.
-                    selector && $(node).is(selector);
+            if (node === blockNode) {
+                var handlers = events[''];
+                if (handlers) {
+                    matched.push({
+                        handlers: handlers,
+                        node: node
+                    });
+                }
 
-                if (matches) {
-                    //  Если событие с селектором, то передаем в обработчик ту ноду,
-                    //  которая на самом деле матчится на селектор.
-                    //  В противном случае, передаем ноду всего блока.
-                    var eventNode = (selector) ? node : blockNode;
+            } else {
 
-                    //  В `handlers` лежит цепочка обработчиков этого события.
-                    //  Самый последний обработчик -- это обработчик собственно этого блока.
-                    //  Перед ним -- обработчик предка и т.д.
-                    //  Если в `nb.define` не был указан базовый блок, то длина цепочки равна 1.
-                    var handlers = events[selector];
-                    for (var j = handlers.length; j--; ) {
-                        if ( handlers[j].call(this, e, eventNode) === false ) {
-                            //  Обработчик вернул `false`, значит оставшиеся обработчики не вызываем.
-                            r = false;
-                            break;
-                        }
+                //  FIXME: Вынести из внешнего цикла.
+                var $node = $(node);
+
+                for (var selector in events) {
+                    //  Проверяем, матчится ли нода на селектор.
+                    if ( selector && $node.is(selector) ) {
+                        matched.push({
+                            handlers: events[selector],
+                            node: node
+                        });
                     }
                 }
             }
+        }
 
-            //  Если хотя бы один блок вернул false или же мы дошли до ноды блока, останавливаемся.
-            if (r === false || node === blockNode) { break; }
+        if (matched.length) {
+            block = block || this.create(blockNode);
 
-            node = node.parentNode;
+            var r;
+            for (var j = 0, k = matched.length; j < k; j++) {
+                var item = matched[j];
+
+                //  В `handlers` лежит цепочка обработчиков этого события.
+                //  Самый последний обработчик -- это обработчик собственно этого блока.
+                //  Перед ним -- обработчик предка и т.д.
+                //  Если в `nb.define` не был указан базовый блок, то длина цепочки равна 1.
+                for (var p = handlers.length; p--; ) {
+                    if ( handlers[p].call(block, e, item.node) === false ) {
+                        //  Обработчик вернул `false`, значит оставшиеся обработчики не вызываем.
+                        r = false;
+                        break;
+                    }
+                }
+
+                //  Хотя бы один обработчик вернул false. Дальше вверх по DOM'у не баблимся.
+                if (r === false) {
+                    break;
+                }
+            }
         }
     }
 
-    //  Хотя бы один обработчик вернул false. Дальше вверх по DOM'у не баблимся.
-    if (r === false) {
-        return false;
-    }
 };
 
 //  Достаем класс по имени.
@@ -468,9 +556,14 @@ Factory.get = function(name) {
 //
 //      var popup = nb.block( document.getElementById('popup') );
 //
-nb.block = function(node) {
-    var block_id = node.getAttribute('data-nb');
-    if (!block_id) {
+nb.block = function(node, name, events) {
+    if (name && typeof name !== 'string') {
+        events = name;
+        name = null;
+    }
+
+    name = name || node.getAttribute('data-nb');
+    if (!name) {
         //  Эта нода не содержит блока. Ничего не делаем.
         return null;
     }
@@ -490,12 +583,7 @@ nb.block = function(node) {
     if (!block) {
         //  Блока в кэше еще нет.
         //  Создаем экземпляр блока нужного класса и инициализируем его.
-        var Class = Block.__getClass(block_id);
-        block = cache[id] = new Class;
-
-        //  Инициализируем блок.
-        block.__init(node);
-        block.trigger('init');
+        block = Factory.get(name).create(node, events);
     }
 
     return block;
@@ -519,24 +607,37 @@ nb.block = function(node) {
 //      });
 //
 nb.define = function(name, methods, base) {
+    if (typeof name !== 'string') {
+        //  Анонимный блок.
+
+        base = methods;
+        methods = name;
+        //  Генерим ему уникальное имя.
+        name = 'nb-' + __id++;
+    }
+
     if (base) {
         base = Factory.get(base);
     }
 
     //  Вытаскиваем из `methods` информацию про события.
     var events = methods.events;
+    //  Оставляем только методы.
     delete methods.events;
 
     //  "Пустой" конструктор.
     var ctor = function() {};
     //  Наследуемся либо от дефолтного конструктора, либо от указанного базового.
-    nb.inherit(ctor, (base) ? base.ctor : Block );
+    nb.inherit( ctor, (base) ? base.ctor : Block );
     //  Все, что осталось в methods -- это дополнительные методы блока.
     nb.extend(ctor.prototype, methods);
     //  Иногда полезно знать, что же это за блок.
     ctor.prototype.name = name;
 
     var factory = new Factory(ctor, events);
+
+    //  FIXME: Непонятно, нужно ли это. Пусть пока побудет.
+    ctor.prototype.factory = factory;
 
     //  Если указан базовый блок, нужно "склеить" события.
     if (base) {
@@ -555,7 +656,7 @@ nb.define = function(name, methods, base) {
 //  По-дефолту ищем ноды во всем документе, но можно передать ноду,
 //  внутри которой будет происходить поиск. Полезно для инициализации динамически
 //  созданных блоков.
-nb.init = function(where) {
+nb.block.init = function(where) {
     where = where || document;
 
     var nodes = where.getElementsByClassName('_init');
@@ -574,25 +675,21 @@ nb.find = function(id) {
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-})();
-
-//  ---------------------------------------------------------------------------------------------------------------  //
-
 //  Инициализация библиотеки
 //  ------------------------
 
 //  Навешиваем на документ обработчики всех DOM-событий.
 //  NOTE: Поскольку события вешаем на document, то не нужно ждать domReady.
-domEvents.forEach(function(event) {
+__domEvents.forEach(function(type) {
     //  Ловим события только на блоках, для чего передаем селектор .nb.
-    $(document).on(event, '.nb', function(e) {
+    $(document).on(type, '.nb', function(e) {
         var node = e.currentTarget;
 
         var name = node.getAttribute('data-nb');
         if (!name) { return; }
 
         var factory = Factory.get(name);
-        return factory.__onevent(event, node);
+        return factory._onevent(type, e);
     });
 });
 
@@ -600,4 +697,8 @@ $(function() {
     //  Инициализируем все неленивые блоки.
     nb.block.init();
 });
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+})();
 
