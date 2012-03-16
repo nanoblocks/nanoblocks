@@ -12,23 +12,97 @@
     <script type="text/javascript" src="../popup/popup.js"></script>
     <script type="text/javascript" src="../suggest/suggest-data.js"></script>
     <script type="text/javascript" src="../suggest/suggest.js"></script>
+
+    <style>
+        .body {
+            width: 80%;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            margin: 0 auto;
+            padding: 0;
+            border-collapse: collapse;
+        }
+
+        table tr { margin: 0; padding: 0; }
+
+        table td {
+            margin: 0;
+            padding: 1em;
+            border: 1px solid #EEE;
+        }
+
+        table td.left {
+            width: 200px;
+            text-align: right;
+        }
+
+        .hint {
+            color: #CCC;
+        }
+    </style>
 </head>
 <body>
-    <input type="text"
-        class="suggest"
-        data-nb="suggest"
-        data-nb-source-url="http://falling-meadow-9826.herokuapp.com"
-        data-nb-delay="200"
-        data-nb-min_length="1"
-        data-nb-timeout="5000"
-        data-nb-scroll-min="5"
-        data-nb-expand-popup-to-input="true"
-        data-nb-show-loader="true"
-        data-nb-show-fade="true"
-        data-nb-highlight-matches="true"
-        data-nb-focusin-show="true"
-    />
-    <br/>
-    <br/>
+    <div class="body">
+        <h1>Suggest</h1>
+        <table>
+            <tr>
+                <td class="left">ajax ручка с данными</td>
+                <td>
+                    <input type="text"
+                        class="suggest"
+                        data-nb="suggest"
+                        data-nb-source-url="http://falling-meadow-9826.herokuapp.com"
+                        data-nb-delay="200"
+                        data-nb-min_length="1"
+                        data-nb-timeout="5000"
+                        data-nb-scroll-min="5"
+                        data-nb-expand-popup-to-input="true"
+                        data-nb-show-loader="true"
+                        data-nb-show-fade="true"
+                        data-nb-highlight-matches="true"
+                        data-nb-focusin-show="true"
+                    />
+                    <span class="hint">Введите "ru", к примеру</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="left">статический массив</td>
+                <td>
+                    <input type="text" id="suggest-static"
+                           class="suggest"
+                           data-nb="suggest"
+                           data-nb-label-key="name"
+                           data-nb-delay="200"
+                           data-nb-min_length="1"
+                           data-nb-scroll-min="5"
+                           data-nb-expand-popup-to-input="true"
+                           data-nb-show-loader="true"
+                           data-nb-show-fade="true"
+                           data-nb-highlight-matches="true"
+                           data-nb-focusin-show="true"
+                            />
+                    <span class="hint">Введите название месяца на английском</span>
+                    <script type="text/javascript">
+                        var monthes = [];
+                        var date;
+                        for (var i = 0; i < 12; i++) {
+                            date = (new Date(2011,i,1)).toLocaleDateString();
+                            monthes.push({
+                                name: date.split(' ')[1]
+                            });
+                        }
+
+                        nb.on("inited:suggest-static", function(evt, block) {
+                            block.setData(monthes, 'name')
+                        });
+                    </script>
+                </td>
+            </tr>
+        </table>
+    </div>
 </body>
 </html>
