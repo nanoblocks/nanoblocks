@@ -13,7 +13,7 @@ ds.prototype.init = function() {
 };
 
 ds.prototype.has = function(key) {
-    return (key in this.cache);
+    return ((key.toLowerCase()) in this.cache);
 };
 
 /**
@@ -23,7 +23,7 @@ ds.prototype.has = function(key) {
 ds.prototype.get = function(req) {};
 
 ds.prototype.getSync = function(key) {
-    return this.cache[key];
+    return this.cache[key.toLowerCase()];
 };
 
 /**
@@ -161,7 +161,7 @@ arrayDS.prototype.get = function(req) {
 
     // If already in cache.
     if (query in this.cache) {
-        req.onsuccess(this.cache(query));
+        req.onsuccess(this.cache[query]);
         return;
     }
 
