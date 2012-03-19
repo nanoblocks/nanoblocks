@@ -263,9 +263,14 @@ Block.prototype.children = function() {
 //  Factory
 //  -------
 
-var Factory = function(ctor, events) {
+var Factory = function(name, ctor, events) {
+    this.name = name;
+
+    ctor.prototype.name = name;
+    ctor.prototype.factory = this;
     this.ctor = ctor;
-    this._prepareEvents(events);
+
+    this.events = (events instanceof Array) ? events : this._prepareEvents(events);
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //
@@ -463,7 +468,7 @@ Factory.prototype._prepareEvents = function(events) {
         }
     }
 
-    this.events = [
+    return [
         {
             dom: dom,
             custom: custom
@@ -474,6 +479,9 @@ Factory.prototype._prepareEvents = function(events) {
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
+//  FIXME: Сейчас неправильно отрабатывается ситуация, когда, скажем, click пришелся в блок,
+//  который его обрабатывает, но не останавливает баблинг. Нужно, чтобы процесс шел выше по DOM'у
+//  и искал следующий вышележащий блок.
 Factory.prototype._onevent = function(type, e) {
     var blockNode = e.currentTarget;
 
@@ -583,17 +591,15 @@ Factory.get = function(name) {
             nb.inherit(ctor, mixin.ctor);
 
             //  FIXME: А что будет с super_?
-            //  ctor.prototype.super_ = Block ?
+            //  Ответ. Будет ерунда. Чтобы эту ерунду замечать вовремя, напишем пока null.
+            ctor.prototype.super_ = null;
 
             //  Собираем массив из структур с событиями.
             //  `mixin.events[0]` -- здесь `0` потому, что у "простых" классов там всегда один элемент.
             events.push( mixin.events[0] );
         }
 
-        ctor.prototype.name = name;
-
-        factory = new Factory(ctor);
-        factory.events = events;
+        factory = new Factory(name, ctor, events);
 
         _factories[name] = factory;
     }
@@ -656,6 +662,7 @@ nb.define = function(name, methods, base) {
     if (typeof name !== 'string') {
         //  Анонимный блок.
 
+        //  Сдвигаем параметры.
         base = methods;
         methods = name;
         //  Генерим ему уникальное имя.
@@ -677,13 +684,8 @@ nb.define = function(name, methods, base) {
     nb.inherit( ctor, (base) ? base.ctor : Block );
     //  Все, что осталось в methods -- это дополнительные методы блока.
     nb.extend(ctor.prototype, methods);
-    //  Иногда полезно знать, что же это за блок.
-    ctor.prototype.name = name;
 
-    var factory = new Factory(ctor, events);
-
-    //  FIXME: Непонятно, нужно ли это. Пусть пока побудет.
-    ctor.prototype.factory = factory;
+    var factory = new Factory(name, ctor, events);
 
     //  Если указан базовый блок, нужно "склеить" события.
     if (base) {
@@ -715,11 +717,11 @@ nb.block.init = function(where) {
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-
-nb.define( '__root', { events: {} } );
-
-var html = document.getElementsByTagName('html')[0];
-nb.root = nb.block(html, '__root');
+//  Создаем "космос".
+//  Физически это пустой блок, созданный на ноде html.
+//  Его можно использовать как глобальный канал для отправки сообщений
+//  и для навешивания разных live-событий на html.
+nb.root = nb.define( {} ).create( document.getElementsByTagName('html')[0] );
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
