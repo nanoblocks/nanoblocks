@@ -460,7 +460,7 @@ Factory.prototype._prepareEvents = function(events) {
                     if (!name) { return; }
 
                     var factory = Factory.get(name);
-                    return factory._onevent(type, e);
+                    return Factory._onevent(type, e);
                 });
             })(type);
 
@@ -482,89 +482,110 @@ Factory.prototype._prepareEvents = function(events) {
 //  FIXME: Сейчас неправильно отрабатывается ситуация, когда, скажем, click пришелся в блок,
 //  который его обрабатывает, но не останавливает баблинг. Нужно, чтобы процесс шел выше по DOM'у
 //  и искал следующий вышележащий блок.
-Factory.prototype._onevent = function(type, e) {
-    var blockNode = e.currentTarget;
-
-    var nodes = [];
+Factory._onevent = function(type, e) {
     var node = e.target;
+
+    var R;
+
     while (1) {
-        nodes.push(node);
-        if (node === blockNode) { break; }
-        node = node.parentNode;
-    }
-    var n = nodes.length;
+        var nodes = [];
+        var blockNode = null;
+        var name;
+        var parent;
 
-    //  Для каждого миксина ищем подходящий обработчик.
-    var mixinEvents = this.events;
-
-    var block;
-
-    for (var i = 0, l = mixinEvents.length; i < l; i++) {
-        var events = mixinEvents[i].dom[type];
-        if (!events) {
-            continue;
+        while (( parent = node.parentNode )) {
+            nodes.push(node);
+            if (( name = node.getAttribute('data-nb') )) {
+                blockNode = node;
+                break;
+            }
+            node = parent;
         }
 
-        var matched = [];
+        if (!blockNode) { break; }
 
-        //  Идем вверх по DOM, проверяем, матчатся ли ноды на какие-нибудь
-        //  селекторы из событий блока.
-        for (var j = 0; j < n; j++) {
-            node = nodes[j];
+        var n = nodes.length;
 
-            if (node === blockNode) {
-                var handlers = events[''];
-                if (handlers) {
-                    matched.push({
-                        handlers: handlers,
-                        node: node
-                    });
-                }
+        var factory = Factory.get(name);
+        var mixinEvents = factory.events;
 
-            } else {
+        var block;
 
-                //  FIXME: Вынести из внешнего цикла.
-                var $node = $(node);
+        for (var i = 0, l = mixinEvents.length; i < l; i++) {
+            var events = mixinEvents[i].dom[type];
+            if (!events) {
+                continue;
+            }
 
-                for (var selector in events) {
-                    //  Проверяем, матчится ли нода на селектор.
-                    if ( selector && $node.is(selector) ) {
+            var matched = [];
+
+            //  Идем вверх по DOM, проверяем, матчатся ли ноды на какие-нибудь
+            //  селекторы из событий блока.
+            for (var j = 0; j < n; j++) {
+                node = nodes[j];
+
+                if (node === blockNode) {
+                    var handlers = events[''];
+                    if (handlers) {
                         matched.push({
-                            handlers: events[selector],
+                            handlers: handlers,
                             node: node
                         });
                     }
+
+                } else {
+
+                    //  FIXME: Вынести из внешнего цикла.
+                    var $node = $(node);
+
+                    for (var selector in events) {
+                        //  Проверяем, матчится ли нода на селектор.
+                        if ( selector && $node.is(selector) ) {
+                            matched.push({
+                                handlers: events[selector],
+                                node: node
+                            });
+                        }
+                    }
                 }
             }
-        }
 
-        if (matched.length) {
-            block = block || this.create(blockNode);
+            if (matched.length) {
+                //  Для каждого миксина ищем подходящий обработчик.
 
-            var r;
-            for (var j = 0, k = matched.length; j < k; j++) {
-                var item = matched[j];
+                block = block || factory.create(blockNode);
 
-                //  В `handlers` лежит цепочка обработчиков этого события.
-                //  Самый последний обработчик -- это обработчик собственно этого блока.
-                //  Перед ним -- обработчик предка и т.д.
-                //  Если в `nb.define` не был указан базовый блок, то длина цепочки равна 1.
-                var handlers = item.handlers;
-                for (var p = handlers.length; p--; ) {
-                    if ( handlers[p].call(block, e, item.node) === false ) {
-                        //  Обработчик вернул `false`, значит оставшиеся обработчики не вызываем.
-                        r = false;
+                var r;
+                for (var j = 0, k = matched.length; j < k; j++) {
+                    var item = matched[j];
+
+                    //  В `handlers` лежит цепочка обработчиков этого события.
+                    //  Самый последний обработчик -- это обработчик собственно этого блока.
+                    //  Перед ним -- обработчик предка и т.д.
+                    //  Если в `nb.define` не был указан базовый блок, то длина цепочки равна 1.
+                    var handlers = item.handlers;
+                    for (var p = handlers.length; p--; ) {
+                        if ( handlers[p].call(block, e, item.node) === false ) {
+                            //  Обработчик вернул `false`, значит оставшиеся обработчики не вызываем.
+                            r = false;
+                            break;
+                        }
+                    }
+
+                    //  Хотя бы один обработчик вернул false. Дальше вверх по DOM'у не баблимся.
+                    if (r === false) {
+                        R = r;
                         break;
                     }
                 }
-
-                //  Хотя бы один обработчик вернул false. Дальше вверх по DOM'у не баблимся.
-                if (r === false) {
-                    break;
-                }
             }
         }
+
+        node = node.parentNode;
+
     }
+
+    if (R === false) { return R; }
 
 };
 
