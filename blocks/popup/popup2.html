@@ -29,9 +29,7 @@
     nb.define('change-toggler', {
 
         events: {
-            'init': function() {
-                this.i = 0;
-            },
+            'init': 'oninit',
 
             'click': function() {
                 var popup = nb.find('popup-1');
@@ -41,25 +39,29 @@
                     this.i = (this.i + 1) % dirs.length;
                 }
             }
+        },
+
+        oninit: function() {
+            this.i = 0;
         }
 
     });
 </script>
 
-    <div class="popup popup_dropdown _hidden" data-nb="popup" id="popup-1">
+    <div class="nb popup popup_dropdown _hidden" data-nb="popup" id="popup-1">
         <div class="popup__tail"></div>
         <a href="#" class="popup__line link">Попап</a>
         <a href="#" class="popup__line link">Какое-то меню</a>
         <a href="#" class="popup__line link">Ололололо</a>
         <div class="popup__hr"></div>
         <a href="#" class="popup__line link">И ещё пункт</a>
-        <a class="popup__line link link_wrapper link_pseudo popup__close"><span class="link__inner">Закрыть</span></a>
+        <a class="nb popup__line link link_wrapper link_pseudo popup__close"><span class="link__inner">Закрыть</span></a>
     </div>
 
     <div style="margin-top: 180px">
-        <div style="position: absolute; left: 200px; width: 15px; height: 15px; background: #ccc" data-nb="change-toggler popup-toggler"></div>
-        <div style="position: absolute; left: 400px; width: 80px; height: 80px; background: #ccc" data-nb="change-toggler popup-toggler"></div>
-        <div style="position: absolute; left: 700px; width: 200px; height: 200px; background: #ccc" data-nb="change-toggler popup-toggler"></div>
+        <div class="nb" style="position: absolute; left: 200px; width: 15px; height: 15px; background: #ccc" data-nb="change-toggler popup-toggler"></div>
+        <div class="nb" style="position: absolute; left: 400px; width: 80px; height: 80px; background: #ccc" data-nb="change-toggler popup-toggler"></div>
+        <div class="nb" style="position: absolute; left: 700px; width: 200px; height: 200px; background: #ccc" data-nb="change-toggler popup-toggler"></div>
     </div>
 
 </body>

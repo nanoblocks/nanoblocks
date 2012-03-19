@@ -371,8 +371,6 @@ nb.define('popup-toggler', {
     },
 
     'onclick': function() {
-        console.log('foo');
-
         var data = this.data()['popup-toggler'];
 
         //  Находим соответствующий попап.

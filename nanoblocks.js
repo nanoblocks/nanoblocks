@@ -155,6 +155,9 @@ var Block = function() {};
 //  Информация про все объявленные блоки.
 var _factories = {};
 
+//  Список всех повешенных на document событий.
+var _docEvents = {};
+
 //  Список всех поддерживаемых DOM-событий.
 var _domEvents = [
     'click',
@@ -397,6 +400,8 @@ var Factory = function(ctor, events) {
     this._prepareEvents(events);
 };
 
+//  ---------------------------------------------------------------------------------------------------------------  //
+
 Factory.prototype.create = function(node, events) {
     var block;
 
@@ -429,6 +434,8 @@ Factory.prototype.create = function(node, events) {
 
     return block;
 };
+
+//  ---------------------------------------------------------------------------------------------------------------  //
 
 //  Наследуем события.
 //  В структуре с событиями (`block.__events`) есть куски:
@@ -477,6 +484,7 @@ Factory.prototype._extendEvents = function(base) {
     }
 };
 
+//  ---------------------------------------------------------------------------------------------------------------  //
 
 //  Делим события на DOM и кастомные и создаем объект,
 //  в котором хранится информация про события и их обработчики.
@@ -571,6 +579,26 @@ Factory.prototype._prepareEvents = function(events) {
 
     }
 
+    for (var type in dom) {
+        if (!_docEvents[type]) {
+
+            (function(type) {
+                //  Ловим события только на блоках, для чего передаем селектор .nb.
+                $(document).on(type, '.nb', function(e) {
+                    var node = e.currentTarget;
+
+                    var name = node.getAttribute('data-nb');
+                    if (!name) { return; }
+
+                    var factory = Factory.get(name);
+                    return factory._onevent(type, e);
+                });
+            })(type);
+
+            _docEvents[type] = true;
+        }
+    }
+
     this.events = [
         {
             dom: dom,
@@ -579,6 +607,8 @@ Factory.prototype._prepareEvents = function(events) {
     ];
 
 };
+
+//  ---------------------------------------------------------------------------------------------------------------  //
 
 Factory.prototype._onevent = function(type, e) {
     var blockNode = e.currentTarget;
@@ -647,6 +677,7 @@ Factory.prototype._onevent = function(type, e) {
                 //  Самый последний обработчик -- это обработчик собственно этого блока.
                 //  Перед ним -- обработчик предка и т.д.
                 //  Если в `nb.define` не был указан базовый блок, то длина цепочки равна 1.
+                var handlers = item.handlers;
                 for (var p = handlers.length; p--; ) {
                     if ( handlers[p].call(block, e, item.node) === false ) {
                         //  Обработчик вернул `false`, значит оставшиеся обработчики не вызываем.
@@ -665,6 +696,8 @@ Factory.prototype._onevent = function(type, e) {
 
 };
 
+//  ---------------------------------------------------------------------------------------------------------------  //
+
 //  Достаем класс по имени.
 //  Имя может быть "простым" -- это классы, которые определены через `nb.define`.
 //  Или "сложным" -- несколько простых классов через пробел (микс нескольких блоков).
@@ -679,7 +712,7 @@ Factory.get = function(name) {
 
         var events = [];
 
-        var names = name.trim().split(/\s+/);
+        var names = name.split(/\s+/);
         for (var i = 0, l = names.length; i < l; i++) {
             //  Примиксовываем все "простые" классы.
             var mixin = Factory.get( names[i] );
@@ -693,8 +726,12 @@ Factory.get = function(name) {
             events.push( mixin.events[0] );
         }
 
-        factory = new Factory(name, ctor);
+        ctor.prototype.name = name;
+
+        factory = new Factory(ctor);
         factory.events = events;
+
+        _factories[name] = factory;
     }
 
     return factory;
@@ -723,6 +760,16 @@ nb.block = function(node, name, events) {
 
     return Factory.get(name).create(node, events);
 };
+
+//  Находим ноду по ее id, создаем на ней блок и возвращаем его.
+nb.find = function(id) {
+    var node = document.getElementById(id);
+    if (node) {
+        return nb.block(node);
+    }
+};
+
+//  ---------------------------------------------------------------------------------------------------------------  //
 
 //  Метод определяет новый блок (точнее класс):
 //
@@ -786,6 +833,8 @@ nb.define = function(name, methods, base) {
     return factory;
 };
 
+//  ---------------------------------------------------------------------------------------------------------------  //
+
 //  Неленивая инициализация.
 //  Находим все ноды с классом `_init` и на каждой из них инициализируем блок.
 //  По-дефолту ищем ноды во всем документе, но можно передать ноду,
@@ -800,34 +849,10 @@ nb.block.init = function(where) {
     }
 };
 
-//  Находим ноду по ее id, создаем на ней блок и возвращаем его.
-nb.find = function(id) {
-    var node = document.getElementById(id);
-    if (node) {
-        return nb.block(node);
-    }
-};
-
 //  ---------------------------------------------------------------------------------------------------------------  //
 
 //  Инициализация библиотеки
 //  ------------------------
-
-//  Навешиваем на документ обработчики всех DOM-событий.
-//  NOTE: Поскольку события вешаем на document, то не нужно ждать domReady.
-_domEvents.forEach(function(type) {
-    //  Ловим события только на блоках, для чего передаем селектор .nb.
-    $(document).on(type, '.nb', function(e) {
-        console.log(e);
-        var node = e.currentTarget;
-
-        var name = node.getAttribute('data-nb');
-        if (!name) { return; }
-
-        var factory = Factory.get(name);
-        return factory._onevent(type, e);
-    });
-});
 
 $(function() {
     //  Инициализируем все неленивые блоки.
