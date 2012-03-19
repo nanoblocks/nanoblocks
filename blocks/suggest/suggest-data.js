@@ -56,10 +56,11 @@ nb.inherit(ajaxDS, ds);
 // ----------------------------------------------------------------------------------------------------------------- //
 
 ajaxDS.prototype.get = function(req) {
-    if (!(req.key in this.requests)) {
+    var query = req.key.toLowerCase();
+    if (!(query in this.requests)) {
         this._createRequest(req);
     }
-    this.requests[req.key].retry();
+    this.requests[query].retry();
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -69,13 +70,14 @@ ajaxDS.prototype.get = function(req) {
  */
 ajaxDS.prototype._createRequest = function(req) {
     var that = this;
+    var query = req.key.toLowerCase();
 
-    if (req.key in this.requests) {
+    if (query in this.requests) {
         return;
     }
 
     var data = {
-        'text': req.key,
+        'text': query,
         'max': this.max_items
     };
 
@@ -87,7 +89,7 @@ ajaxDS.prototype._createRequest = function(req) {
     request.retry = function() {
         if (request.retries_left === 0) {
             req.onfail(); // Sorry, no more retries.
-            delete that.requests[req.key]; // Clear old request. Maybe at some moment (later) we can get needed data.
+            delete that.requests[query]; // Clear old request. Maybe at some moment (later) we can get needed data.
             return;
         }
 
@@ -100,7 +102,7 @@ ajaxDS.prototype._createRequest = function(req) {
             'dataType': 'jsonp',
             'success': function(data) {
                 var parsed_data = that.prepareData(data);
-                that.cache[req.key] = parsed_data;
+                that.cache[query] = parsed_data;
                 req.onsuccess(parsed_data);
             },
             'error': function() {
@@ -112,7 +114,7 @@ ajaxDS.prototype._createRequest = function(req) {
         request.retries_left--;
     };
 
-    this.requests[req.key] = request;
+    this.requests[query] = request;
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
