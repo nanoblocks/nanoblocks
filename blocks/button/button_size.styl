@@ -27,6 +27,30 @@
 // Small button
 .{button}_size_xs {
     font-size: 11px;
+    padding: 1px 6px;
+    font-family: verdana, arial, sans-serif;
+
+    &:active {
+        padding: 2px 6px 0px;
+
+    }
+
+    & > .{button}__arrow {
+        width: .95em;
+        height: .95em;
+    }
+
+    &.{button}_arrowed,
+    &.{button}_arrowed:active {
+        padding-right: 5px;
+        margin-right: 4px;
+    }
+
+    button&.{button}_arrowed:active:hover{o-selector-hack} {
+        padding-left: 6px;
+        padding-right: 5px;
+    }
+
 }
 
 // Big button
