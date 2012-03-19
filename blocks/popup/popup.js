@@ -51,7 +51,7 @@ popup.onopen = function(e, params) {
         //  Попап закрыт. Будем открывать.
 
         //  На всякий случай даем сигнал, что нужно закрыть все открытые попапы.
-        nb.trigger('popup-close');
+        nb.root.trigger('popup-close');
 
         //  Передвигаем попап.
         this._move(where, how);
@@ -341,7 +341,7 @@ popup._bindClose = function() {
     };
     $(document).on('click', this._onclick);
 
-    this._onpopupclose = nb.on('popup-close', function() {
+    this._onpopupclose = nb.root.on('popup-close', function() {
         that.trigger('close');
     });
 };
@@ -351,7 +351,7 @@ popup._unbindClose = function() {
     if (this.where) {
         $(document).off('keydown', this._onkeypress);
         $(document).off('click', this._onclick);
-        nb.off('popup-close', this._onpopupclose);
+        nb.root.off('popup-close', this._onpopupclose);
     }
     this._onkeypress = this._onclick = this._onpopupclose = null;
 };
@@ -371,6 +371,8 @@ nb.define('popup-toggler', {
     },
 
     'onclick': function() {
+        console.log('foo');
+
         var data = this.data()['popup-toggler'];
 
         //  Находим соответствующий попап.

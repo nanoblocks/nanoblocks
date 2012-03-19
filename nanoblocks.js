@@ -153,10 +153,10 @@ var Block = function() {};
 //  ---------------------------------------------------------------------------------------------------------------  //
 
 //  Информация про все объявленные блоки.
-var __factories = {};
+var _factories = {};
 
 //  Список всех поддерживаемых DOM-событий.
-var __domEvents = [
+var _domEvents = [
     'click',
     'dblclick',
     'mouseup',
@@ -169,12 +169,12 @@ var __domEvents = [
 ];
 
 //  Regexp для строк вида `click`, `click .foo`.
-var __rx_domEvents = new RegExp( '^(' + __domEvents.join('|') + ')\\b\\s*(.*)?$' );
+var _rx_domEvents = new RegExp( '^(' + _domEvents.join('|') + ')\\b\\s*(.*)?$' );
 
 //  Автоинкрементный id для блоков, у которых нет атрибута id.
-var __id = 0;
+var _id = 0;
 //  Кэш проинициализированных блоков.
-var __cache = {};
+var _cache = {};
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
@@ -190,13 +190,13 @@ Block.prototype.__init = function(node) {
     this.__handlers = {};
 
     //  Развешиваем обработчики кастомных событий.
-    this.__bindCustomEvents();
+    this.__bindEvents();
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
 //  Вешаем кастомные (не DOM) события на экземпляр блока.
-Block.prototype.__bindCustomEvents = function() {
+Block.prototype.__bindEvents = function() {
     var that = this;
 
     var mixinEvents = Factory.get(this.name).events;
@@ -253,10 +253,10 @@ Block.prototype.on = function(name, handler) {
     if (typeof name === 'string') {
         //  Вешаем только одно событие.
 
-        var r = __rx_domEvents.exec(name);
+        var r = _rx_domEvents.exec(name);
         if (r) {
             //  DOM-событие.
-            this.__bindDOMEvent( r[1], r[2] || '', handler );
+            $(this.node).on( r[1], r[2] || '', handler );
         } else {
             //  Кастомное событие.
             this.__bindCustomEvent(name, handler);
@@ -275,17 +275,13 @@ Block.prototype.__bindCustomEvent = function(name, handler) {
     this.__getHandlers(name).push(handler);
 };
 
-Block.prototype.__bindDOMEvent = function(type, selector, handler) {
-    $(this.node).on(type, selector, handler);
-};
-
 //  Отписываем обработчик handler от события name.
 //  Если не передать handler, то удалятся вообще все обработчики события name.
 Block.prototype.off = function(name, handler) {
     if (typeof name === 'string') {
         //  Отписываем одно событие.
 
-        var r = __rx_domEvents.exec(name);
+        var r = _rx_domEvents.exec(name);
         if (r) {
             //  DOM-событие.
             $(this.node).off( r[1], r[2] || '', handler );
@@ -402,17 +398,33 @@ var Factory = function(ctor, events) {
 };
 
 Factory.prototype.create = function(node, events) {
-    var block = new this.ctor(node);
+    var block;
 
-    //  Инициализируем блок.
-    block.__init(node);
-    console.log(block);
-    block.trigger('init');
-    //  FIXME: Определить сперва nb.document.
-    //  nb.document.trigger('inited:' + id, block);
+    var id = node.getAttribute('id');
+    if (id) {
+        //  Пытаемся достать блок из кэша по id.
+        block = _cache[id];
+    } else {
+        //  У блока нет атрибута id. Создаем его, генерим уникальный id.
+        id = 'nb-' + _id++;
+        node.setAttribute('id', id);
+    }
 
-    if (events) {
-        block.on(events);
+    if (!block) {
+        block = new this.ctor(node);
+
+        //  Инициализируем блок.
+        block.__init(node);
+        //  FIXME: Не лучше ли унести это в __init?
+        block.trigger('init');
+        //  FIXME: Определить сперва nb.document.
+        //  nb.document.trigger('inited:' + id, block);
+
+        if (events) {
+            block.on(events);
+        }
+
+        _cache[id] = block;
     }
 
     return block;
@@ -527,7 +539,7 @@ Factory.prototype._prepareEvents = function(events) {
         }
 
         //  Матчим строки вида `click` или `click .foo`.
-        r = __rx_domEvents.exec(event);
+        r = _rx_domEvents.exec(event);
 
         var handler = events[event];
         if (typeof handler === 'string') {
@@ -658,7 +670,7 @@ Factory.prototype._onevent = function(type, e) {
 //  Или "сложным" -- несколько простых классов через пробел (микс нескольких блоков).
 Factory.get = function(name) {
     //  Смотрим в кэше.
-    var factory = __factories[name];
+    var factory = _factories[name];
 
     //  В кэше нет, это будет "сложный" класс, т.к. все простые точно в кэше есть.
     if (!factory) {
@@ -670,7 +682,7 @@ Factory.get = function(name) {
         var names = name.trim().split(/\s+/);
         for (var i = 0, l = names.length; i < l; i++) {
             //  Примиксовываем все "простые" классы.
-            var mixin = getFactory( names[i] );
+            var mixin = Factory.get( names[i] );
             nb.inherit(ctor, mixin.ctor);
 
             //  FIXME: А что будет с super_?
@@ -709,25 +721,7 @@ nb.block = function(node, name, events) {
         return null;
     }
 
-    var block;
-
-    var id = node.getAttribute('id');
-    if (id) {
-        //  Пытаемся достать блок из кэша по id.
-        block = cache[id];
-    } else {
-        //  У блока нет атрибута id. Создаем его, генерим уникальный id.
-        id = 'nb-' + __id++;
-        node.setAttribute('id', id);
-    }
-
-    if (!block) {
-        //  Блока в кэше еще нет.
-        //  Создаем экземпляр блока нужного класса и инициализируем его.
-        block = Factory.get(name).create(node, events);
-    }
-
-    return block;
+    return Factory.get(name).create(node, events);
 };
 
 //  Метод определяет новый блок (точнее класс):
@@ -754,7 +748,7 @@ nb.define = function(name, methods, base) {
         base = methods;
         methods = name;
         //  Генерим ему уникальное имя.
-        name = 'nb-' + __id++;
+        name = 'nb-' + _id++;
     }
 
     if (base) {
@@ -787,7 +781,7 @@ nb.define = function(name, methods, base) {
 
     //  Сохраняем для дальнейшего применения.
     //  Достать нужную factory можно вызовом Factory.get(name).
-    __factories[name] = factory;
+    _factories[name] = factory;
 
     return factory;
 };
@@ -821,9 +815,10 @@ nb.find = function(id) {
 
 //  Навешиваем на документ обработчики всех DOM-событий.
 //  NOTE: Поскольку события вешаем на document, то не нужно ждать domReady.
-__domEvents.forEach(function(type) {
+_domEvents.forEach(function(type) {
     //  Ловим события только на блоках, для чего передаем селектор .nb.
     $(document).on(type, '.nb', function(e) {
+        console.log(e);
         var node = e.currentTarget;
 
         var name = node.getAttribute('data-nb');
@@ -838,6 +833,12 @@ $(function() {
     //  Инициализируем все неленивые блоки.
     nb.block.init();
 });
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+nb.define( 'root', { events: {} } );
+
+nb.root = nb.block( document.getElementsByTagName('html')[0], 'root' );
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
