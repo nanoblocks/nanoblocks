@@ -536,7 +536,7 @@ Factory._onevent = function(type, e) {
         //  Проверяем, матчатся ли ноды какие-нибудь ноды из nodes на какие-нибудь
         //  селекторы из событий блока.
         for (var j = 0; j < n; j++) {
-            node = nodes[j];
+            var node = nodes[j];
             var $node = $nodes[j] || (( $nodes[j] = $(node) ));
 
             for (var selector in events) {
