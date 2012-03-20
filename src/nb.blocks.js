@@ -438,18 +438,13 @@ Factory.prototype._prepareEvents = function(events) {
             (function(type) {
                 //  FIXME: Для большинства событий (click, ...) не нужен селектор,
                 //  он нужен только для mouseenter/mouseleave.
-
-                //  Ловим события только на блоках, для чего передаем селектор .nb.
-                //  $(document).on(type, '.nb', function(e) {
-                //      var node = e.currentTarget;
-
-                $(document).on(type, function(e) {
-                    var node = e.target;
-
-                    var name = node.getAttribute('data-nb');
-                    if (!name) { return; }
-
-                    var factory = Factory.get(name);
+                //  Но. Если его убрать прямо сейчас, то ломается попап.
+                //  Наличие или отсутствие селектора меняет порядок выполнения обработчиков click'а.
+                //  При открытии, попап вешает на click обработчик, закрывающий его.
+                //  Но если мы при открытом попапе кликаем в другой popup-toggler, то без селектора .nb
+                //  они срабатывают в неправильном порядке: сперва попап перемещается, а потом он закрывается.
+                //  Думаю, как это полечить.
+                $(document).on(type, '.nb', function(e) {
                     return Factory._onevent(type, e);
                 });
             })(type);
@@ -475,14 +470,53 @@ Factory.prototype._prepareEvents = function(events) {
 Factory._onevent = function(type, e) {
     var node = e.target;
 
-    var R;
+    var nodes;
+    var n;
+    var $nodes;
+    var blockNode;
+    var name;
+    var factory;
+    var block;
 
     while (1) {
-        var nodes = [];
-        var blockNode = null;
-        var name;
-        var parent;
+        if ( !findBlockNodes() ) {
+            //  Все, больше никаких блоков выше node нет.
+            break;
+        }
 
+        //  Мы собрали все ноды внутри блока с именем name.
+        factory = Factory.get(name);
+        //  Берем все события, на которые подписан этот блок.
+        var mixinEvents = factory.events;
+
+        n = nodes.length - 1;
+        block = null;
+
+        //  Для каждого миксина проверяем все ноды из nodes.
+        var r = true;
+        for (var i = 0, l = mixinEvents.length; i < l; i++) {
+            //  Все события нужного типа.
+            if ( checkEvents( mixinEvents[i].dom[type] ) === false ) {
+                r = false;
+            }
+        }
+
+        if (!r) { return false; }
+
+        //  Идем еще выше, в новый блок.
+        node = node.parentNode;
+
+    }
+
+    function findBlockNodes() {
+        nodes = [];
+        $nodes = [];
+        blockNode = null;
+
+        var parent;
+        //  Идем по DOM'у вверх, начиная с node и заканчивая первой попавшейся нодой блока (т.е. с атрибутом data-nb).
+        //  Т.е. мы делим всех предков e.target на отрезки, соответствующие внутренностям блоков.
+        //  Условие о наличии parentNode позволяет остановиться на ноде <html>.
         while (( parent = node.parentNode )) {
             nodes.push(node);
             if (( name = node.getAttribute('data-nb') )) {
@@ -492,91 +526,55 @@ Factory._onevent = function(type, e) {
             node = parent;
         }
 
-        if (!blockNode) { break; }
-
-        var n = nodes.length;
-
-        var factory = Factory.get(name);
-        var mixinEvents = factory.events;
-
-        var block;
-
-        for (var i = 0, l = mixinEvents.length; i < l; i++) {
-            var events = mixinEvents[i].dom[type];
-            if (!events) {
-                continue;
-            }
-
-            var matched = [];
-
-            //  Идем вверх по DOM, проверяем, матчатся ли ноды на какие-нибудь
-            //  селекторы из событий блока.
-            for (var j = 0; j < n; j++) {
-                node = nodes[j];
-
-                if (node === blockNode) {
-                    var handlers = events[''];
-                    if (handlers) {
-                        matched.push({
-                            handlers: handlers,
-                            node: node
-                        });
-                    }
-
-                } else {
-
-                    //  FIXME: Вынести из внешнего цикла.
-                    var $node = $(node);
-
-                    for (var selector in events) {
-                        //  Проверяем, матчится ли нода на селектор.
-                        if ( selector && $node.is(selector) ) {
-                            matched.push({
-                                handlers: events[selector],
-                                node: node
-                            });
-                        }
-                    }
-                }
-            }
-
-            if (matched.length) {
-                //  Для каждого миксина ищем подходящий обработчик.
-
-                block = block || factory.create(blockNode);
-
-                var r;
-                for (var j = 0, k = matched.length; j < k; j++) {
-                    var item = matched[j];
-
-                    //  В `handlers` лежит цепочка обработчиков этого события.
-                    //  Самый последний обработчик -- это обработчик собственно этого блока.
-                    //  Перед ним -- обработчик предка и т.д.
-                    //  Если в `nb.define` не был указан базовый блок, то длина цепочки равна 1.
-                    var handlers = item.handlers;
-                    for (var p = handlers.length; p--; ) {
-                        if ( handlers[p].call(block, e, item.node) === false ) {
-                            //  Обработчик вернул `false`, значит оставшиеся обработчики не вызываем.
-                            r = false;
-                            break;
-                        }
-                    }
-
-                    //  Хотя бы один обработчик вернул false. Дальше вверх по DOM'у не баблимся.
-                    if (r === false) {
-                        R = r;
-                        break;
-                    }
-                }
-            }
-        }
-
-        node = node.parentNode;
-
+        return blockNode;
     }
 
-    if (R === false) { return R; }
+    function checkEvents(events) {
+        if (!events) { return; }
 
+        var R;
+        //  Проверяем, матчатся ли ноды какие-нибудь ноды из nodes на какие-нибудь
+        //  селекторы из событий блока.
+        for (var j = 0; j < n; j++) {
+            node = nodes[j];
+            var $node = $nodes[j] || (( $nodes[j] = $(node) ));
+
+            for (var selector in events) {
+                //  Проверяем, матчится ли нода на селектор.
+                if ( selector && $node.is(selector) ) {
+                    var r = doHandlers( node, events[selector] );
+                    if ( (r === false || r === null) && (R !== false) ) {
+                        R = r;
+                    }
+                }
+            }
+
+            if (R === false || R === null) { return R; }
+        }
+        //  Отдельно обрабатываем ситуацию, когда j === n, т.е. node === blockNode.
+        //  В этом случае мы смотрим только события без селекторов.
+        //  События с селектором относятся только к нодам строго внутри блока.
+        var handlers = events[''];
+        if (handlers) {
+            return doHandlers( nodes[n], handlers );
+        }
+    }
+
+    function doHandlers(node, handlers) {
+        block = block || factory.create(blockNode);
+
+        //  В `handlers` лежит цепочка обработчиков этого события.
+        //  Самый последний обработчик -- это обработчик собственно этого блока.
+        //  Перед ним -- обработчик предка и т.д.
+        //  Если в `nb.define` не был указан базовый блок, то длина цепочки равна 1.
+        for (var i = handlers.length; i--; ) {
+            var r = handlers[i].call(block, e, node);
+            if (r === false || r === null) {
+                //  Обработчик вернул false или null, значит оставшиеся обработчики не вызываем.
+                return r;
+            }
+        }
+    }
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //
