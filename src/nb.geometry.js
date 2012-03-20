@@ -39,7 +39,7 @@ nb.vec.scale = function(a, b) {
 //
 nb.vec.dir2vec = function(dir) {
     return [ nb.vec.dirs[ dir[0] ], nb.vec.dirs[ dir[1] ] ];
-}
+};
 
 nb.vec.dirs = {
     left: -1,
