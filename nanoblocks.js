@@ -224,7 +224,7 @@ Block.prototype.__bindEvents = function() {
                         if (r === false || r === null) { return r; }
                     }
                 });
-            })( events[event] )
+            })( events[event] );
         }
     }
 };
@@ -534,13 +534,6 @@ Factory.prototype._prepareEvents = function(events) {
     var custom = {};
 
     for (var event in events) {
-        //  Проверяем, нет ли в event префикса !. Например, '! click .foo'.
-        var r = /^!\s*(.*)/.exec(event);
-        var important = !!r;
-        if (r) {
-            event = r[1];
-        }
-
         //  Матчим строки вида `click` или `click .foo`.
         r = _rx_domEvents.exec(event);
         var handlers, key;
@@ -566,7 +559,7 @@ Factory.prototype._prepareEvents = function(events) {
             //  null означает, что нужно игнорировать родительские обработчики события.
             handlers[key] = null;
         } else {
-            handlers = ( !important && handlers[key] ) || (( handlers[key] = [] ));
+            handlers = handlers[key] || (( handlers[key] = [] ));
             handlers.push(handler);
         }
 
@@ -584,7 +577,7 @@ Factory.prototype._prepareEvents = function(events) {
                 //  Но если мы при открытом попапе кликаем в другой popup-toggler, то без селектора .nb
                 //  они срабатывают в неправильном порядке: сперва попап перемещается, а потом он закрывается.
                 //  Думаю, как это полечить.
-                $(document).on(type, '.nb', function(e) {
+                $(document).on(type, function(e) {
                     return Factory._onevent(type, e);
                 });
             })(type);
@@ -927,7 +920,7 @@ nb.vec.scale = function(a, b) {
 //
 nb.vec.dir2vec = function(dir) {
     return [ nb.vec.dirs[ dir[0] ], nb.vec.dirs[ dir[1] ] ];
-}
+};
 
 nb.vec.dirs = {
     left: -1,
