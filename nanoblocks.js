@@ -496,47 +496,33 @@ Factory.prototype._extendEvents = function(base) {
 //  ---------------------------------------------------------------------------------------------------------------  //
 
 //  Делим события на DOM и кастомные и создаем объект,
-//  в котором хранится информация про события и их обработчики.
-//  В каждом блоке (а точнее в прототипе класса) есть свойство `__events`
+//  в котором хранится информация про события и их обработчики,
 //  с примерно такой структурой:
 //
-//      [
-//          //  Каждый элемент в этом массиве -- это миксин.
-//          //  Т.е. для каждого класса, указанного в data-nb,
-//          //  в этот массив добавляется такой объект:
-//          {
-//              //  DOM-события.
-//              dom: {
-//                  //  Тип DOM-события.
-//                  click: {
-//                      //  Селектор DOM-события (может быть пустой строкой).
-//                      '': [
-//                          Этот массив -- это обработчики для блока и его предков.
-//                          handler1,
-//                          handler2,
-//                          ...
-//                      ],
-//                      '.close': [ handler3 ],
+//      {
+//          //  DOM-события.
+//          dom: {
+//              //  Тип DOM-события.
+//              click: {
+//                  //  Селектор DOM-события (может быть пустой строкой).
+//                  '': [
+//                      //  Этот массив -- это обработчики для блока и его предков.
+//                      //  Для "простых" блоков (без наследования), в массиве всегда один хэндлер.
+//                      handler1,
+//                      handler2,
 //                      ...
-//                  },
+//                  ],
+//                  '.close': [ handler3 ],
 //                  ...
 //              },
-//              //  Кастомные события.
-//              custom: {
-//                  'open': [ handler4, handler5 ],
-//                  ...
-//              }
+//              ...
 //          },
-//          {
-//              dom: {
-//                  ...
-//              },
-//              custom: {
-//                  ...
-//              }
-//          },
-//          ...
-//      ];
+//          //  Кастомные события.
+//          custom: {
+//              'open': [ handler4, handler5 ],
+//              ...
+//          }
+//      }
 //
 Factory.prototype._prepareEvents = function(events) {
     events = events || {};
@@ -557,12 +543,6 @@ Factory.prototype._prepareEvents = function(events) {
 
         //  Матчим строки вида `click` или `click .foo`.
         r = _rx_domEvents.exec(event);
-
-        var handler = events[event];
-        if (typeof handler === 'string') {
-            handler = proto[handler];
-        }
-
         var handlers, key;
         if (r) {
             //  Тип DOM-события, например, `click`.
@@ -577,6 +557,10 @@ Factory.prototype._prepareEvents = function(events) {
             key = event;
         }
 
+        var handler = events[event];
+        if (typeof handler === 'string') {
+            handler = proto[handler];
+        }
         if (handler === null) {
             //  Особый случай, бывает только при наследовании блоков.
             //  null означает, что нужно игнорировать родительские обработчики события.
@@ -592,9 +576,15 @@ Factory.prototype._prepareEvents = function(events) {
         if (!_docEvents[type]) {
 
             (function(type) {
+                //  FIXME: Для большинства событий (click, ...) не нужен селектор,
+                //  он нужен только для mouseenter/mouseleave.
+
                 //  Ловим события только на блоках, для чего передаем селектор .nb.
-                $(document).on(type, '.nb', function(e) {
-                    var node = e.currentTarget;
+                //  $(document).on(type, '.nb', function(e) {
+                //      var node = e.currentTarget;
+
+                $(document).on(type, function(e) {
+                    var node = e.target;
 
                     var name = node.getAttribute('data-nb');
                     if (!name) { return; }
