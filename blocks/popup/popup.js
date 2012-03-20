@@ -38,12 +38,20 @@ popup.onopen = function(e, params) {
     var how = params.how;
 
     //  FIXME: Нужно сделать отдельный флаг this.visible.
+
+    //  Специальный флаг-костыль.
+    //  Если он true, то это значит, что мы только что передвинули открытый попап в другое место
+    //  и его не нужно закрывать на клик.
+    this.moved = false;
+
     if (this.where) {
         //  Попап уже открыт
-        if (where === this.where) {
+        //  FIXME: Буэээ. Уродливое условие для варианта, когда заданы координаты вместо ноды.
+        if ( where === this.where || ( (where instanceof Array) && where[0] === this.where[0] && where[1] === this.where[1] ) ) {
             //  На той же ноде. Значит закрываем его.
             this.trigger('close');
         } else {
+            this.moved = true;
             //  На другой ноде. Передвигаем его в нужное место.
             this._move(where, how);
         }
@@ -333,7 +341,12 @@ popup._bindClose = function() {
     };
     $(document).on('keydown', this._onkeypress);
 
+    var that = this;
     this._onclick = function(e) {
+        if (that.moved) {
+            that.moved = false;
+            return;
+        }
         //  Проверяем, что клик случился не внутри попапа и не на ноде, на которой попап открыт (если открыт).
         if ( !$.contains(that.node, e.target) && !(that.where && !(that.where instanceof Array) && $.contains(that.where, e.target)) ) {
             that.trigger('close');

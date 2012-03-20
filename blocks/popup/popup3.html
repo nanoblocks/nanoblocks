@@ -6,31 +6,71 @@
     <link rel="stylesheet" href="../s/all.css">
     <script type="text/javascript" src="http://yandex.st/jquery/1.7.1/jquery.js"></script>
     <script type="text/javascript" src="../../nanoblocks.js"></script>
+    <style>
+        .boo { background-color: #ccc; }
+    </style>
 </head>
 <body>
 
-<div class="nb foo" data-nb="foo">
-    <div>
+<div class="nb bar" data-nb="bar">
+    <div class="nb boo" data-nb="boo">
         <div>
-            <span>Hello</span>
+            <div class="a">
+                <span>Hello</span>
+            </div>
+            <div class="b">
+                <span>World</span>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
+
+nb.define('bar', {
+    events: {
+        click: function() {
+            console.log('bar-click');
+        }
+    }
+});
+
 nb.define('foo', {
     events: {
         init: function() {
-            console.log('init', this);
             this.i = 0;
         },
 
         click: function() {
-            console.log('click');
-            console.log(this.i++);
+            console.log('foo-click', this.i);
+            this.i++;
         }
     }
 });
+
+nb.define('boo', {
+    events: {
+        /*
+        click: function() {
+            console.log('boo-click', this.i);
+        },
+        'click span': function(e, node) {
+            console.log('boo-span-click', node);
+        },
+        'click div': function(e, node) {
+            console.log('boo-div-click', node);
+            return false;
+        }
+        */
+        'mouseenter': function() {
+            console.log('boo over');
+        },
+        'mouseleave': function() {
+            console.log('boo out');
+        }
+    }
+}, 'foo');
+
 </script>
 
 </body>
