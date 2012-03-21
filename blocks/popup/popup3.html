@@ -7,69 +7,54 @@
     <script type="text/javascript" src="http://yandex.st/jquery/1.7.1/jquery.js"></script>
     <script type="text/javascript" src="../../nanoblocks.js"></script>
     <style>
-        .boo { background-color: #ccc; }
+        div {
+            padding: 1em;
+            border: 1px solid #ccc;
+        }
+        div[data-nb] {
+            border: 1px solid #c00;
+        }
     </style>
 </head>
 <body>
 
-<div class="nb bar" data-nb="bar">
-    <div class="nb boo" data-nb="boo">
-        <div>
-            <div class="a">
-                <span>Hello</span>
-            </div>
-            <div class="b">
-                <span>World</span>
-            </div>
+<div class="a" data-nb="foo">
+    <div class="b" data-nb="bar">
+        <div class="c">c</div>
+        <div class="d">d</div>
         </div>
     </div>
 </div>
 
 <script>
 
-nb.define('bar', {
-    events: {
-        click: function() {
-            console.log('bar-click');
-        }
-    }
-});
-
 nb.define('foo', {
     events: {
-        init: function() {
-            this.i = 0;
+        'mouseover': function() {
+            console.log('foo-over');
         },
-
-        click: function() {
-            console.log('foo-click', this.i);
-            this.i++;
+        'mouseout': function() {
+            console.log('foo-out');
         }
     }
 });
 
-nb.define('boo', {
+nb.define('bar', {
     events: {
-        /*
-        click: function() {
-            console.log('boo-click', this.i);
+        'mouseover': function() {
+            console.log('bar-over');
         },
-        'click span': function(e, node) {
-            console.log('boo-span-click', node);
+        'mouseout': function() {
+            console.log('bar-out');
         },
-        'click div': function(e, node) {
-            console.log('boo-div-click', node);
-            return false;
-        }
-        */
-        'mouseenter': function() {
-            console.log('boo over');
+        'mouseover .d': function() {
+            console.log('bar-over-d');
         },
-        'mouseleave': function() {
-            console.log('boo out');
+        'mouseout .d': function() {
+            console.log('bar-out-d');
         }
     }
-}, 'foo');
+});
 
 </script>
 

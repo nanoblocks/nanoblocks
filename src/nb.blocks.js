@@ -428,14 +428,9 @@ Factory.prototype._prepareEvents = function(events) {
 
     for (var type in dom) {
         if (!_docEvents[type]) {
-
-            (function(type) {
-                //  FIXME: Для некоторых событий (mouseenter, mouseleave, ...) нужен селектор, например, .nb.
-                //  Без него событие случается только один раз на документе.
-                $(document).on(type, function(e) {
-                    return Factory._onevent(type, e);
-                });
-            })(type);
+            $(document).on(type, function(e) {
+                return Factory._onevent(e);
+            });
 
             _docEvents[type] = true;
         }
@@ -452,8 +447,13 @@ Factory.prototype._prepareEvents = function(events) {
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-Factory._onevent = function(type, e) {
-    var node = e.target;
+Factory._onevent = function(e) {
+    var type = e.type;
+    var origNode = e.target;
+    var node = origNode;
+
+    var isHover = (type === 'mouseover' || type === 'mouseout');
+    var fromNode = e.relatedTarget;
 
     var nodes;
     var n;
@@ -474,9 +474,6 @@ Factory._onevent = function(type, e) {
         //  Берем все события, на которые подписан этот блок.
         var mixinEvents = factory.events;
 
-        n = nodes.length - 1;
-        block = null;
-
         //  Для каждого миксина проверяем все ноды из nodes.
         var r = true;
         for (var i = 0, l = mixinEvents.length; i < l; i++) {
@@ -488,6 +485,8 @@ Factory._onevent = function(type, e) {
 
         if (!r) { return false; }
 
+        if (fromNode) { break; }
+
         //  Идем еще выше, в новый блок.
         node = node.parentNode;
 
@@ -496,6 +495,7 @@ Factory._onevent = function(type, e) {
     function findBlockNodes() {
         nodes = [];
         $nodes = [];
+        block = null;
         blockNode = null;
 
         var parent;
@@ -511,7 +511,18 @@ Factory._onevent = function(type, e) {
             node = parent;
         }
 
-        return blockNode;
+        if (blockNode) {
+            if (isHover && fromNode) {
+                if (origNode === blockNode) {
+                    nodes = [ blockNode ];
+                } else {
+                    nodes = [ origNode, blockNode ];
+                }
+            }
+            n = nodes.length - 1;
+
+            return true;
+        }
     }
 
     function checkEvents(events) {
@@ -520,13 +531,14 @@ Factory._onevent = function(type, e) {
         var R;
         //  Проверяем, матчатся ли ноды какие-нибудь ноды из nodes на какие-нибудь
         //  селекторы из событий блока.
-        for (var j = 0; j < n; j++) {
-            var node = nodes[j];
-            var $node = $nodes[j] || (( $nodes[j] = $(node) ));
+        var node, $node;
+        for (var i = 0; i < n; i++) {
+            node = nodes[i];
+            $node = $nodes[i] || (( $nodes[i] = $(node) ));
 
             for (var selector in events) {
                 //  Проверяем, матчится ли нода на селектор.
-                if ( selector && $node.is(selector) ) {
+                if ( selector && $node.is(selector) && ( !(isHover && fromNode) || !($.contains(node, fromNode) || node === fromNode)) ) {
                     var r = doHandlers( node, events[selector] );
                     if ( (r === false || r === null) && (R !== false) ) {
                         R = r;
@@ -536,12 +548,13 @@ Factory._onevent = function(type, e) {
 
             if (R === false || R === null) { return R; }
         }
-        //  Отдельно обрабатываем ситуацию, когда j === n, т.е. node === blockNode.
+
+        //  Отдельно обрабатываем ситуацию, когда i === n, т.е. node === blockNode.
         //  В этом случае мы смотрим только события без селекторов.
         //  События с селектором относятся только к нодам строго внутри блока.
         var handlers = events[''];
-        if (handlers) {
-            return doHandlers( nodes[n], handlers );
+        if ( handlers && (( node = nodes[n] )) && ( !(isHover && fromNode) || !($.contains(node, fromNode) || node === fromNode)) ) {
+            return doHandlers(node, handlers);
         }
     }
 
