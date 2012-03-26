@@ -217,11 +217,11 @@ Block.prototype.__init = function(node) {
     this.trigger('init');
 
     //  Отправляем в "космос" сообщение, что блок проинициализирован.
-    //  Проверка nb.root нужна для того, чтобы при создании самого nb.root не происходило ошибки.
+    //  Проверка space нужна для того, чтобы при создании самого space не происходило ошибки.
     //  FIXME: Сделать поддержку специального атрибута, например, data-nb-inited-key, который, если есть,
     //  используется вместо id. Нужно для нескольких одинаковых блоков (у которых id, очевидно, разные).
-    if (nb.root) {
-        nb.root.trigger('inited:' + this.id, this);
+    if (space) {
+        nb.trigger('inited:' + this.id, this);
     }
 };
 
@@ -265,25 +265,16 @@ Block.prototype.__getHandlers = function(name) {
 
 //  Подписываем обработчик handler на событие name.
 Block.prototype.on = function(name, handler) {
-    if (typeof name === 'string') {
-        //  Вешаем только одно событие.
-
-        var r = _rx_domEvents.exec(name);
-        if (r) {
-            //  DOM-событие.
-            $(this.node).on( r[1], r[2] || '', handler );
-        } else {
-            //  Кастомное событие.
-            this.__bindCustomEvent(name, handler);
-        }
-
-        return handler;
+    var r = _rx_domEvents.exec(name);
+    if (r) {
+        //  DOM-событие.
+        $(this.node).on( r[1], r[2] || '', handler );
+    } else {
+        //  Кастомное событие.
+        this.__bindCustomEvent(name, handler);
     }
 
-    //  В этом случае name -- это объект, т.е. вешаем несколько событий сразу.
-    for (var event in name) {
-        this.on( event, name[event] );
-    }
+    return handler;
 };
 
 Block.prototype.__bindCustomEvent = function(name, handler) {
@@ -293,38 +284,26 @@ Block.prototype.__bindCustomEvent = function(name, handler) {
 //  Отписываем обработчик handler от события name.
 //  Если не передать handler, то удалятся вообще все обработчики события name.
 Block.prototype.off = function(name, handler) {
-    if (typeof name === 'string') {
-        //  Отписываем одно событие.
-
-        var r = _rx_domEvents.exec(name);
-        if (r) {
-            //  DOM-событие.
-            $(this.node).off( r[1], r[2] || '', handler );
-
-        } else {
-            if (handler) {
-                //  Кастомное событие.
-
-                var handlers = this.__getHandlers(name);
-                //  Ищем этот хэндлер среди уже забинженных обработчиков этого события.
-                var i = handlers.indexOf(handler);
-
-                //  Нашли и удаляем этот обработчик.
-                if (i !== -1) {
-                    handlers.splice(i, 1);
-                }
-            } else {
-                //  Удаляем всех обработчиков этого события.
-                this.__handlers[name] = null;
-            }
-
-        }
+    var r = _rx_domEvents.exec(name);
+    if (r) {
+        //  DOM-событие.
+        $(this.node).off( r[1], r[2] || '', handler );
 
     } else {
-        //  event -- это объект, т.е. отписываем сразу несколько событий.
+        if (handler) {
+            //  Кастомное событие.
 
-        for (var event in name) {
-            this.off(event, name[event]);
+            var handlers = this.__getHandlers(name);
+            //  Ищем этот хэндлер среди уже забинженных обработчиков этого события.
+            var i = handlers.indexOf(handler);
+
+            //  Нашли и удаляем этот обработчик.
+            if (i !== -1) {
+                handlers.splice(i, 1);
+            }
+        } else {
+            //  Удаляем всех обработчиков этого события.
+            this.__handlers[name] = null;
         }
 
     }
@@ -442,7 +421,9 @@ Factory.prototype.create = function(node, events) {
         block.__init(node);
 
         if (events) {
-            block.on(events);
+            for (var event in events) {
+                block.on( event, events[event] );
+            }
         }
 
         _cache[id] = block;
@@ -873,7 +854,19 @@ nb.init = function(where) {
 //  Физически это пустой блок, созданный на ноде html.
 //  Его можно использовать как глобальный канал для отправки сообщений
 //  и для навешивания разных live-событий на html.
-nb.root = nb.define( {} ).create( document.getElementsByTagName('html')[0] );
+var space = nb.define( {} ).create( document.getElementsByTagName('html')[0] );
+
+nb.on = function(name, handler) {
+    return space.on(name, handler);
+};
+
+nb.off = function(name, handler) {
+    space.off(name, handler);
+};
+
+nb.trigger = function(name, params) {
+    space.trigger(name, params);
+};
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
