@@ -535,6 +535,15 @@ Factory.prototype._prepareEvents = function(events) {
         if (!_docEvents[type]) {
             $(document).on(type, function(e) {
                 //  Все обработчики вызывают один чудо-метод:
+
+                //  https://github.com/nanoblocks/nanoblocks/issues/48
+                //  Цельнотянуто из jquery:
+                //
+                //  Make sure we avoid non-left-click bubbling in Firefox (#3861)
+                if (e.button && e.type === 'click') {
+                    return;
+                }
+
                 return Factory._onevent(e);
             });
 
