@@ -990,7 +990,7 @@ nb.define = function(name, methods, base) {
 nb.init = function(where) {
     where = where || document;
 
-    var nodes = where.getElementsByClassName('_init');
+    var nodes = $(where).find('._init');
     for (var i = 0, l = nodes.length; i < l; i++) {
         nb.block( nodes[i] );
     }
