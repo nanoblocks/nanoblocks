@@ -1,4 +1,5 @@
 link ?= prefix + 'link'
+ico ?= prefix + 'ico'
 
 // Basic styles
 .{link} {
@@ -16,7 +17,7 @@ link ?= prefix + 'link'
 
         text-decoration: none;
 
-        & .ico {
+        & .{ico} {
             margin-top: -4px;
 
             vertical-align: middle;
@@ -37,7 +38,18 @@ link ?= prefix + 'link'
     }
     &_pseudo&_wrapper {
         border-bottom: 0;
-        }
+    }
 
+    // Disabled state
+    &._disabled,
+    &._disabled  &__inner {
+        cursor: default;
+
+        color: rgba(0,0,0,0.3);
+        border-color: rgba(0,0,0,0.15);
+    }
+    &._disabled .{ico} {
+        opacity: .4;
+    }
 }
 

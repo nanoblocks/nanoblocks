@@ -1,6 +1,11 @@
 // Small Button
 .{button}_size_s {
-    padding: 1px 8px;
+    &,
+    &._disabled,
+    &._disabled:active,
+    &._disabled:hover {
+        padding: 1px 8px;
+    }
 
     &:active {
         padding: 2px 8px 0px;
@@ -12,8 +17,14 @@
     }
 
     &.{button}_arrowed {
-        padding-right: 7px;
         margin-right: 6px;
+
+        &,
+        &._disabled,
+        &._disabled:active,
+        &._disabled:hover {
+            padding-right: 7px;
+        }
     }
 
     button&.{button}_arrowed:active:hover{o-selector-hack} {
@@ -24,9 +35,14 @@
 
 // Very small button
 .{button}_size_xs {
-    font-size: 11px;
-    padding: 1px 6px;
-    font-family: verdana, arial, sans-serif;
+    &,
+    &._disabled,
+    &._disabled:active,
+    &._disabled:hover {
+        font-size: 11px;
+        padding: 1px 6px;
+        font-family: verdana, arial, sans-serif;
+    }
 
     &:active {
         padding: 2px 6px 0px;
@@ -38,8 +54,14 @@
     }
 
     &.{button}_arrowed {
-        padding-right: 5px;
         margin-right: 4px;
+
+        &,
+        &._disabled,
+        &._disabled:active,
+        &._disabled:hover {
+            padding-right: 5px;
+        }
     }
 
     button&.{button}_arrowed:active:hover{o-selector-hack} {
@@ -51,8 +73,13 @@
 
 // Big button
 .{button}_size_l {
-    padding: 3px 12px;
-    font-size: 15px;
+    &,
+    &._disabled,
+    &._disabled:active,
+    &._disabled:hover {
+        padding: 3px 12px;
+        font-size: 15px;
+    }
 
     &:active {
         padding: 4px 12px 2px;
@@ -69,7 +96,13 @@
     }
 
     &.{button}_arrowed {
-        padding-right: 11px;
         margin-right: 10px;
+
+        &,
+        &._disabled,
+        &._disabled:active,
+        &._disabled:hover {
+            padding-right: 11px;
+        }
     }
 }
