@@ -445,7 +445,7 @@ Factory.prototype.create = function(node, events) {
 
         //  FIXME: Что будет, если node.getAttribute('data-nb') !== this.name ?
         //  У ноды каждого блока должен быть атрибут data-nb.
-        if ( !node.hasAttribute('data-nb') ) {
+        if ( node.getAttribute('data-nb') === null ) {
             node.setAttribute('data-nb', this.name);
         }
 
