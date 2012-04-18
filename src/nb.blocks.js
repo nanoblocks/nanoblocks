@@ -23,7 +23,8 @@ var _domEvents = [
         'mouseleave',
     */
     'mouseover',
-    'mouseout'
+    'mouseout',
+    'focusin'
 ];
 
 //  Regexp для строк вида 'click', 'click .foo'.

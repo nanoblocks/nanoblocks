@@ -348,7 +348,7 @@ popup._bindClose = function() {
             return;
         }
         //  Проверяем, что клик случился не внутри попапа и не на ноде, на которой попап открыт (если открыт).
-        if ( !$.contains(that.node, e.target) && !(that.where && !(that.where instanceof Array) && $.contains(that.where, e.target)) ) {
+        if ( !$.contains(that.node, e.target) && !( that.where && !( that.where instanceof Array ) && ( $.contains(that.where, e.target) || that.where == e.target ) ) ) {
             that.trigger('close');
         }
     };
