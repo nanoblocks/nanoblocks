@@ -1,22 +1,20 @@
 // Crazy arrowed button mode
 
 // TODO:
-//   1. hover pointer
-//   2. fix everything in Fx
-//   3. adjust paddings
-//   4. add more sizes
-
+//   Fix :active in Fx
 
 .{button}_arrowed {
-    &,
-    &:active {
-        vertical-align: top; // Active state won't make baseline jumps
-        overflow: visible;
+    vertical-align: top; // Active state won't make baseline jumps
+    overflow: visible;
+    margin-right: 8px;
+    border-radius: 3px 0 0 3px;
 
+    &,
+    &._disabled,
+    &._disabled:active,
+    &._disabled:hover {
         border-right: 0;
         padding-right: 9px;
-        margin-right: 8px;
-        border-radius: 3px 0 0 3px;
     }
 
     button&:active:hover{o-selector-hack} {
@@ -32,7 +30,7 @@
         transform: rotate(180deg) translateX(-10px);
     }
 
-    &:active:before {
+    &:not(._disabled):active:before {
         box-shadow: inset 0 -1px 4px rgba(0,0,0,.4);
     }
 }
@@ -67,18 +65,18 @@
         transform: scale(0.65, 1) rotate(45deg);
     }
 
-    .{button}_arrowed:focus > &:before {
+    .{button}_arrowed:not(._disabled):focus > &:before {
         box-shadow: 2px -2px 2px 0 rgba(255,229,131,.6), 0 0 2px 0 rgba(255,229,131,.6);
     }
 
-    .{button}_arrowed:hover > &:before {
+    .{button}_arrowed:not(._disabled):hover > &:before {
         background: -webkit-linear-gradient(-45deg,#FEFEFE 0, #CBCBCB 87%, #FFF 100%);
         background:    -moz-linear-gradient(-45deg,#FEFEFE 0, #CBCBCB 87%, #FFF 100%);
         background:      -o-linear-gradient(-45deg,#FEFEFE 0, #CBCBCB 87%, #FFF 100%);
         background:         linear-gradient(-45deg,#FEFEFE 0, #CBCBCB 87%, #FFF 100%);
     }
 
-    .{button}_arrowed:active > &:before {
+    .{button}_arrowed:not(._disabled):active > &:before {
         border-color: #9F9F9F #C7C7C7;
         background: -webkit-linear-gradient(-45deg,#E6E6E6, #FBFBFB);
         background:    -moz-linear-gradient(-45deg,#E6E6E6, #FBFBFB);
@@ -86,7 +84,7 @@
         background:         linear-gradient(-45deg,#E6E6E6, #FBFBFB);
     }
 
-    .{button}_arrowed:active > &:before {
+    .{button}_arrowed:not(._disabled):active > &:before {
         box-shadow: inset 0 0 3px rgba(0,0,0,.3);
     }
 }

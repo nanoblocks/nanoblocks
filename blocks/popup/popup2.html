@@ -29,18 +29,20 @@
     nb.define('change-toggler', {
 
         events: {
-            'init': function() {
-                this.i = 0;
-            },
+            'init': 'oninit',
 
             'click': function() {
                 var popup = nb.find('popup-1');
 
-                if ( $(popup.node).hasClass('_hidden') ) {
+                if ( popup.where !== this.node ) {
                     this.data( 'popup-toggler', JSON.stringify( { id: 'popup-1', how: dirs[this.i] } ) );
                     this.i = (this.i + 1) % dirs.length;
                 }
             }
+        },
+
+        oninit: function() {
+            this.i = 0;
         }
 
     });
@@ -57,9 +59,9 @@
     </div>
 
     <div style="margin-top: 180px">
-        <div style="position: absolute; left: 200px; width: 15px; height: 15px; background: #ccc" data-nb="change-toggler popup-toggler"></div>
-        <div style="position: absolute; left: 400px; width: 80px; height: 80px; background: #ccc" data-nb="change-toggler popup-toggler"></div>
-        <div style="position: absolute; left: 700px; width: 200px; height: 200px; background: #ccc" data-nb="change-toggler popup-toggler"></div>
+        <div class="nb" style="position: absolute; left: 200px; width: 15px; height: 15px; background: #ccc" data-nb="change-toggler popup-toggler"></div>
+        <div class="nb" style="position: absolute; left: 400px; width: 80px; height: 80px; background: #ccc" data-nb="change-toggler popup-toggler"></div>
+        <div class="nb" style="position: absolute; left: 700px; width: 200px; height: 200px; background: #ccc" data-nb="change-toggler popup-toggler"></div>
     </div>
 
 </body>

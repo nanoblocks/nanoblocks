@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Попапы и дропдауны</title>
+    <link rel="stylesheet" href="../s/all.css">
+    <script type="text/javascript" src="http://yandex.st/jquery/1.7.1/jquery.js"></script>
+    <script type="text/javascript" src="../../nanoblocks.js"></script>
+    <style>
+        div {
+            padding: 1em;
+            border: 1px solid #ccc;
+        }
+        div[data-nb] {
+            border: 1px solid #c00;
+        }
+    </style>
+</head>
+<body>
+
+<div class="a" data-nb="foo">
+    <div class="b" data-nb="bar">
+        <div class="c">c</div>
+        <div class="d">d</div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+nb.define('foo', {
+    events: {
+        'mouseover': function() {
+            console.log('foo-over');
+        },
+        'mouseout': function() {
+            console.log('foo-out');
+        }
+    }
+});
+
+nb.define('bar', {
+    events: {
+        'mouseover': function() {
+            console.log('bar-over');
+        },
+        'mouseout': function() {
+            console.log('bar-out');
+        },
+        'mouseover .d': function() {
+            console.log('bar-over-d');
+        },
+        'mouseout .d': function() {
+            console.log('bar-out-d');
+        }
+    }
+});
+
+</script>
+
+</body>
+</html>
+
