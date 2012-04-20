@@ -16,47 +16,17 @@ button ?= prefix + 'button'
     cursor: pointer;
     user-select: none;
 
-    text-shadow: 0 1px rgba(255,255,255,.5);
-
-    border-radius: 3px;
-
     // Normal and disabled states
     &,
     &._disabled,
     &._disabled:active,
     &._disabled:hover {
-
         padding: 2px 10px;
-
-        border: 1px solid;
-        border-color: rgba(0,0,0,0.14); unless _ie
-        border-color: #DDD #BBB #999; if _ie
-
-        color: #000;
-
-        background: #EEE;
-        background:\
-            -webkit-linear-gradient(top,#FEFEFE,#D1D1D1),\
-            -webkit-linear-gradient(top,rgba(0,0,0,0),rgba(0,0,0,0.31));
-        background:\
-            -moz-linear-gradient(top,#FEFEFE,#D1D1D1),\
-            -moz-linear-gradient(top,rgba(0,0,0,0),rgba(0,0,0,0.31));
-        background:\
-            -o-linear-gradient(top,#FEFEFE,#D1D1D1),\
-            -o-linear-gradient(top,rgba(0,0,0,0),rgba(0,0,0,0.31));
-        background:\
-            linear-gradient(to bottom,#FEFEFE,#D1D1D1),\
-            linear-gradient(to bottom,rgba(0,0,0,0),rgba(0,0,0,0.31));
-        background-repeat: no-repeat;
-        background-size: 100% 100%;
-        background-origin: padding-box, border-box;
     }
     // Disabled state
     &._disabled,
     &._disabled:active {
-        opacity: 0.5;
         cursor: default;
-        box-shadow: none !important;
     }
     &._disabled:before {
         display: none;
@@ -70,51 +40,6 @@ button ?= prefix + 'button'
         right: 0;
         bottom: 0;
         left: 0;
-        border-radius: 2px;
-    }
-
-    &:hover {
-        background-image:\
-            -webkit-linear-gradient(top, #FEFEFE 0, #CBCBCB 87%, #FFF 100%),\
-            -webkit-linear-gradient(top,rgba(0,0,0,0),rgba(0,0,0,0.31));
-        background-image:\
-            -moz-linear-gradient(top, #FEFEFE 0, #CBCBCB 87%, #FFF 100%),\
-            -moz-linear-gradient(top,rgba(0,0,0,0),rgba(0,0,0,0.31));
-        background-image:\
-            -o-linear-gradient(top, #FEFEFE 0, #CBCBCB 87%, #FFF 100%),\
-            -o-linear-gradient(top,rgba(0,0,0,0),rgba(0,0,0,0.31));
-        background-image:\
-            linear-gradient(to bottom, #FEFEFE 0, #CBCBCB 87%, #FFF 100%),\
-            linear-gradient(to bottom,rgba(0,0,0,0),rgba(0,0,0,0.31));
-    }
-
-    &:active {
-        padding-top: 3px;
-        padding-bottom: 1px;
-        border-color: rgba(0,0,0,0.22);
-
-        background-image:\
-            -webkit-linear-gradient(top, #E6E6E6, #FBFBFB),\
-            -webkit-linear-gradient(top,rgba(0,0,0,0.21),rgba(0,0,0,0));
-        background-image:\
-            -moz-linear-gradient(top, #E6E6E6, #FBFBFB),\
-            -moz-linear-gradient(top,rgba(0,0,0,0.21),rgba(0,0,0,0));
-        background-image:\
-            -o-linear-gradient(top, #E6E6E6, #FBFBFB),\
-            -o-linear-gradient(top,rgba(0,0,0,0.21),rgba(0,0,0,0));
-        background-image:\
-            linear-gradient(to bottom, #E6E6E6, #FBFBFB),\
-            linear-gradient(to bottom,rgba(0,0,0,0.21),rgba(0,0,0,0));
-    }
-
-    &:active:before,
-    input&:active {
-        box-shadow: inset 0 1px 4px rgba(0,0,0,.4);
-    }
-
-    &:focus {
-        outline: none;
-        box-shadow: 0 0 3px 1px rgba(255,229,131,.8);
     }
 
     // Fixing mozilla's inner paddings
@@ -122,5 +47,4 @@ button ?= prefix + 'button'
         padding: 0;
         border: none;
     }
-
 }
