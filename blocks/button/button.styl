@@ -1,6 +1,9 @@
 button ?= prefix + 'button'
 
-.{button} {
+//---------------------------------------------------------------------------//
+/* Default button mixin */
+
+button_base() {
     font: 13px/1.2 "Helvetica Neue", Arial, sans-serif;
 
     position: relative;
@@ -48,3 +51,5 @@ button ?= prefix + 'button'
         border: none;
     }
 }
+
+//---------------------------------------------------------------------------//
