@@ -1,0 +1,158 @@
+//---------------------------------------------------------------------------//
+/* MIXINs */
+button-bg($gradient, $opacity)
+    $c1 = $gradient[0]
+    $c2 = $gradient[1]
+    $o1 = $opacity[0]
+    $o2 = $opacity[1]
+    background: -webkit-linear-gradient(top, $c1, $c2), -webkit-linear-gradient(top,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
+    background: -moz-linear-gradient(top, $c1, $c2), -moz-linear-gradient(top,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
+    background: -o-linear-gradient(top, $c1, $c2), -o-linear-gradient(top,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
+    background: linear-gradient(to bottom, $c1, $c2), linear-gradient(to bottom,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
+
+button-bg-image($gradient, $opacity)
+    $formula = unquote(join(', ', $gradient))
+
+    $o1 = $opacity[0]
+    $o2 = $opacity[1]
+
+    background-image: -webkit-linear-gradient(top, $formula), -webkit-linear-gradient(top,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
+    background-image: -moz-linear-gradient(top, $formula), -moz-linear-gradient(top,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
+    background-image: -o-linear-gradient(top, $formula), -o-linear-gradient(top,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
+    background-image: linear-gradient(to bottom, $formula), linear-gradient(to bottom,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
+
+pseudo-button-bg($opacity)
+    $o1 = $opacity[0]
+    $o2 = $opacity[1]
+    background: rgba(0,0,0,$o2)
+    background: -webkit-linear-gradient(top,rgba(0,0,0,$o1) 0,rgba(0,0,0,$o2) 100%);
+    backgroudn: -webkit-gradient(linear,left top,left bottom,color-stop(0%,rgba(0,0,0,$o1)),color-stop(100%,rgba(0,0,0,$o2)))
+    background: -moz-linear-gradient(top,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
+    background: -o-linear-gradient(top,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
+    background: linear-gradient(to bottom,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
+
+//---------------------------------------------------------------------------//
+
+/* Default button mixin */
+button_default() {
+    text-shadow: 0 1px rgba(255,255,255,.5);
+
+    border-radius: 3px;
+
+    // Normal and disabled states
+    &,
+    &._disabled,
+    &._disabled:active,
+    &._disabled:hover {
+        color: #000;
+
+        border: 1px solid;
+        border-color: rgba(0,0,0,0.14); unless _ie
+        border-color: #DDD #BBB #999; if _ie
+
+        background: #EEE;
+        $gradient = #FEFEFE #D1D1D1
+        $opacity = 0 0.31
+        button-bg($gradient, $opacity)
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        background-origin: padding-box, border-box;
+    }
+
+    // Disabled state
+    &._disabled,
+    &._disabled:active {
+        opacity: 0.5;
+        box-shadow: none !important;
+    }
+
+    // Pseudo-elements to better state styling
+    &:before {
+        border-radius: 2px;
+    }
+
+    &:hover {
+        $gradient = (#FEFEFE 0) (#CBCBCB 87%) (#FFF 100%)
+        $opacity = 0 0.31
+        button-bg-image($gradient, $opacity)
+    }
+
+    &:active {
+        padding-top: 3px;
+        padding-bottom: 1px;
+        border-color: rgba(0,0,0,0.22);
+
+        $gradient = #E6E6E6, #FBFBFB
+        $opacity = 0.21 0
+        button-bg-image($gradient, $opacity)
+    }
+
+    &:active:before,
+    input&:active {
+        box-shadow: inset 0 1px 4px rgba(0,0,0,.4);
+    }
+
+    &:focus {
+        outline: none;
+        box-shadow: 0 0 3px 1px rgba(255,229,131,.8);
+    }
+}
+
+//---------------------------------------------------------------------------//
+
+/* Pseudo button mixin */
+button_pseudo() {
+    text-shadow: none;
+    border: 0;
+    border-radius: 3px;
+
+    // Normal and disabled states
+    &,
+    &._disabled,
+    &._disabled:active,
+    &._disabled:hover {
+        color: #000;
+
+        pseudo-button-bg(0.05 0.12)
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        background-origin: padding-box, border-box;
+    }
+
+    // Disabled state
+    &._disabled,
+    &._disabled:active {
+        opacity: 0.5;
+        box-shadow: none !important;
+    }
+
+    &:hover {
+        pseudo-button-bg(0.08 0.18)
+    }
+
+    &.button_size_xs:active { // XXX это треш, надо выносить паддинг сюда, чтоли из button_syze...
+        padding 1px 6px
+    }
+    &.button_size_s:active { // XXX это треш, надо выносить паддинг сюда, чтоли из button_syze...
+        padding 1px 8px
+    }
+    &.button_size_l:active { // XXX это треш, надо выносить паддинг сюда, чтоли из button_syze...
+        padding 3px 12px
+    }
+}
+
+//---------------------------------------------------------------------------//
+
+.{button} {
+    button_base()
+    button_default()
+}
+
+//---------------------------------------------------------------------------//
+
+.pseudo-{button} {
+    button_base()
+    button_pseudo()
+}
+
+//---------------------------------------------------------------------------//
