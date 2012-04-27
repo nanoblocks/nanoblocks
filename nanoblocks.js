@@ -365,11 +365,13 @@ Block.prototype.data = function(key, value) {
 //  Показываем блок.
 Block.prototype.show = function() {
     $(this.node).removeClass('_hidden');
+    this.trigger('show');
 };
 
 //  Прячем блок.
 Block.prototype.hide = function() {
     $(this.node).addClass('_hidden');
+    this.trigger('hide');
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //
