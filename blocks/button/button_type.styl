@@ -114,6 +114,13 @@ button_default() {
 
 //---------------------------------------------------------------------------//
 
+button_pseudo-bg() {
+    $bg = rgba(#000, 0.12)
+    $grad = rgba(#000, 0.05) $bg
+    background: $bg
+    bg-gradient(background, $grad)
+}
+
 /* Pseudo button mixin */
 button_pseudo() {
     text-shadow: none;
@@ -127,10 +134,7 @@ button_pseudo() {
     &._disabled:hover {
         color: #000;
 
-        $bg = rgba(#000, 0.12)
-        $grad = rgba(#000, 0.05) $bg
-        background: $bg
-        bg-gradient(background, $grad)
+        button_pseudo-bg()
 
         background-repeat: no-repeat;
         background-size: 100% 100%;
@@ -144,6 +148,11 @@ button_pseudo() {
         box-shadow: none !important;
     }
 
+    // Pseudo-elements to better state styling
+    &:before {
+        border-radius: 3px;
+    }
+
     &:hover {
         $bg = rgba(#000, 0.18)
         $grad = rgba(#000, 0.08) $bg
@@ -151,13 +160,13 @@ button_pseudo() {
         bg-gradient(background, $grad)
     }
 
-    &.button_size_xs:active { // XXX это треш, надо выносить паддинг сюда, чтоли из button_syze...
+    &.button_size_xs:active { // XXX это треш, надо выносить паддинг сюда, чтоли из button_size...
         padding 1px 6px
     }
-    &.button_size_s:active { // XXX это треш, надо выносить паддинг сюда, чтоли из button_syze...
+    &.button_size_s:active { // XXX это треш, надо выносить паддинг сюда, чтоли из button_size...
         padding 1px 8px
     }
-    &.button_size_l:active { // XXX это треш, надо выносить паддинг сюда, чтоли из button_syze...
+    &.button_size_l:active { // XXX это треш, надо выносить паддинг сюда, чтоли из button_size...
         padding 3px 12px
     }
 }
@@ -174,6 +183,23 @@ button_pseudo() {
 .pseudo-{button} {
     button_base()
     button_pseudo()
+
+    &.yellow-back {
+        &,
+        &._disabled:active {
+            button_pseudo-bg()
+        }
+
+        &:active {
+            background-color: #fef1b2
+            bg-gradient(background-image, #fbeeae #fff6cf)
+        }
+
+        &:active:before,
+        input&:active {
+            box-shadow: inset 0 1px 4px rgba(0,0,0,.4);
+        }
+    }
 }
 
 //---------------------------------------------------------------------------//
