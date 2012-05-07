@@ -1,35 +1,47 @@
 //---------------------------------------------------------------------------//
 /* MIXINs */
-button-bg($gradient, $opacity)
-    $c1 = $gradient[0]
-    $c2 = $gradient[1]
-    $o1 = $opacity[0]
-    $o2 = $opacity[1]
-    background: -webkit-linear-gradient(top, $c1, $c2), -webkit-linear-gradient(top,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
-    background: -moz-linear-gradient(top, $c1, $c2), -moz-linear-gradient(top,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
-    background: -o-linear-gradient(top, $c1, $c2), -o-linear-gradient(top,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
-    background: linear-gradient(to bottom, $c1, $c2), linear-gradient(to bottom,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
 
-button-bg-image($gradient, $opacity)
-    $formula = unquote(join(', ', $gradient))
+/**
+    @param {string} $prop_name CSS property to be rendered
+    @param {Array.<Gradient>} $grads Gradients definition.
 
-    $o1 = $opacity[0]
-    $o2 = $opacity[1]
+    Example:
+        $grad1 = (#EEE 0) (#EFEFEF 100%)
+        $grad2 = #FAFAFA #EFEFEF
 
-    background-image: -webkit-linear-gradient(top, $formula), -webkit-linear-gradient(top,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
-    background-image: -moz-linear-gradient(top, $formula), -moz-linear-gradient(top,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
-    background-image: -o-linear-gradient(top, $formula), -o-linear-gradient(top,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
-    background-image: linear-gradient(to bottom, $formula), linear-gradient(to bottom,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
+        bg-gradient(background, $grad1)
+        bg-gradient(background-image, $grad2)
+        bg-gradient(background-image, $grad1, $grad2)
+*/
+bg-gradient($prop_name, $grads...) {
+    $webkit = ()
+    $moz = ()
+    $o = ()
+    $standart = ()
 
-pseudo-button-bg($opacity)
-    $o1 = $opacity[0]
-    $o2 = $opacity[1]
-    background: rgba(0,0,0,$o2)
-    background: -webkit-linear-gradient(top,rgba(0,0,0,$o1) 0,rgba(0,0,0,$o2) 100%);
-    backgroudn: -webkit-gradient(linear,left top,left bottom,color-stop(0%,rgba(0,0,0,$o1)),color-stop(100%,rgba(0,0,0,$o2)))
-    background: -moz-linear-gradient(top,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
-    background: -o-linear-gradient(top,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
-    background: linear-gradient(to bottom,rgba(0,0,0,$o1),rgba(0,0,0,$o2));
+    $comma = unquote(',')
+
+    for $grad, i in $grads {
+        if (i > 0) {
+            push($webkit, $comma) // Мегахак: вставляем разделитель как расквотированную запятую
+            push($moz, $comma)
+            push($o, $comma)
+            push($standart, $comma)
+        }
+
+        $formula = unquote(join(', ', $grad))
+
+        push($webkit, -webkit-linear-gradient(top, $formula))
+        push($moz, -moz-linear-gradient(top, $formula))
+        push($o, -o-linear-gradient(top, $formula))
+        push($standart, linear-gradient(to bottom, $formula))
+    }
+
+    {$prop_name}: $webkit
+    {$prop_name}: $moz
+    {$prop_name}: $o
+    {$prop_name}: $standart
+}
 
 //---------------------------------------------------------------------------//
 
@@ -51,9 +63,11 @@ button_default() {
         border-color: #DDD #BBB #999; if _ie
 
         background: #EEE;
-        $gradient = #FEFEFE #D1D1D1
-        $opacity = 0 0.31
-        button-bg($gradient, $opacity)
+
+        $grad1 = #FEFEFE #D1D1D1
+        $grad2 = rgba(#000, 0) rgba(#000, 0.31)
+        bg-gradient(background, $grad1, $grad2)
+
         background-repeat: no-repeat;
         background-size: 100% 100%;
         background-origin: padding-box, border-box;
@@ -72,9 +86,9 @@ button_default() {
     }
 
     &:hover {
-        $gradient = (#FEFEFE 0) (#CBCBCB 87%) (#FFF 100%)
-        $opacity = 0 0.31
-        button-bg-image($gradient, $opacity)
+        $grad1 = (#FEFEFE 0) (#CBCBCB 87%) (#FFF 100%)
+        $grad2 = rgba(#000, 0) rgba(#000, 0.31)
+        bg-gradient(background-image, $grad1, $grad2)
     }
 
     &:active {
@@ -82,9 +96,9 @@ button_default() {
         padding-bottom: 1px;
         border-color: rgba(0,0,0,0.22);
 
-        $gradient = #E6E6E6, #FBFBFB
-        $opacity = 0.21 0
-        button-bg-image($gradient, $opacity)
+        $grad1 = #E6E6E6 #FBFBFB
+        $grad2 = rgba(#000, 0.21) rgba(#000, 0)
+        bg-gradient(background-image, $grad1, $grad2)
     }
 
     &:active:before,
@@ -113,7 +127,11 @@ button_pseudo() {
     &._disabled:hover {
         color: #000;
 
-        pseudo-button-bg(0.05 0.12)
+        $bg = rgba(#000, 0.12)
+        $grad = rgba(#000, 0.05) $bg
+        background: $bg
+        bg-gradient(background, $grad)
+
         background-repeat: no-repeat;
         background-size: 100% 100%;
         background-origin: padding-box, border-box;
@@ -127,7 +145,10 @@ button_pseudo() {
     }
 
     &:hover {
-        pseudo-button-bg(0.08 0.18)
+        $bg = rgba(#000, 0.18)
+        $grad = rgba(#000, 0.08) $bg
+        background: $bg
+        bg-gradient(background, $grad)
     }
 
     &.button_size_xs:active { // XXX это треш, надо выносить паддинг сюда, чтоли из button_syze...
