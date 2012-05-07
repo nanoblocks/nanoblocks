@@ -68,6 +68,9 @@ popup.onopen = function(e, params) {
 
         //  Показываем.
         this.show();
+
+        this.opener = params.by;
+        $(this.opener.node).toggleClass('state-open', true);
     }
 };
 
@@ -78,6 +81,9 @@ popup.onclose = function() {
     this.where = null;
     //  Прячем.
     this.hide();
+
+    $(this.opener.node).toggleClass('state-open', false);
+    delete this.opener;
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -398,7 +404,8 @@ nb.define('popup-toggler', {
                 where: data.where || this.node,
 
                 //  Как позиционировать попап.
-                how: data.how
+                how: data.how,
+                by: this
             });
 
             return false;
