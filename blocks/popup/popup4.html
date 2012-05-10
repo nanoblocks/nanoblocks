@@ -1,0 +1,41 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Попапы и дропдауны</title>
+    <link rel="stylesheet" href="../s/all.css">
+    <script type="text/javascript" src="http://yandex.st/jquery/1.7.1/jquery.js"></script>
+    <script type="text/javascript" src="../../nanoblocks.js"></script>
+    <script type="text/javascript" src="popup.js"></script>
+</head>
+<body>
+
+<script>
+    nb.define('popup-toggler-2', {
+
+        events: {
+            'click': null, // Отменяем родительское событие на клик.
+            'mouseover': 'onclick',
+            'mouseout': 'onclick'
+        }
+
+    }, 'popup-toggler');
+</script>
+
+    <div class="popup popup_dropdown _hidden" data-nb="popup" id="popup-1">
+        <div class="popup__tail"></div>
+        <a href="#" class="popup__line link">Попап</a>
+        <a href="#" class="popup__line link">Какое-то меню</a>
+        <a href="#" class="popup__line link">Ололололо</a>
+        <div class="popup__hr"></div>
+        <a href="#" class="popup__line link">И ещё пункт</a>
+        <a class="popup__line link link_wrapper link_pseudo popup__close"><span class="link__inner">Закрыть</span></a>
+    </div>
+
+    <div style="margin-top: 180px">
+        <div class="nb" style="position: absolute; left: 400px; width: 80px; height: 80px; background: #ccc" data-nb="popup-toggler-2" data-nb-popup-toggler="{ id: 'popup-1' }"></div>
+    </div>
+
+</body>
+</html>
+
