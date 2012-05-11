@@ -68,6 +68,9 @@ popup.onopen = function(e, params) {
 
         //  Показываем.
         this.show();
+
+        // Сообщаем в космос, что открылся попап
+        nb.trigger('popup-opened', this);
     }
 };
 
@@ -78,6 +81,8 @@ popup.onclose = function() {
     this.where = null;
     //  Прячем.
     this.hide();
+    // Сообщаем в космос, что закрылся попап
+    nb.trigger('popup-closed', this);
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
