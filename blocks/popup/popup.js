@@ -16,18 +16,17 @@ popup.events = {
 
 popup.oninit = function() {
     var data = this.data();
-    var $node = $(this.node);
 
     if ('modal' in data) {
         this.modal = true;
     }
 
     //  У попапа есть "хвостик".
-    this.$tail = $node.find('.popup__tail');
+    this.$tail = $(this.node).find('.popup__tail');
     this.hasTail = !!this.$tail.length;
 
     // Храним исходное положение попапа, чтобы возвращать его на место
-    var previous = $node.prev()[0];
+    var previous = this.node.previousSibling;
     this._home = previous ? { previous: previous } : { parent: this.node.parentNode };
 };
 
