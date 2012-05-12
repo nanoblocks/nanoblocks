@@ -16,19 +16,19 @@ popup.events = {
 
 popup.oninit = function() {
     var data = this.data();
+    var $node = $(this.node);
 
     if ('modal' in data) {
         this.modal = true;
     }
 
     //  У попапа есть "хвостик".
-    this.$tail = $(this.node).find('.popup__tail');
+    this.$tail = $node.find('.popup__tail');
     this.hasTail = !!this.$tail.length;
 
-    //  FIXME: Может быть это нужно делать не тут, а где-нибудь в _show()?
-    //  Переносим ноду попапа в самый конец документа,
-    //  чтобы избежать разных проблем с css.
-    $('body').append(this.node);
+    // Храним исходное положение попапа, чтобы возвращать его на место
+    var previous = $node.prev()[0];
+    this._home = previous ? { previous: previous } : { parent: this.node.parentNode };
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -105,6 +105,10 @@ popup.show = function() {
     if (this.modal) {
         //  Ноду блока переносим внутрь паранджи.
         $paranja().append(this.node).show();
+    } else {
+        //  Переносим ноду попапа в самый конец документа,
+        //  чтобы избежать разных проблем с css.
+        $('body').append(this.node);
     }
 
     this.super_.show.call(this);
@@ -114,12 +118,16 @@ popup.show = function() {
 popup.hide = function() {
     if (this.modal) {
         $paranja().hide();
-        //  Выносим блок из паранджи.
-        //  FIXME: А может это и не нужно. Ну и пусть все модальные диалоги копятся в ней.
-        $('body').append(this.node);
     }
 
     this.super_.hide.call(this);
+
+    // Возвращаем ноду попапа на старое место
+    if (this._home.previous) {
+        $(this._home.previous).after(this.node);
+    } else if (this._home.parent) {
+        $(this._home.parent).prepend(this.node);
+    }
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
