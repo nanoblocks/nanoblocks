@@ -397,6 +397,10 @@ nb.define('popup-toggler', {
     },
 
     'onclick': function() {
+        if (this.getMod('_disabled')) {
+            return;
+        }
+
         var data = this.data()['popup-toggler'];
 
         //  Находим соответствующий попап.
