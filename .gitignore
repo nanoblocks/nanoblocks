@@ -1,3 +1,4 @@
 # Sublime Text Project files
 *.sublime-workspace
 .idea
+.jshintrc
