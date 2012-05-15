@@ -492,7 +492,7 @@ Factory.prototype._prepareEvents = function(events) {
 
     for (var event in events) {
         //  Матчим строки вида 'click' или 'click .foo'.
-        r = _rx_domEvents.exec(event);
+        var r = _rx_domEvents.exec(event);
         var handlers, key;
         if (r) {
             //  Тип DOM-события, например, click.
@@ -1005,7 +1005,13 @@ nb.init = function(where) {
 //  Физически это пустой блок, созданный на ноде html.
 //  Его можно использовать как глобальный канал для отправки сообщений
 //  и для навешивания разных live-событий на html.
-var space = nb.define( {} ).create( document.getElementsByTagName('html')[0] );
+var space = nb.define({
+    events: {
+        'click': function() {
+            nb.trigger('space:click');
+        }
+    }
+}).create( document.getElementsByTagName('html')[0] );
 
 nb.on = function(name, handler) {
     return space.on(name, handler);
