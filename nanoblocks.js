@@ -871,6 +871,9 @@ Factory.get = function(name) {
         var events = [];
 
         var names = name.split(/\s+/);
+        if (names.length < 2) {
+            throw "Block '" + name + "' is undefined";
+        }
         for (var i = 0, l = names.length; i < l; i++) {
             //  Примиксовываем все "простые" классы.
             var mixin = Factory.get( names[i] );
