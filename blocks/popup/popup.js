@@ -97,7 +97,7 @@ var $paranja = function() {
     }
 
     return _$paranja;
-}
+};
 
 popup.show = function() {
     //  Включаем паранджу, если нужно.
@@ -145,7 +145,7 @@ popup._move = function(where, how) {
 
     //  Изначальные прямоугольники для what и where.
     var orig_what = nb.rect(this.node);
-    var where = nb.rect(where);
+    where = nb.rect(where);
 
     //  Adjusted what -- т.е. мы what передвинули так, чтобы точки привязки what и where совпадали.
     //  adj_what -- это объект с двумя свойствами:
@@ -195,7 +195,7 @@ popup._move = function(where, how) {
             //  Справа -- минимумом из середин what и where.
             var r = Math.min( t_what[1][0] / 2, t_where[1][0] / 2);
 
-            var x;
+            var x, y;
             if (MIN_LEFT <= r) {
                 //  Для "хвоста" достаточно места.
 
@@ -216,7 +216,8 @@ popup._move = function(where, how) {
             var tailOffset = nb.vec.mulM( transform, nb.vec.mulM( transform, nb.vec.mulM( transform, [ x, 0] ) ) );
 
             //  Позиционируем "хвост".
-            var x = tailOffset[0], y = tailOffset[1];
+            x = tailOffset[0];
+            y = tailOffset[1];
             var AUTO = 'auto';
             if (x > 0) {
                 css.left = x;
@@ -329,7 +330,7 @@ function tailDirs(what, where) {
         return [ where[1], where[0] ];
     }
 
-};
+}
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
@@ -353,7 +354,6 @@ popup._bindClose = function() {
     };
     $(document).on('keydown', this._onkeypress);
 
-    var that = this;
     this._onclick = function(e) {
         if (that.moved) {
             that.moved = false;
@@ -396,6 +396,10 @@ nb.define('popup-toggler', {
     },
 
     'onclick': function() {
+        if (this.getMod('_disabled')) {
+            return;
+        }
+
         var data = this.data()['popup-toggler'];
 
         //  Находим соответствующий попап.

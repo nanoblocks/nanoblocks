@@ -1,0 +1,25 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Попапы и дропдауны</title>
+    <link rel="stylesheet" href="../s/all.css">
+    <script type="text/javascript" src="http://yandex.st/jquery/1.7.1/jquery.js"></script>
+    <script type="text/javascript" src="../../nanoblocks.js"></script>
+    <script type="text/javascript" src="popup.js"></script>
+</head>
+<body>
+    <p style="margin-top: 50px; margin-bottom: 500px">
+        Это выключенный popup:
+        <a href="#hello" class="nb link link_wrapper link_pseudo _disabled" data-nb="popup-toggler" data-nb-popup-toggler="{ id: 'popup-1', how: { where: 'left bottom', what: 'left top' } }">
+            <span class="link__inner">Не откроюсь</span>
+        </a>
+        Он не должен открываться.
+    </p>
+    <div class="nb popup popup_dropdown _hidden" data-nb="popup" id="popup-1">
+        <div class="popup__tail"></div>
+        <div>Это никто не должен видеть!</div>
+    </div>
+</body>
+</html>
+
