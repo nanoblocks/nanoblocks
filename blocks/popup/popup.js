@@ -32,6 +32,19 @@ popup.oninit = function() {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
+//  FIXME: Паранджа, наверное, должна быть общедоступным компонентом.
+
+var _$paranja;
+
+var $paranja = function() {
+    if (!_$paranja) {
+        _$paranja = $('<div class="paranja paranja_theme_dark"></div>').hide();
+        $('body').append( _$paranja );
+    }
+
+    return _$paranja;
+};
+
 popup.onopen = function(e, params) {
     var where = params.where;
     var how = params.how;
@@ -60,6 +73,16 @@ popup.onopen = function(e, params) {
         //  На всякий случай даем сигнал, что нужно закрыть все открытые попапы.
         nb.trigger('popup-close');
 
+        //  Включаем паранджу, если нужно.
+        if (this.modal) {
+            //  Ноду блока переносим внутрь паранджи.
+            $paranja().append(this.node).show();
+        } else {
+            //  Переносим ноду попапа в самый конец документа,
+            //  чтобы избежать разных проблем с css.
+            $('body').append(this.node);
+        }
+
         //  Передвигаем попап.
         this._move(where, how);
         //  Вешаем события, чтобы попап закрывался по нажатие ESC и клику вне попапа.
@@ -80,38 +103,22 @@ popup.onclose = function() {
     this.where = null;
     //  Прячем.
     this.hide();
+
+    // Возвращаем ноду попапа на старое место
+    if (this._home.previous) {
+        $(this._home.previous).after(this.node);
+    } else if (this._home.parent) {
+        $(this._home.parent).prepend(this.node);
+    }
+
     // Сообщаем в космос, что закрылся попап
     nb.trigger('popup-closed', this);
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-//  FIXME: Паранджа, наверное, должна быть общедоступным компонентом.
-
-var _$paranja;
-
-var $paranja = function() {
-    if (!_$paranja) {
-        _$paranja = $('<div class="paranja paranja_theme_dark"></div>').hide();
-        $('body').append( _$paranja );
-    }
-
-    return _$paranja;
-};
-
 popup.show = function() {
-    //  Включаем паранджу, если нужно.
-    if (this.modal) {
-        //  Ноду блока переносим внутрь паранджи.
-        $paranja().append(this.node).show();
-    } else {
-        //  Переносим ноду попапа в самый конец документа,
-        //  чтобы избежать разных проблем с css.
-        $('body').append(this.node);
-    }
-
     this.super_.show.call(this);
-
 };
 
 popup.hide = function() {
@@ -120,13 +127,6 @@ popup.hide = function() {
     }
 
     this.super_.hide.call(this);
-
-    // Возвращаем ноду попапа на старое место
-    if (this._home.previous) {
-        $(this._home.previous).after(this.node);
-    } else if (this._home.parent) {
-        $(this._home.parent).prepend(this.node);
-    }
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
