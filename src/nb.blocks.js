@@ -870,8 +870,8 @@ nb.init = function(where) {
 //  и для навешивания разных live-событий на html.
 var space = nb.define({
     events: {
-        'click': function() {
-            nb.trigger('space:click');
+        'click': function(e) {
+            nb.trigger('space:click', e.target);
         }
     }
 }).create( document.getElementsByTagName('html')[0] );
