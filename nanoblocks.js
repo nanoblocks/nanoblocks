@@ -25,7 +25,6 @@ nb.inherit = function(child, parent) {
     var F = function() {};
     F.prototype = parent.prototype;
     child.prototype = new F();
-    child.prototype.super_ = parent.prototype;
     child.prototype.constructor = child;
 };
 
@@ -878,11 +877,6 @@ Factory.get = function(name) {
             //  Примиксовываем все "простые" классы.
             var mixin = Factory.get( names[i] );
             nb.inherit(ctor, mixin.ctor);
-
-            //  FIXME.
-            //  Вопрос: А что будет с super_?
-            //  Ответ: Будет ерунда. Чтобы эту ерунду замечать вовремя, напишем пока null.
-            ctor.prototype.super_ = null;
 
             //  Собираем массив из структур с событиями.
             //  mixin.events[0] -- здесь 0 потому, что у "простых" классов там всегда один элемент.

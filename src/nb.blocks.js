@@ -739,11 +739,6 @@ Factory.get = function(name) {
             var mixin = Factory.get( names[i] );
             nb.inherit(ctor, mixin.ctor);
 
-            //  FIXME.
-            //  Вопрос: А что будет с super_?
-            //  Ответ: Будет ерунда. Чтобы эту ерунду замечать вовремя, напишем пока null.
-            ctor.prototype.super_ = null;
-
             //  Собираем массив из структур с событиями.
             //  mixin.events[0] -- здесь 0 потому, что у "простых" классов там всегда один элемент.
             events.push( mixin.events[0] );
@@ -870,8 +865,8 @@ nb.init = function(where) {
 //  и для навешивания разных live-событий на html.
 var space = nb.define({
     events: {
-        'click': function() {
-            nb.trigger('space:click');
+        'click': function(e) {
+            nb.trigger('space:click', e.target);
         }
     }
 }).create( document.getElementsByTagName('html')[0] );
