@@ -64,8 +64,10 @@ popup.onopen = function(e, params) {
             this.trigger('close');
         } else {
             this.moved = true;
+            this.where = where;
+            this.how = how;
             //  На другой ноде. Передвигаем его в нужное место.
-            this._move(where, how);
+            this._move();
         }
     } else {
         //  Попап закрыт. Будем открывать.
@@ -84,7 +86,9 @@ popup.onopen = function(e, params) {
         }
 
         //  Передвигаем попап.
-        this._move(where, how);
+        this.where = where;
+        this.how = how;
+        this._move();
         //  Вешаем события, чтобы попап закрывался по нажатие ESC и клику вне попапа.
         this._bindClose();
 
@@ -120,10 +124,10 @@ popup.onclose = function() {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-popup._move = function(where, how) {
-    //  FIXME: Не нужно это делать в _move().
-    //  Запоминаем, на какой ноде мы открываем попап.
-    this.where = where;
+popup._move = function() {
+    var where = this.where;
+    var how = this.how;
+    if (!where) return;
 
     //  Модальный попап двигать не нужно.
     if (this.modal) {
