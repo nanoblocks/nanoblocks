@@ -102,6 +102,9 @@ popup.onclose = function() {
     //  Снимаем флаг о том, что попап открыт.
     this.where = null;
     //  Прячем.
+    if (this.modal) {
+        $paranja().hide();
+    }
     this.hide();
 
     // Возвращаем ноду попапа на старое место
@@ -113,20 +116,6 @@ popup.onclose = function() {
 
     // Сообщаем в космос, что закрылся попап
     nb.trigger('popup-closed', this);
-};
-
-// ----------------------------------------------------------------------------------------------------------------- //
-
-popup.show = function() {
-    this.super_.show.call(this);
-};
-
-popup.hide = function() {
-    if (this.modal) {
-        $paranja().hide();
-    }
-
-    this.super_.hide.call(this);
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
