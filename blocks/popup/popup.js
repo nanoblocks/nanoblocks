@@ -344,13 +344,13 @@ popup._bindClose = function() {
     };
     $(document).on('keydown', this._onkeypress);
 
-    this._onclick = function(e) {
+    this._onclick = function(e, target) {
         if (that.moved) {
             that.moved = false;
             return;
         }
         //  Проверяем, что клик случился не внутри попапа и не на ноде, на которой попап открыт (если открыт).
-        if ( !$.contains(that.node, e.target) && !( that.where && !( that.where instanceof Array ) && ( $.contains(that.where, e.target) || that.where == e.target ) ) ) {
+        if ( (that.node !== target) && !$.contains(that.node, target) && !( that.where && !( that.where instanceof Array ) && ( $.contains(that.where, target) || that.where == target ) ) ) {
             that.trigger('close');
         }
     };
