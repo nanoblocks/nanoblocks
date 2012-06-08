@@ -12,10 +12,24 @@ popup.events = {
     'click .popup__close': 'onclose'
 };
 
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+//  Показываем блок.
+popup.show = function() {
+    $(this.node).removeClass('_hidden');
+    this.trigger('show');
+};
+
+//  Прячем блок.
+popup.hide = function() {
+    $(this.node).addClass('_hidden');
+    this.trigger('hide');
+};
+
 // ----------------------------------------------------------------------------------------------------------------- //
 
 popup.oninit = function() {
-    var data = this.data();
+    var data = this.nbdata();
 
     if ('modal' in data) {
         this.modal = true;
@@ -390,7 +404,7 @@ nb.define('popup-toggler', {
             return;
         }
 
-        var data = this.data()['popup-toggler'];
+        var data = this.nbdata()['popup-toggler'];
 
         //  Находим соответствующий попап.
         //  Соответствие задается атрибутом `id`.

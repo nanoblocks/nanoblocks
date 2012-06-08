@@ -365,22 +365,8 @@ Block.prototype.trigger = function(name, params) {
 //
 //  Если вызвать метод без аргументов, то он вернет объект со всеми data-атрибутами.
 //
-Block.prototype.data = function(key, value) {
+Block.prototype.nbdata = function(key, value) {
     return nb.node.data(this.node, key, value);
-};
-
-//  ---------------------------------------------------------------------------------------------------------------  //
-
-//  Показываем блок.
-Block.prototype.show = function() {
-    $(this.node).removeClass('_hidden');
-    this.trigger('show');
-};
-
-//  Прячем блок.
-Block.prototype.hide = function() {
-    $(this.node).addClass('_hidden');
-    this.trigger('hide');
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //
