@@ -1,0 +1,49 @@
+pager ?= prefix + 'pager'
+
+.{pager} {
+    font-size: 130%;
+    margin: 1em 0 2em;
+
+    &__title {
+        font-weight: bold;
+        padding-right: 0.65em;
+    }
+
+    &__nav {
+        margin-right: 0.8em;
+
+        &_inactive {
+            color: #999;
+        }
+    }
+
+    &__key {
+        font: 70% Arial, sans-serif;
+        word-spacing: 0.04em;
+
+        &_dir_prev {
+            margin-right: 0.6em;
+        }
+
+        &_dir_next {
+            margin-left: 0.6em;
+        }
+    }
+
+    &__arr {
+        font: 100% Times, sans-serif;
+    }
+
+    &__pages {
+        margin-top: 0.4em;
+    }
+
+    &__page {
+        margin: 0.15em 0.3em;
+
+        &_current {
+            background: #e8e9ec;
+            padding: 0.15em 0.3em;
+        }
+    }
+}
