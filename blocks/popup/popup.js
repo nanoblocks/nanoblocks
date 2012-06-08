@@ -15,7 +15,7 @@ popup.events = {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 popup.oninit = function() {
-    var data = this.data();
+    var data = this.nbdata();
 
     if ('modal' in data) {
         this.modal = true;
@@ -390,7 +390,7 @@ nb.define('popup-toggler', {
             return;
         }
 
-        var data = this.data()['popup-toggler'];
+        var data = this.nbdata()['popup-toggler'];
 
         //  Находим соответствующий попап.
         //  Соответствие задается атрибутом `id`.
