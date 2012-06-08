@@ -12,6 +12,20 @@ popup.events = {
     'click .popup__close': 'onclose'
 };
 
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+//  Показываем блок.
+popup.show = function() {
+    $(this.node).removeClass('_hidden');
+    this.trigger('show');
+};
+
+//  Прячем блок.
+popup.hide = function() {
+    $(this.node).addClass('_hidden');
+    this.trigger('hide');
+};
+
 // ----------------------------------------------------------------------------------------------------------------- //
 
 popup.oninit = function() {
