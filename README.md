@@ -321,8 +321,8 @@ var node = block.node; // html-нода, на которой инициализ�
 Метод `data`:
 
 ```javascript
-var foo = block.data('foo'); // тоже самое, что и block.node.getAttribute('data-nb-foo').
-block.data('foo', 42); // тоже самое, что и block.node.setAttribute('data-nb-foo', 42).
+var foo = block.nbdata('foo'); // тоже самое, что и block.node.getAttribute('data-nb-foo').
+block.nbdata('foo', 42); // тоже самое, что и block.node.setAttribute('data-nb-foo', 42).
 ```
 
 

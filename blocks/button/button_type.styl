@@ -49,7 +49,7 @@ bg-gradient($prop_name, $grads...) {
 button_default() {
     text-shadow: 0 1px rgba(255,255,255,.5);
 
-    border-radius: 3px;
+    border-radius: 3px
 
     // Normal and disabled states
     &,
@@ -82,7 +82,7 @@ button_default() {
 
     // Pseudo-elements to better state styling
     &:before {
-        border-radius: 2px;
+        border-radius: 2px
     }
 
     &:hover {
@@ -177,3 +177,35 @@ button_pseudo() {
 }
 
 //---------------------------------------------------------------------------//
+
+.button-group .{button} {
+    button_base()
+    button_default()
+
+    border-radius: 0
+    border-right-width: 0 !important
+    &:before {
+        border-radius: 0
+        border-right-width: 0 !important
+    }
+
+    &:first-child {
+        border-top-left-radius: 3px;
+        border-bottom-left-radius: 3px;
+    }
+    &:first-child :before {
+        border-top-left-radius: 2px;
+        border-bottom-left-radius: 2px;
+    }
+
+    &:last-child {
+        border-top-right-radius: 3px;
+        border-bottom-right-radius: 3px;
+        border-right-width: 1px !important
+    }
+    &:last-child :before {
+        border-top-right-radius: 2px;
+        border-bottom-right-radius: 2px;
+        border-right-width: 1px !important
+    }
+}
