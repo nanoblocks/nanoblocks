@@ -723,7 +723,7 @@ Factory.get = function(name) {
         for (var i = 0, l = names.length; i < l; i++) {
             //  Примиксовываем все "простые" классы.
             var mixin = Factory.get( names[i] );
-            nb.inherit(ctor, mixin.ctor);
+            nb.extend(ctor.prototype, mixin.ctor.prototype);
 
             //  Собираем массив из структур с событиями.
             //  mixin.events[0] -- здесь 0 потому, что у "простых" классов там всегда один элемент.
