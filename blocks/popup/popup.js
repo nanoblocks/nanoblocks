@@ -316,7 +316,7 @@ var $paranja = function() {
 }
 
 var $holder = function() {
-    var div = $('<div id=qweqwe/>').appendTo('body');
+    var div = $('<div/>').appendTo('body');
     $holder = function() {
         return div.appendTo('body');
     }
@@ -465,9 +465,7 @@ nb.define('tooltip-toggler', {
 
     events: {
         'mouseover': 'showTooltip',
-        'mouseout': 'hideTooltip',
-        'focus': 'showTooltip',
-        'blur': 'hideTooltip'
+        'mouseout': 'hideTooltip'
     },
 
     'showTooltip': function() {
@@ -475,11 +473,11 @@ nb.define('tooltip-toggler', {
             return;
         }
 
-        var popup = this.getPopup();
+        var tooltip = this.getTooltip();
 
-        if (popup) {
+        if (tooltip) {
             var data = this.nbdata('tooltip-toggler');
-            popup.trigger('open', {
+            tooltip.trigger('open', {
                 where: data.where || this.node,
                 how: data.how
             });
@@ -489,20 +487,20 @@ nb.define('tooltip-toggler', {
     },
 
     'hideTooltip': function() {
-        var popup = this.getPopup();
+        var tooltip = this.getTooltip();
 
-        if (popup) {
-            popup.trigger('close');
+        if (tooltip) {
+            tooltip.trigger('close');
             return false;
         }
     },
 
-    getPopup: function() {
-        if (!this._popup) {
+    getTooltip: function() {
+        if (!this._tooltip) {
             var data = this.nbdata('tooltip-toggler');
-            this._popup = nb.find( data['id'] );
+            this._tooltip = nb.find( data['id'] );
         }
-        return this._popup;
+        return this._tooltip;
     }
 });
 
