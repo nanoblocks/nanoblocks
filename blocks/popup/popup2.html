@@ -35,7 +35,7 @@
                 var popup = nb.find('popup-1');
 
                 if ( popup.where !== this.node ) {
-                    this.data( 'popup-toggler', JSON.stringify( { id: 'popup-1', how: dirs[this.i] } ) );
+                    this.nbdata( 'popup-toggler', JSON.stringify( { id: 'popup-1', how: dirs[this.i] } ) );
                     this.i = (this.i + 1) % dirs.length;
                 }
             }
