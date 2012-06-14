@@ -417,6 +417,15 @@ nb.on('space:click', function(e, node) {
         }
     }
 });
+
+nb.on('popup-close', function() {
+    if ($holder().children().length) {
+        nb.block($holder().children().first()[0]).trigger('close');
+    }
+    if ($paranja().children().length) {
+        nb.block($paranja().children().first()[0]).trigger('close');
+    }
+});
 }(jQuery, nb));
 
 // ----------------------------------------------------------------------------------------------------------------- //
