@@ -49,7 +49,7 @@ function onopen(e, params) {
     } else {
         //  Переносим ноду попапа в отдельный блок,
         //  чтобы избежать разных проблем с css.
-        $holder().append(this.node);
+        $holder(true).append(this.node);
 
         //  Передвигаем попап.
         this._move();
@@ -317,8 +317,11 @@ var $paranja = function() {
 
 var $holder = function() {
     var div = $('<div/>').appendTo('body');
-    $holder = function() {
-        return div.appendTo('body');
+    $holder = function(append) {
+        if (append) {
+            div.appendTo('body');
+        }
+        return div;
     }
     return div;
 }
