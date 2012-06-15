@@ -216,22 +216,8 @@ Block.prototype.trigger = function(name, params) {
 //
 //  Если вызвать метод без аргументов, то он вернет объект со всеми data-атрибутами.
 //
-Block.prototype.data = function(key, value) {
+Block.prototype.nbdata = function(key, value) {
     return nb.node.data(this.node, key, value);
-};
-
-//  ---------------------------------------------------------------------------------------------------------------  //
-
-//  Показываем блок.
-Block.prototype.show = function() {
-    $(this.node).removeClass('_hidden');
-    this.trigger('show');
-};
-
-//  Прячем блок.
-Block.prototype.hide = function() {
-    $(this.node).addClass('_hidden');
-    this.trigger('hide');
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //
@@ -737,7 +723,7 @@ Factory.get = function(name) {
         for (var i = 0, l = names.length; i < l; i++) {
             //  Примиксовываем все "простые" классы.
             var mixin = Factory.get( names[i] );
-            nb.inherit(ctor, mixin.ctor);
+            nb.extend(ctor.prototype, mixin.ctor.prototype);
 
             //  Собираем массив из структур с событиями.
             //  mixin.events[0] -- здесь 0 потому, что у "простых" классов там всегда один элемент.
