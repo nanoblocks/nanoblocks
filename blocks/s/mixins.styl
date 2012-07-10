@@ -42,3 +42,46 @@ gen(props) {
         }
     }
 }
+
+//---------------------------------------------------------------------------//
+/**
+    @param {string} $prop_name CSS property to be rendered
+    @param {Array.<Gradient>} $grads Gradients definition.
+
+    Example:
+        $grad1 = (#EEE 0) (#EFEFEF 100%)
+        $grad2 = #FAFAFA #EFEFEF
+
+        bg-gradient(background, $grad1)
+        bg-gradient(background-image, $grad2)
+        bg-gradient(background-image, $grad1, $grad2)
+*/
+bg-gradient($prop_name, $grads...) {
+    $webkit = ()
+    $moz = ()
+    $o = ()
+    $standart = ()
+
+    $comma = unquote(',')
+
+    for $grad, i in $grads {
+        if (i > 0) {
+            push($webkit, $comma) // Мегахак: вставляем разделитель как расквотированную запятую
+            push($moz, $comma)
+            push($o, $comma)
+            push($standart, $comma)
+        }
+
+        $formula = unquote(join(', ', $grad))
+
+        push($webkit, -webkit-linear-gradient(top, $formula))
+        push($moz, -moz-linear-gradient(top, $formula))
+        push($o, -o-linear-gradient(top, $formula))
+        push($standart, linear-gradient(to bottom, $formula))
+    }
+
+    {$prop_name}: $webkit
+    {$prop_name}: $moz
+    {$prop_name}: $o
+    {$prop_name}: $standart
+}
