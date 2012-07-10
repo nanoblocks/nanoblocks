@@ -30,3 +30,15 @@ background-origin()
 
 // Selector hacks. Use in selectors .class{o-selector-hack}
 o-selector-hack = ', x:-o-prefocus'
+
+get(hash, key) {
+    return pair[1] if pair[0] == key for pair in hash
+}
+
+gen(props) {
+    for val in props {
+        if val {
+            {val[0]}: val[1]
+        }
+    }
+}

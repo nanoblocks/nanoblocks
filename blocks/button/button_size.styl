@@ -1,108 +1,60 @@
-// Small Button
-.{button}_size_s {
+size(normal, active, arrow) {
     &,
     &._disabled,
     &._disabled:active,
     &._disabled:hover {
-        padding: 1px 8px;
+        gen(normal);
     }
 
     &:active {
-        padding: 2px 8px 0px;
+        gen(active);
     }
 
     & > .{button}__arrow {
-        width: .85em;
-        height: .85em;
+        width: get(arrow, size);
+        height: @width;
     }
 
     &.{button}_arrowed {
-        margin-right: 6px;
+        margin-right: get(arrow, margin-right);
 
         &,
         &._disabled,
         &._disabled:active,
         &._disabled:hover {
-            padding-right: 7px;
+            padding-right: get(arrow, padding-right);
         }
     }
 
     button&.{button}_arrowed:active:hover{o-selector-hack} {
-        padding-left: 8px;
-        padding-right: 7px;
+        padding-left: get(arrow, padding-left);
+        padding-right: get(arrow, padding-right);
     }
+};
+
+// Small Button
+.{button}_size_s {
+    normal = (padding (1px 8px)) ()
+    active = (padding (2px 8px 0)) ()
+    arrow = (size .85em) (margin-right 6px) (padding-right 7px) (padding-left 8px)
+
+    size(normal, active, arrow);
 }
 
 // Very small button
 .{button}_size_xs {
-    &,
-    &._disabled,
-    &._disabled:active,
-    &._disabled:hover {
-        font-size: 11px;
-        padding: 1px 6px;
-        font-family: verdana, arial, sans-serif;
-    }
+    normal = (padding (1px 6px)) (font-size 11px) (font-family unquote(join(", ", "verdana" "arial" "sans-serif")))
+    active = (padding (2px 6px 0)) ()
+    arrow = (size .95em) (margin-right 4px) (padding-right 5px) (padding-left 6px)
 
-    &:active {
-        padding: 2px 6px 0px;
-    }
-
-    & > .{button}__arrow {
-        width: .95em;
-        height: .95em;
-    }
-
-    &.{button}_arrowed {
-        margin-right: 4px;
-
-        &,
-        &._disabled,
-        &._disabled:active,
-        &._disabled:hover {
-            padding-right: 5px;
-        }
-    }
-
-    button&.{button}_arrowed:active:hover{o-selector-hack} {
-        padding-left: 6px;
-        padding-right: 5px;
-    }
-
+    size(normal, active, arrow);
 }
 
 // Big button
 .{button}_size_l {
-    &,
-    &._disabled,
-    &._disabled:active,
-    &._disabled:hover {
-        padding: 3px 12px;
-        font-size: 15px;
-    }
+    normal = (padding (3px 12px)) (font-size 15px)
+    active = (padding (4px 12px 2px)) ()
+    arrow = (size 1.07em) (margin-right 10px) (padding-right 11px) (padding-left 12px)
 
-    &:active {
-        padding: 4px 12px 2px;
-    }
-
-    button&.{button}_arrowed:active:hover{o-selector-hack} {
-        padding-right: 11px;
-        padding-left: 12px;
-    }
-
-    & > .{button}__arrow {
-        width: 1.07em;
-        height: 1.07em;
-    }
-
-    &.{button}_arrowed {
-        margin-right: 10px;
-
-        &,
-        &._disabled,
-        &._disabled:active,
-        &._disabled:hover {
-            padding-right: 11px;
-        }
-    }
+    size(normal, active, arrow);
 }
