@@ -1,4 +1,8 @@
 size(normal, active, arrow) {
+    .{button}&:active {
+        gen(active);
+    }
+
     &,
     &._disabled,
     &._disabled:active,
@@ -6,9 +10,6 @@ size(normal, active, arrow) {
         gen(normal);
     }
 
-    .{button}&:active {
-        gen(active);
-    }
 
     & > .{button}__arrow {
         width: get(arrow, size);

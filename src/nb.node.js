@@ -9,8 +9,6 @@ nb.node = {};
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-var _rx_nbAttr = /^data-nb-(.+)/;
-
 nb.node.data = function(node, key, value) {
     //  Возвращаем или меняем data-атрибут.
     if (key) {
@@ -27,7 +25,7 @@ nb.node.data = function(node, key, value) {
         var r;
         for (var i = 0, l = attrs.length; i < l; i++) {
             var attr = attrs[i];
-            if (( r = _rx_nbAttr.exec(attr.name) )) {
+            if (( r = /^data-nb-(.+)/.exec(attr.name) )) {
                 data[ r[1] ] = parseValue(attr.value);
             }
         }
