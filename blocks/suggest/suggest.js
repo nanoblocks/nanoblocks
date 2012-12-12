@@ -113,7 +113,7 @@ suggest._createPopup = function() {
     var that = this;
 
     this.$popup = $(
-        '<div class="popup popup_dropdown popup_theme_blocky popup_to_top _hidden" data-nb="popup">' +
+        '<div class="popup popup_theme_blocky popup_to_top _hidden" data-nb="popup">' +
             '<div class="popup__scrollbox"></div>' +
         '</div>')
         .addClass(this.theme_class)
