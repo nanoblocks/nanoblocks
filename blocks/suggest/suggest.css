@@ -21,15 +21,6 @@
     cursor: pointer;
 }
 
-.loader {
-    background: url('http://assets.tumblr.com/images/loading.gif') no-repeat center center;
-    width: 16px;
-    height: 16px;
-    padding: 3px;
-    vertical-align: middle;
-    display: inline-block;
-}
-
 .loader_new {
     position: absolute;
     display: inline-block;

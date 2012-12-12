@@ -78,14 +78,7 @@ suggest.onInit = function() {
     this._popup_opened = false;
 
     // Data.
-    if (this.source_url) {
-        this._data = new nb.suggest.ajaxDS({
-            url: this.source_url,
-            retry_count: 3,
-            max_items: this.max_items,
-            timeout: this.response_timeout
-        });
-    }
+    this.createDataSource();
     this._getDataTimeout = null;
 
     nb.trigger('inited:' + this.node.id, this); // TODO удалить, когда для всех блоков добавиться такое поведение
@@ -245,6 +238,21 @@ suggest.onClose = function() {
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
+
+suggest.createDataSource = function() {
+    if (this.source_url) {
+        this._data = new nb.suggest.ajaxDS().init({
+            url: this.source_url,
+            retry_count: 3,
+            max_items: this.max_items,
+            timeout: this.response_timeout
+        });
+    }
+};
+
+suggest.setArrayData = function(options) {
+    this._data = new nb.suggest.arrayDS().init(options);
+};
 
 suggest._requestData = function(text) {
     var that = this;
@@ -546,12 +554,6 @@ suggest.scrollCurrentIntoView = function() {
             wrapper.scrollTop = cur_top - dy;
         }
     }
-};
-
-// ----------------------------------------------------------------------------------------------------------------- //
-
-suggest.setData = function(ar, key_name) {
-    this._data = new nb.suggest.arrayDS(ar, key_name);
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //

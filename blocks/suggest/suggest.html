@@ -97,7 +97,7 @@
                         }
 
                         nb.on("inited:suggest-static", function(evt, block) {
-                            block.setData(monthes, 'name')
+                            block.setArrayData({ data: monthes, key: 'name' })
                         });
                     </script>
                 </td>

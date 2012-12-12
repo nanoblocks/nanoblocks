@@ -1,15 +1,17 @@
 (function($){
 
-// ----------------------------------------------------------------------------------------------------------------- //
-
 /**
  * Data source.
- * Any inheritor as usual needs to implement only the get method.
  */
 var ds = function() {};
 
-ds.prototype.init = function() {
+/**
+ * @param {Object} options Data source options.
+ */
+ds.prototype.init = function(options) {
+    this.options = options;
     this.cache = {};
+    return this;
 };
 
 ds.prototype.has = function(key) {
@@ -38,32 +40,40 @@ ds.prototype.prepareData = function(data) {
 
 /**
  * Ajax data source.
+ */
+var ajaxDS = function() {};
+
+nb.inherit(ajaxDS, ds);
+
+/**
  * @param {{ url: string, retry_count: ?number=3, max_items: ?number=, timeout: number= }} options.
  */
-var ajaxDS = function(options) {
-    this.super_.init();
+ajaxDS.prototype.init = function(options) {
+    this.super_.init(options);
+    this._requests = {};
 
     this.url = options.url;
     this.retry_count = (typeof options.retry_count === 'undefined') ? 3 : +options.retry_count;
     this.max_items = options.max_items;
     this.timeout = options.timeout;
 
-    this.requests = {};
+    return this;
 };
-
-nb.inherit(ajaxDS, ds);
-
-// ----------------------------------------------------------------------------------------------------------------- //
 
 ajaxDS.prototype.get = function(req) {
     var query = req.key.toLowerCase();
-    if (!(query in this.requests)) {
+    if (!(query in this._requests)) {
         this._createRequest(req);
     }
-    this.requests[query].retry();
+    this._requests[query].retry();
 };
 
-// ----------------------------------------------------------------------------------------------------------------- //
+ajaxDS.prototype.createRequestData = function(text) {
+    return {
+        'text': text,
+        'max': this.max_items
+    };
+};
 
 /**
  * @param {{ key: string, onstart: function(), onsuccess: function(Object), onerror: function() }} req Request params.
@@ -72,14 +82,9 @@ ajaxDS.prototype._createRequest = function(req) {
     var that = this;
     var query = req.key.toLowerCase();
 
-    if (query in this.requests) {
+    if (query in this._requests) {
         return;
     }
-
-    var data = {
-        'text': query,
-        'max': this.max_items
-    };
 
     var request = {
         "retries_left": this.retry_count,
@@ -89,7 +94,7 @@ ajaxDS.prototype._createRequest = function(req) {
     request.retry = function() {
         if (request.retries_left === 0) {
             req.onfail(); // Sorry, no more retries.
-            delete that.requests[query]; // Clear old request. Maybe at some moment (later) we can get needed data.
+            delete that._requests[query]; // Clear old request. Maybe at some moment (later) we can get needed data.
             return;
         }
 
@@ -98,7 +103,7 @@ ajaxDS.prototype._createRequest = function(req) {
         $.ajax({
             'url': that.url,
             'type': 'GET',
-            'data': data,
+            'data': that.createRequestData(query),
             'dataType': 'jsonp',
             'success': function(data) {
                 var parsed_data = that.prepareData(data);
@@ -114,37 +119,40 @@ ajaxDS.prototype._createRequest = function(req) {
         request.retries_left--;
     };
 
-    this.requests[query] = request;
+    this._requests[query] = request;
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
 /**
  * Static array data source.
- * @param {Array.<Object>} ar An array with data.
  */
-var arrayDS = function(ar, key_name) {
-    this.super_.init();
-    this.key_name = key_name;
-    this._keys = null; // Cache keys for faster search.
-    this.ar = this.prepareData(ar);
-};
+var arrayDS = function() {};
 
 nb.inherit(arrayDS, ds);
 
-// ----------------------------------------------------------------------------------------------------------------- //
+/**
+ * @param {Array.<Object>} ar An array with data.
+ */
+arrayDS.prototype.init = function(options) {
+    this.super_.init(options);
+    this._keys = null; // Cache keys for faster search.
+
+    this.key_name = options.key;
+    this.ar = this.prepareData(options.data);
+
+    return this;
+};
 
 arrayDS.prototype.prepareData = function(ar) {
     ar = ar.slice(0); // Create copy, cause sort() modify initial array.
-// TODO кажется, сортировка, всё-таки, не нужна.
-//    var key = this.key_name;
-//    ar.sort(function(a, b) {
-//        return a[key] > b[key];
-//    });
+    // // TODO кажется, сортировка, всё-таки, не нужна.
+    // var key = this.key_name;
+    // ar.sort(function(a, b) {
+    //     return a[key] > b[key];
+    // });
     return ar;
 };
-
-// ----------------------------------------------------------------------------------------------------------------- //
 
 /**
  * @param req
@@ -195,7 +203,7 @@ arrayDS.prototype.get = function(req) {
     return;
 
     function match(key, query) {
-        return (key.indexOf(query) >= 0);
+        return ( key.indexOf(query) >= 0 );
     }
 };
 
