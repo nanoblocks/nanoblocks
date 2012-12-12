@@ -65,6 +65,7 @@ suggest.onInit = function() {
     this.show_fade = this.getDataBool('show-fade');
     this.highlight_match = this.getDataBool('highlight-matches');
     this.focusin_show = this.getDataBool('focusin-show');
+    this.theme_class = this.getDataString('theme-class', '');
 
     this.$input = $(this.node);
 
@@ -115,6 +116,7 @@ suggest._createPopup = function() {
         '<div class="popup popup_dropdown popup_theme_blocky popup_to_top _hidden" data-nb="popup">' +
             '<div class="popup__scrollbox"></div>' +
         '</div>')
+        .addClass(this.theme_class)
         .appendTo(doc.body);
 
     if (this.show_loader) {

@@ -12,10 +12,6 @@
             padding: 0.2em;
             white-space: nowrap;
 
-            span.match {
-                background: #ffe500;
-            }
-
             .fader {
                 position: absolute;
                 top: 0;
@@ -26,16 +22,34 @@
             }
 
             &.current {
-                background-color: #EEE
-                cursor: pointer
-
-                .fader {
-                    background: -webkit-linear-gradient(0, rgba(238,238,238,0.00), #EEE);
-                }
+                cursor: pointer;
             }
         }
     }
 }
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+// Default theme
+
+.theme__default {
+    .popup__scrollbox ul li {
+
+        .match {
+            background: #FFE500;
+        }
+
+        &.current {
+            background-color: #EEE;
+
+            .fader {
+                background: -webkit-linear-gradient(0, rgba(238,238,238,0.00), @background-color);
+            }
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------------------- //
 
 .loader_new {
     position: absolute;

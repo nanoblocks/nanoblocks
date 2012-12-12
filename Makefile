@@ -7,7 +7,10 @@ test-tools:
 	test -x "$(shell which uglifyjs)"
 	test -x "$(shell which csso)"
 
-.PHONY: all test-tools
+css :
+	cd blocks/suggest ; stylus *.styl
+
+.PHONY: all test-tools css
 
 # TODO: посмотреть на grunt
 #       https://github.com/cowboy/grunt

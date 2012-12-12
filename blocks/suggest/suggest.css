@@ -10,9 +10,6 @@
   padding: 0.2em;
   white-space: nowrap;
 }
-.popup__scrollbox ul li span.match {
-  background: #ffe500;
-}
 .popup__scrollbox ul li .fader {
   position: absolute;
   top: 0;
@@ -22,10 +19,15 @@
   background: -webkit-linear-gradient(0, rgba(255,255,255,0.00), #fff);
 }
 .popup__scrollbox ul li.current {
-  background-color: #eee;
   cursor: pointer;
 }
-.popup__scrollbox ul li.current .fader {
+.theme__default .popup__scrollbox ul li .match {
+  background: #ffe500;
+}
+.theme__default .popup__scrollbox ul li.current {
+  background-color: #eee;
+}
+.theme__default .popup__scrollbox ul li.current .fader {
   background: -webkit-linear-gradient(0, rgba(238,238,238,0.00), #eee);
 }
 .loader_new {
