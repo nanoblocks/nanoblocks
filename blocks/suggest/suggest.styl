@@ -1,3 +1,5 @@
+@import '../s/mixins'
+
 .popup__scrollbox {
 
     ul {
@@ -18,7 +20,7 @@
                 right: 0;
                 width: 20px;
                 height: 100%;
-                background: -webkit-linear-gradient(0, rgba(255,255,255,0.00), #FFF);
+                bg-gradient( rgba(#FFF, 0) #FFF, #FFF );
             }
 
             &.current {
@@ -43,7 +45,7 @@
             background-color: #EEE;
 
             .fader {
-                background: -webkit-linear-gradient(0, rgba(238,238,238,0.00), @background-color);
+                bg-gradient( rgba(#EEE, 0) #EEE, #EEE );
             }
         }
     }

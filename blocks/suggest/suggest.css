@@ -16,7 +16,19 @@
   right: 0;
   width: 20px;
   height: 100%;
-  background: -webkit-linear-gradient(0, rgba(255,255,255,0.00), #fff);
+  background: #fff;
+  background: -webkit-linear-gradient(top, rgba(255,255,255,0.00), #fff);
+/* Saf4+, Chrome */
+  background: -webkit-linear-gradient(top, rgba(255,255,255,0.00), #fff);
+/* Chrome 10+, Saf5.1+ */
+  background: -moz-linear-gradient(top, rgba(255,255,255,0.00), #fff);
+/* FF3.6+ */
+  background: -ms-linear-gradient(top, rgba(255,255,255,0.00), #fff);
+/* IE10 */
+  background: -o-linear-gradient(top, rgba(255,255,255,0.00), #fff);
+/* Opera 11.10+ */
+  background: linear-gradient(to bottom, rgba(255,255,255,0.00), #fff);
+/* W3C */
 }
 .popup__scrollbox ul li.current {
   cursor: pointer;
@@ -28,7 +40,19 @@
   background-color: #eee;
 }
 .theme__default .popup__scrollbox ul li.current .fader {
-  background: -webkit-linear-gradient(0, rgba(238,238,238,0.00), #eee);
+  background: #eee;
+  background: -webkit-linear-gradient(top, rgba(238,238,238,0.00), #eee);
+/* Saf4+, Chrome */
+  background: -webkit-linear-gradient(top, rgba(238,238,238,0.00), #eee);
+/* Chrome 10+, Saf5.1+ */
+  background: -moz-linear-gradient(top, rgba(238,238,238,0.00), #eee);
+/* FF3.6+ */
+  background: -ms-linear-gradient(top, rgba(238,238,238,0.00), #eee);
+/* IE10 */
+  background: -o-linear-gradient(top, rgba(238,238,238,0.00), #eee);
+/* Opera 11.10+ */
+  background: linear-gradient(to bottom, rgba(238,238,238,0.00), #eee);
+/* W3C */
 }
 .loader_new {
   position: absolute;
