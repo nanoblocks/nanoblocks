@@ -1,55 +1,46 @@
 .popup__scrollbox ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
 }
-
 .popup__scrollbox ul li {
-    padding: 0.2em;
-    margin: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    position: relative;
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  padding: 0.2em;
+  white-space: nowrap;
 }
-
 .popup__scrollbox ul li span.match {
-    background: #FFE500;
+  background: #ffe500;
 }
-
+.popup__scrollbox ul li .fader {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 100%;
+  background: -webkit-linear-gradient(0, rgba(255,255,255,0.00), #fff);
+}
 .popup__scrollbox ul li.current {
-    background-color: #EEE;
-    cursor: pointer;
+  background-color: #eee;
+  cursor: pointer;
 }
-
-.loader_new {
-    position: absolute;
-    display: inline-block;
-    background: url('http://assets.tumblr.com/images/loading.gif') no-repeat center center;
-    width: 16px;
-    height: 16px;
-    padding: 0px;
-    margin-top: 2px;
-
-    opacity: 0;
-
-    -webkit-transition-property: opacity;
-    -webkit-transition-duration: 0.5s;
-    transition-timing-function: default;
-}
-
-.loader_new__show {
-    opacity: 1;
-}
-
-.fader {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 20px;
-    height: 100%;
-    background: -webkit-linear-gradient(0, rgba(255,255,255,0), rgba(255,255,255,1.0));
-}
-
 .popup__scrollbox ul li.current .fader {
-    background: -webkit-linear-gradient(0, rgba(238,238,238,0), rgba(238,238,238,1.0));
+  background: -webkit-linear-gradient(0, rgba(238,238,238,0.00), #eee);
+}
+.loader_new {
+  position: absolute;
+  display: inline-block;
+  margin-top: 2px;
+  padding: 0px;
+  width: 16px;
+  height: 16px;
+  background: url("http://assets.tumblr.com/images/loading.gif") no-repeat center center;
+  opacity: 0;
+  transition-timing-function: default;
+  -webkit-transition-duration: 0.5s;
+  -webkit-transition-property: opacity;
+}
+.loader_new .loader_new__show {
+  opacity: 1;
 }

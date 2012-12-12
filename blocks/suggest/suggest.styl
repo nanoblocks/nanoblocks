@@ -1,0 +1,56 @@
+.popup__scrollbox {
+
+    ul {
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+
+        li {
+            position: relative;
+            overflow: hidden;
+            margin: 0;
+            padding: 0.2em;
+            white-space: nowrap;
+
+            span.match {
+                background: #ffe500;
+            }
+
+            .fader {
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 20px;
+                height: 100%;
+                background: -webkit-linear-gradient(0, rgba(255,255,255,0.00), #FFF);
+            }
+
+            &.current {
+                background-color: #EEE
+                cursor: pointer
+
+                .fader {
+                    background: -webkit-linear-gradient(0, rgba(238,238,238,0.00), #EEE);
+                }
+            }
+        }
+    }
+}
+
+.loader_new {
+    position: absolute;
+    display: inline-block;
+    margin-top: 2px;
+    padding: 0px;
+    width: 16px;
+    height: 16px;
+    background: url("http://assets.tumblr.com/images/loading.gif") no-repeat center center;
+    opacity: 0;
+    transition-timing-function: default;
+    -webkit-transition-duration: 0.5s;
+    -webkit-transition-property: opacity;
+
+    .loader_new__show {
+        opacity: 1;
+    }
+}
