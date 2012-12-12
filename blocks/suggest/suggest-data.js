@@ -69,10 +69,10 @@ ajaxDS.prototype.get = function(req) {
 };
 
 ajaxDS.prototype.createRequestData = function(text) {
-    return {
-        'text': text,
-        'max': this.max_items
-    };
+    var query = {};
+    query[this.options.query_param_name] = text;
+    query[this.options.max_param_name] = this.max_items;
+    return nb.extend({}, this.options.default_params, query);
 };
 
 /**

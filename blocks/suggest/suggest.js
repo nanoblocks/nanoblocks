@@ -66,6 +66,9 @@ suggest.onInit = function() {
     this.highlight_match = this.getDataBool('highlight-matches');
     this.focusin_show = this.getDataBool('focusin-show');
     this.theme_class = this.getDataString('theme-class', '');
+    this.search_param_name = this.getDataString('search-param-name', 'text');
+    this.max_param_name = this.getDataString('max-param-name', 'max');
+    this.default_params = this.getDataObject('default_params', {});
 
     this.$input = $(this.node);
 
@@ -96,6 +99,10 @@ suggest.getDataBool = function(key) {
 };
 
 suggest.getDataString = function(key, default_value) {
+    return this.data(key) || default_value;
+};
+
+suggest.getDataObject = function(key, default_value) {
     return this.data(key) || default_value;
 };
 
@@ -243,12 +250,16 @@ suggest.onClose = function() {
 
 suggest.createDataSource = function() {
     if (this.source_url) {
-        this._data = new nb.suggest.ajaxDS().init({
+        var params = {
             url: this.source_url,
             retry_count: 3,
             max_items: this.max_items,
-            timeout: this.response_timeout
-        });
+            timeout: this.response_timeout,
+            query_param_name: this.search_param_name,
+            max_param_name: this.max_param_name,
+            default_params: this.default_params
+        };
+        this._data = new nb.suggest.ajaxDS().init(params);
     }
 };
 
