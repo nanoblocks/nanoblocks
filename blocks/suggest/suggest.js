@@ -335,11 +335,11 @@ suggest.renderSuggest = function(text, data) {
 
     data.forEach(function(item) {
         var $item = that.renderItem(item);
-        if (!$item.is('li')) { // renderItem() can be overriden. So, we wrap rendered item with <li/> if needed.
-            $item.wrap('li');
-        }
-
         $container.append($item);
+
+        if (!$item.is('li')) { // renderItem() can be overriden. So, we wrap rendered item with <li/> if needed.
+            $item.wrap($('<li class="popup__line"/>'));
+        }
     });
 
     // Calculate scroll height.
@@ -389,7 +389,7 @@ suggest.showSuggest = function() {
  */
 suggest.renderItem = function(item) {
     // <a href="#" class="popup__line link">Улучшенное меню</a>
-    var label = item[this.label_key];
+    var label = item[this.label_key] || '';
     var label_html;
 
     if (this.highlight_match) {
@@ -414,6 +414,11 @@ suggest.renderItem = function(item) {
  */
 suggest.hightlightMatches = function(text, match) {
     var index;
+
+    if (!text || !match) {
+        return '';
+    }
+
     var text_low = text.toLowerCase();
     var text_length = text.length;
     var match_low = match.toLowerCase();
