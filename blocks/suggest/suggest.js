@@ -287,7 +287,7 @@ suggest._requestData = function(text) {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 suggest._showFor = function(text) {
-    if (this.$input.val() !== text) { // Only show suggest, if text was not changed after request has been sent.
+    if (this.$input.val().trim() !== text) { // Only show suggest, if text was not changed after request has been sent.
         return;
     }
 
