@@ -166,6 +166,7 @@ var _domEvents = [
     'keydown',
     'keypress',
     'keyup',
+    'change',
     /*
         FIXME: Сейчас эти события называются mouseover и mouseout.
         'mouseenter',
@@ -173,7 +174,8 @@ var _domEvents = [
     */
     'mouseover',
     'mouseout',
-    'focusin'
+    'focusin',
+    'focusout'
 ];
 
 //  Regexp для строк вида 'click', 'click .foo'.
