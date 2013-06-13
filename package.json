@@ -1,4 +1,8 @@
 {
     "name": "nanoblocks",
-    "version": "0.0.1"
+    "version": "0.0.1",
+    "dependencies": {
+        "stylus": "git://github.com/Panya/stylus.git#master",
+        "csso": "*"
+    }
 }

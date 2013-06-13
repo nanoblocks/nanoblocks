@@ -2,3 +2,4 @@
 *.sublime-workspace
 .idea
 .jshintrc
+node_modules
