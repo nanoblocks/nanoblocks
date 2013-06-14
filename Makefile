@@ -1,5 +1,5 @@
 all: nanoblocks.js
-	$(MAKE) -C blocks/s
+	$(MAKE) -C blocks/s all
 
 define SOURCES
 	src/nb.banner.js
