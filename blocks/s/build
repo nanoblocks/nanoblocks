@@ -1,0 +1,29 @@
+#!/usr/bin/env node
+var fs = require('fs');
+var stylus = require('stylus');
+var csso = require('csso');
+
+var s = stylus('')
+    .set('filename', 'all.styl')
+    .set('resolve url', true).define('url', stylus.resolver())
+    .import('all.styl');
+
+var csso_callback = function(err, css) {
+    var restructure = false;
+    var needinfo = false;
+    fs.writeFile('all.css', csso.justDoIt(css, restructure, needinfo));
+};
+
+s.render(function (err, css) {
+    var restructure = false;
+    var needinfo = false;
+    fs.writeFile('all.css', csso.justDoIt(css, restructure, needinfo));
+});
+
+s.define('_ie', true).render(function (err, css) {
+    var restructure = false;
+    var needinfo = false;
+    fs.writeFile('all.ie.css', csso.justDoIt(css, restructure, needinfo));
+});
+
+// vim: ft=javascript
