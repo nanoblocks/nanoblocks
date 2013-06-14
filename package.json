@@ -4,5 +4,8 @@
     "dependencies": {
         "stylus": "git://github.com/Panya/stylus.git#master",
         "csso": "*"
+    },
+    "scripts": {
+        "install": "make all"
     }
 }
