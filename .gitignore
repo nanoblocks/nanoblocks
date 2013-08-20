@@ -5,3 +5,5 @@
 node_modules
 blocks/s/all.css
 blocks/s/all.ie.css
+blocks/s/demo.css
+blocks/s/demo.ie.css
