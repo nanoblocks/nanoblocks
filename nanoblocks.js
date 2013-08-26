@@ -867,7 +867,7 @@ Factory.get = function(name) {
 
         var events = [];
 
-        var names = name.split(/\s+/);
+        var names = name.trim().split(/\s+/);
         if (names.length < 2) {
             throw "Block '" + name + "' is undefined";
         }
