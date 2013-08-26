@@ -17,6 +17,8 @@ var _domEvents = [
     'keydown',
     'keypress',
     'keyup',
+    'blur',
+    'input',
     /*
         FIXME: Сейчас эти события называются mouseover и mouseout.
         'mouseenter',
@@ -107,6 +109,7 @@ Block.prototype.__bindEvents = function() {
     //  Вешаем события для каждого миксина отдельно.
     for (var i = 0, l = mixinEvents.length; i < l; i++) {
         var events = mixinEvents[i].custom;
+        var local = mixinEvents[i].local;
 
         for (var event in events) {
             (function(handlers) {
@@ -122,6 +125,19 @@ Block.prototype.__bindEvents = function() {
                     }
                 });
             })( events[event] );
+        }
+
+        //  Навешиваем локальные обработчики (напрямую на ноды).
+        for (var event in local) {
+            for (var selector in local[event]) {
+                for (var i = 0; i < handlers.length; i++) {
+                    (selector ? $(this.node).find(selector) : $(this.node))
+                        .bind(event, function() {
+                            handlers[i].apply(that, arguments);
+                        }
+                    }
+                }
+            }
         }
     }
 };
@@ -342,6 +358,7 @@ Factory.prototype._prepareEvents = function(events) {
     //  Делим события на DOM и кастомные.
     var dom = {};
     var custom = {};
+    var local = {};
 
     for (var event in events) {
         //  Матчим строки вида 'click' или 'click .foo'.
@@ -351,7 +368,14 @@ Factory.prototype._prepareEvents = function(events) {
             //  Тип DOM-события, например, click.
             var type = r[1];
 
-            handlers = dom[type] || (( dom[type] = {} ));
+            if (type === 'blur') {
+                //  Тут те события, которые нужно слушать на конкретной ноде.
+                handlers = local[type] || (( local[type] = {} ));
+            } else {
+                //  Тут все события, которые можно слушать на документе.
+                handlers = dom[type] || (( dom[type] = {} ));
+            }
+
             //  Селектор.
             key = r[2] || '';
 
@@ -407,11 +431,14 @@ Factory.prototype._prepareEvents = function(events) {
         }
     }
 
+    //  На локальные события блок подписывается только после создания, потому что только в этот момент создаются настоящие ноды.
+
     //  Возвращаем структуру, которая будет сохранена в this.events.
     return [
         {
             dom: dom,
-            custom: custom
+            custom: custom,
+            local: local
         }
     ];
 
