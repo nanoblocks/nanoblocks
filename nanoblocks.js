@@ -700,6 +700,12 @@ Factory._onevent = function(e) {
 
     //  Переменная цикла.
     var node = origNode;
+
+    //  Оригинальная нода тоже имеет право на события!
+    nodes = [ node ];
+    $nodes = [ $(node) ];
+    n = nodes.length;
+
     while (1) {
         //  Цепочку нод от e.target до <html> мы разбиваем на отрезки,
         //  по границам блоков. Например:
@@ -757,8 +763,6 @@ Factory._onevent = function(e) {
 
     function findBlockNodes() {
         //  Сбрасываем значения на каждой итерации.
-        nodes = [];
-        $nodes = [];
         block = null;
         blockNode = null;
 
