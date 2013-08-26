@@ -867,7 +867,7 @@ Factory.get = function(name) {
 
         var events = [];
 
-        var names = name.trim().split(/\s+/);
+        var names = name.split(/\s+/);
         if (names.length < 2) {
             throw "Block '" + name + "' is undefined";
         }
@@ -901,7 +901,7 @@ Factory.get = function(name) {
 //      var popup = nb.block( document.getElementById('popup') );
 //
 nb.block = function(node, events) {
-    var name = node.getAttribute('data-nb');
+    var name = node.getAttribute('data-nb').trim();
     if (!name) {
         //  Эта нода не содержит блока. Ничего не делаем.
         return null;
