@@ -186,6 +186,13 @@ var _id = 0;
 //  Кэш проинициализированных блоков.
 var _cache = {};
 
+//  Получает название блока по ноде.
+var _re_multiple_space = / +/g;
+var _getBlockName = function(node) {
+    var _data_nb = node.getAttribute('data-nb')
+    return _data_nb ? _data_nb.trim().replace(_re_multiple_space, ' ') : _data_nb;
+};
+
 //  ---------------------------------------------------------------------------------------------------------------  //
 
 //  Block
@@ -585,7 +592,7 @@ Factory.prototype.create = function(node, events) {
 
         //  FIXME: Что будет, если node.getAttribute('data-nb') !== this.name ?
         //  У ноды каждого блока должен быть атрибут data-nb.
-        if ( node.getAttribute('data-nb') === null ) {
+        if ( _getBlockName(node) === null ) {
             node.setAttribute('data-nb', this.name);
         }
 
@@ -759,7 +766,7 @@ Factory._onevent = function(e) {
         //  Идем по DOM'у вверх, начиная с node и заканчивая первой попавшейся нодой блока (т.е. с атрибутом data-nb).
         //  Условие о наличии parentNode позволяет остановиться на ноде <html>.
         while (( parent = node.parentNode )) {
-            if (( name = node.getAttribute('data-nb') )) {
+            if (( name = _getBlockName(node) )) {
                 blockNode = node;
                 break;
             }
@@ -901,7 +908,7 @@ Factory.get = function(name) {
 //      var popup = nb.block( document.getElementById('popup') );
 //
 nb.block = function(node, events) {
-    var name = node.getAttribute('data-nb').trim();
+    var name = _getBlockName(node);
     if (!name) {
         //  Эта нода не содержит блока. Ничего не делаем.
         return null;
