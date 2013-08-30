@@ -24,6 +24,7 @@ function ontoggle(e, params) {
 function onopen(e, params) {
     this.where = params.where;
     this.how = params.how;
+    this.toggler = params.toggler;
     this.parent = params.parent;
 
     if (!this._placeholder) {
@@ -65,6 +66,7 @@ function onopen(e, params) {
 function onclose() {
     //  Снимаем флаг о том, что попап открыт.
     this.where = null;
+    this.toggler = null;
     this.parent = null;
 
     nb.trigger('popup-before-close', this);
@@ -456,7 +458,10 @@ nb.define('popup-toggler', {
                 where: data.where || this.node,
 
                 //  Как позиционировать попап.
-                how: data.how
+                how: data.how,
+
+                //  Кто открыл попап?
+                toggler: this.node
             });
 
             return false;
