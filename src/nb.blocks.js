@@ -130,12 +130,13 @@ Block.prototype.__bindEvents = function() {
         //  Навешиваем локальные обработчики (напрямую на ноды).
         for (var event in local) {
             for (var selector in local[event]) {
+                var handlers = local[event][selector];
                 for (var i = 0; i < handlers.length; i++) {
-                    (selector ? $(this.node).find(selector) : $(this.node))
-                        .bind(event, function() {
-                            handlers[i].apply(that, arguments);
-                        }
-                    }
+                    (function(handler) {
+                        (selector ? $(that.node).find(selector) : $(that.node)).bind(event, function() {
+                            handler.apply(that, arguments);
+                        });
+                    })(handlers[i]);
                 }
             }
         }
