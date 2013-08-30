@@ -34,14 +34,28 @@ var _rx_domEvents = new RegExp( '^(' + _domEvents.join('|') + ')\\b\\s*(.*)?$' )
 
 //  Автоинкрементный id для блоков, у которых нет атрибута id.
 var _id = 0;
+
 //  Кэш проинициализированных блоков.
+//  По id ноды хранится хэш с блоками на ноде.
+//  Пример: { 'button-id': { 'popup-toggler': {}, 'counter': {} } }
 var _cache = {};
+
+//  Кэш имён блоков на ноде.
+//  По id ноды хранится массив с именами блоков. При обработке событий блоки будут слушать события в этом порядке.
+//  Пример: { 'button-id': [ 'popup-toggler', 'counter' ] }
+var _cacheNames = {};
 
 //  Получает название блока по ноде.
 var _re_multiple_space = / +/g;
 var _getBlockName = function(node) {
-    var _data_nb = node.getAttribute('data-nb')
+    var _data_nb = node.getAttribute('data-nb');
     return _data_nb ? _data_nb.trim().replace(_re_multiple_space, ' ') : _data_nb;
+};
+
+var _getBlockFromCache = function(id, name) {
+    var blocks = _cache[id];
+    for (blocks
+    return blocks ? blocks[name] : undefined;
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //
@@ -305,10 +319,7 @@ var Factory = function(name, ctor, events) {
     ctor.prototype.name = name;
     this.ctor = ctor;
 
-    //  В нормальной ситуации events это объект, который необходимо еще дополнительно
-    //  обработать, вызвав _prepareEvents.
-    //  но при создании микс-класса, в качестве events будет передан массив с уже готовыми объектами.
-    this.events = (events instanceof Array) ? events : this._prepareEvents(events);
+    this.events = this._prepareEvents(events);
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //
@@ -451,29 +462,36 @@ Factory.prototype._prepareEvents = function(events) {
 //  Опциональный параметр events позволяет сразу навесить на экземпляр блока
 //  дополнительных событий (помимо событий, объявленных в nb.define).
 Factory.prototype.create = function(node, events) {
-    var block;
 
     var id = node.getAttribute('id');
-    if (id) {
-        //  Пытаемся достать блок из кэша по id.
-        block = _cache[id];
-    } else {
+    if (!id) {
         //  У блока нет атрибута id. Создаем его, генерим уникальный id.
         //  В следующий раз блок можно будет достать из кэша при по этому id.
         id = 'nb-' + _id++;
         node.setAttribute('id', id);
     }
 
-    if (!block) {
-        //  Блока в кэше нет. Создаем его.
+    //  Инициализируем кэш для блоков ноды, если нужно.
+    if ( !_cache[id] ) {
+        _cache[id] = {};
+
+        var name = _getBlockName(node);
 
         //  FIXME: Что будет, если node.getAttribute('data-nb') !== this.name ?
+        //  FIXME: для ручных вызовов nb.block() надо будет дописывать имена блоков в атрибут data-nb
         //  У ноды каждого блока должен быть атрибут data-nb.
-        if ( _getBlockName(node) === null ) {
+        if (name === null) {
             node.setAttribute('data-nb', this.name);
+            _cacheNames[id] = [ this.name ];
+        } else {
+            _cacheNames[id] = name.split(/\s+/);
         }
+    }
 
-        block = new this.ctor(node);
+    //  Создаём блок текущей фабрики для переданной ноды.
+    if ( !_cache[id][this.name] ) {
+
+        var block = new this.ctor(node);
 
         //  Инициализируем блок.
         block.__init(node);
@@ -487,10 +505,10 @@ Factory.prototype.create = function(node, events) {
 
         //  Кэшируем блок. Последующие вызовы nb.block на этой же ноде
         //  достанут блок из кэша.
-        _cache[id] = block;
+        _cache[id][this.name] = block;
     }
 
-    return block;
+    return _cache[id][this.name];
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //
