@@ -790,7 +790,7 @@ nb.block = function(node, events, blockName) {
     //  Возвращаем первый из списка блоков.
     var names = _getNames(name);
     var block;
-    for (var i = names.lenght - 1; i >= 0; i--) {
+    for (var i = names.length - 1; i >= 0; i--) {
         block = Factory.get(name).create(node, events);
     }
     return block;
