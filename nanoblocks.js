@@ -191,11 +191,6 @@ var _id = 0;
 //  Пример: { 'button-id': { 'popup-toggler': {}, 'counter': {} } }
 var _cache = {};
 
-//  Кэш имён блоков на ноде.
-//  По id ноды хранится массив с именами блоков. При обработке событий блоки будут слушать события в этом порядке.
-//  Пример: { 'button-id': [ 'popup-toggler', 'counter' ] }
-var _cacheNames = {};
-
 //  Получает название блока по ноде.
 var _getName = function(node) {
     var _data_nb = node.getAttribute('data-nb');
@@ -623,16 +618,11 @@ Factory.prototype.create = function(node, events) {
     if ( !_cache[id] ) {
         _cache[id] = {};
 
-        var name = _getName(node);
-
         //  FIXME: Что будет, если node.getAttribute('data-nb') !== this.name ?
         //  FIXME: для ручных вызовов nb.block() надо будет дописывать имена блоков в атрибут data-nb
         //  У ноды каждого блока должен быть атрибут data-nb.
-        if (name === null) {
+        if ( _getName(node) === null ) {
             node.setAttribute('data-nb', this.name);
-            _cacheNames[id] = [ this.name ];
-        } else {
-            _cacheNames[id] = name.split(/\s+/);
         }
     }
 
