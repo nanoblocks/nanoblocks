@@ -46,16 +46,13 @@ var _cache = {};
 var _cacheNames = {};
 
 //  Получает название блока по ноде.
-var _re_multiple_space = / +/g;
-var _getBlockName = function(node) {
+var _getName = function(node) {
     var _data_nb = node.getAttribute('data-nb');
-    return _data_nb ? _data_nb.trim().replace(_re_multiple_space, ' ') : _data_nb;
+    return _data_nb ? _data_nb.trim().replace(/\s+/g, ' ') : _data_nb;
 };
 
-var _getBlockFromCache = function(id, name) {
-    var blocks = _cache[id];
-    for (blocks
-    return blocks ? blocks[name] : undefined;
+var _getNames = function(name) {
+    return name.split(/\s+/);
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //
@@ -475,7 +472,7 @@ Factory.prototype.create = function(node, events) {
     if ( !_cache[id] ) {
         _cache[id] = {};
 
-        var name = _getBlockName(node);
+        var name = _getName(node);
 
         //  FIXME: Что будет, если node.getAttribute('data-nb') !== this.name ?
         //  FIXME: для ручных вызовов nb.block() надо будет дописывать имена блоков в атрибут data-nb
@@ -623,37 +620,40 @@ Factory._onevent = function(e) {
             break;
         }
 
-        //  Мы собрали в nodes все ноды внутри блока с именем name.
-        factory = Factory.get(name);
-        //  Берем все события, на которые подписан этот блок.
-        var mixinEvents = factory.events;
+        var names = _getNames(name);
+        for (var i = 0; i < names.length; i++) {
 
-        //  Для каждого миксина проверяем все ноды из nodes.
-        var r = true;
-        for (var i = 0, l = mixinEvents.length; i < l; i++) {
-            //  Пытаемся найти подходящее событие для node среди всех событий миксина.
-            if ( checkEvents( mixinEvents[i].dom[type] ) === false ) {
-                r = false;
+            //  Мы собрали в nodes все ноды внутри блока с именем name.
+            factory = Factory.get( names[i] );
+            //  Берем все события, на которые подписан этот блок.
+            var mixinEvents = factory.events;
+
+            //  Для каждого миксина проверяем все ноды из nodes.
+            var r = true;
+            for (var i = 0, l = mixinEvents.length; i < l; i++) {
+                //  Пытаемся найти подходящее событие для node среди всех событий миксина.
+                if ( checkEvents( mixinEvents[i].dom[type] ) === false ) {
+                    r = false;
+                }
             }
+
+            //  Нашли подходящий блок, один из обработчиков события этого блока вернул false.
+            //  Значит все, дальше вверх по DOM'у не идем. Т.е. останавливаем "баблинг".
+            if (!r) { return false; }
+
+            //  В случае hover-события с определенным fromNode можно останавливаться после первой итерации.
+            //  fromNode означает, что мышь передвинули с одной ноды в другую.
+            //  Как следствие, это событие касается только непосредственно того блока,
+            //  внутри которого находится e.target. Потому что остальные блоки обработали этот ховер
+            //  во время предыдущего mouseover/mouseout.
+            //
+            //  А вот в случае, когда fromNode === null (возможно, когда мышь передвинули, например,
+            //  с другого окна в центр нашего окна), все блоки, содержащие e.target должны обработать ховер.
+            if (fromNode) { return; }
+
+            //  Идем еще выше, в новый блок.
+            node = node.parentNode;
         }
-
-        //  Нашли подходящий блок, один из обработчиков события этого блока вернул false.
-        //  Значит все, дальше вверх по DOM'у не идем. Т.е. останавливаем "баблинг".
-        if (!r) { return false; }
-
-        //  В случае hover-события с определенным fromNode можно останавливаться после первой итерации.
-        //  fromNode означает, что мышь передвинули с одной ноды в другую.
-        //  Как следствие, это событие касается только непосредственно того блока,
-        //  внутри которого находится e.target. Потому что остальные блоки обработали этот ховер
-        //  во время предыдущего mouseover/mouseout.
-        //
-        //  А вот в случае, когда fromNode === null (возможно, когда мышь передвинули, например,
-        //  с другого окна в центр нашего окна), все блоки, содержащие e.target должны обработать ховер.
-        if (fromNode) { break; }
-
-        //  Идем еще выше, в новый блок.
-        node = node.parentNode;
-
     }
 
     function findBlockNodes() {
@@ -665,7 +665,7 @@ Factory._onevent = function(e) {
         //  Идем по DOM'у вверх, начиная с node и заканчивая первой попавшейся нодой блока (т.е. с атрибутом data-nb).
         //  Условие о наличии parentNode позволяет остановиться на ноде <html>.
         while (( parent = node.parentNode )) {
-            if (( name = _getBlockName(node) )) {
+            if (( name = _getName(node) )) {
                 blockNode = node;
                 break;
             }
@@ -689,6 +689,7 @@ Factory._onevent = function(e) {
     }
 
     //  Проверяем все ноды из nodes и отдельно blockNode.
+    //  name это текущий блок, для которого выполняются проверки
     function checkEvents(events) {
         if (!events) { return; }
 
@@ -760,41 +761,8 @@ Factory._onevent = function(e) {
 //  ---------------------------------------------------------------------------------------------------------------  //
 
 //  Достаем класс по имени.
-//  Имя может быть "простым" -- это классы, которые определены через nb.define.
-//  Или "сложным" -- несколько простых классов через пробел (микс нескольких блоков).
 Factory.get = function(name) {
-    //  Смотрим в кэше.
-    var factory = _factories[name];
-
-    //  В кэше нет, это будет "сложный" класс, т.к. все простые точно в кэше есть.
-    if (!factory) {
-        //  Пустой конструктор.
-        var ctor = function() {};
-
-        var events = [];
-
-        var names = name.split(/\s+/);
-        if (names.length < 2) {
-            throw "Block '" + name + "' is undefined";
-        }
-        for (var i = 0, l = names.length; i < l; i++) {
-            //  Примиксовываем все "простые" классы.
-            var mixin = Factory.get( names[i] );
-            nb.extend(ctor.prototype, mixin.ctor.prototype);
-
-            //  Собираем массив из структур с событиями.
-            //  mixin.events[0] -- здесь 0 потому, что у "простых" классов там всегда один элемент.
-            events.push( mixin.events[0] );
-        }
-
-        //  Создаем новую фабрику для миксового класса.
-        factory = new Factory(name, ctor, events);
-
-        //  Запоминаем в кэше.
-        _factories[name] = factory;
-    }
-
-    return factory;
+    return _factories[name];
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //
@@ -802,18 +770,30 @@ Factory.get = function(name) {
 //  Интерфейсная часть
 //  ------------------
 
-//  Метод создает блок на заданной ноде:
+//  Метод создает все блоки на заданной ноде:
 //
 //      var popup = nb.block( document.getElementById('popup') );
 //
-nb.block = function(node, events) {
-    var name = _getBlockName(node);
+nb.block = function(node, events, blockName) {
+    var name = _getName(node);
     if (!name) {
         //  Эта нода не содержит блока. Ничего не делаем.
         return null;
     }
 
-    return Factory.get(name).create(node, events);
+    //  Если указано имя блока - инициализируем и возвращаем только его.
+    if (blockName) {
+        return Factory.get(name).create(node, events);
+    }
+
+    //  Инициализируем все блоки на ноде.
+    //  Возвращаем первый из списка блоков.
+    var names = _getNames(name);
+    var block;
+    for (var i = names.lenght - 1; i >= 0; i--) {
+        block = Factory.get(name).create(node, events);
+    }
+    return block;
 };
 
 //  Находим ноду по ее id, создаем на ней блок и возвращаем его.
