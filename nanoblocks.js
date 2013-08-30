@@ -772,10 +772,10 @@ Factory._onevent = function(e) {
         }
 
         var names = _getNames(name);
-        for (var i = 0; i < names.length; i++) {
+        for (var j = 0; j < names.length; j++) {
 
             //  Мы собрали в nodes все ноды внутри блока с именем name.
-            factory = Factory.get( names[i] );
+            factory = Factory.get( names[j] );
             //  Берем все события, на которые подписан этот блок.
             var mixinEvents = factory.events;
 
@@ -801,10 +801,10 @@ Factory._onevent = function(e) {
             //  А вот в случае, когда fromNode === null (возможно, когда мышь передвинули, например,
             //  с другого окна в центр нашего окна), все блоки, содержащие e.target должны обработать ховер.
             if (fromNode) { return; }
-
-            //  Идем еще выше, в новый блок.
-            node = node.parentNode;
         }
+
+        //  Идем еще выше, в новый блок.
+        node = node.parentNode;
     }
 
     function findBlockNodes() {
