@@ -1,7 +1,7 @@
 nanoblocks
 ==========
 
-`nanoblocks` -- библиотека блоков, реализующая портальный стиль Яндекса.
+`nanoblocks` -- nano framework для написания блоков.
 
 
 Блоки
@@ -318,11 +318,9 @@ block.off('foo', handler);
 var node = block.node; // html-нода, на которой инициализирован блок.
 ```
 
-Метод `data`:
+Метод `nbdata`:
 
 ```javascript
 var foo = block.nbdata('foo'); // тоже самое, что и block.node.getAttribute('data-nb-foo').
 block.nbdata('foo', 42); // тоже самое, что и block.node.setAttribute('data-nb-foo', 42).
 ```
-
-
