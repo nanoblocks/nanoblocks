@@ -571,10 +571,6 @@ Factory._onevent = function(e) {
     var name;
     //  Текущая фабрика блоков.
     var factory;
-    //  Текущий блок. Создание блока откладывается как можно дальше.
-    //  До тех пор, пока точно не будет понятно, что найдена нода,
-    //  подходящая для одного из DOM-событий блока.
-    var block;
 
     //  Мы проходим вверх по DOM'у, начиная от e.target до самого верха (<html>).
     //  Пытаемся найти ближайший блок, внутри которого случилось событие и
@@ -615,15 +611,18 @@ Factory._onevent = function(e) {
 
         for (var j = 0; j < names.length; j++) {
 
+            //  Название текущего проверяемого блока.
+            var blockName = names[j];
+
             //  Мы собрали в nodes все ноды внутри блока с именем name.
-            factory = Factory.get( names[j] );
+            factory = Factory.get( blockName );
             //  Берем все события, на которые подписан этот блок.
             var mixinEvents = factory.events;
 
             //  Для каждого миксина проверяем все ноды из nodes.
             for (var i = 0, l = mixinEvents.length; i < l; i++) {
                 //  Пытаемся найти подходящее событие для node среди всех событий миксина.
-                if ( checkEvents( mixinEvents[i].dom[type] ) === false ) {
+                if ( checkEvents( blockName, mixinEvents[i].dom[type] ) === false ) {
                     //  Если обработчик вернул false выше текущей ноды обработка события не пойдёт.
                     //  Но на данной ноде событие послушают все блоки.
                     r = false;
@@ -651,7 +650,6 @@ Factory._onevent = function(e) {
 
     function findBlockNodes() {
         //  Сбрасываем значения на каждой итерации.
-        block = null;
         blockNode = null;
 
         var parent;
@@ -682,8 +680,8 @@ Factory._onevent = function(e) {
     }
 
     //  Проверяем все ноды из nodes и отдельно blockNode.
-    //  name это текущий блок, для которого выполняются проверки
-    function checkEvents(events) {
+    //  blockName название блока, для которого выполняется проверка
+    function checkEvents(blockName, events) {
         if (!events) { return; }
 
         var R;
@@ -710,7 +708,7 @@ Factory._onevent = function(e) {
                     )
                 ) {
                     //  Вызываем обработчиков событий.
-                    var r = doHandlers( node, events[selector] );
+                    var r = doHandlers( node, blockName, events[selector] );
                     if (r === false) {
                         R = r;
                     }
@@ -727,14 +725,14 @@ Factory._onevent = function(e) {
         var handlers = events[''];
         //  Опять таки костыль для ховер-событий.
         if ( handlers && !( isHover && fromNode && $.contains(blockNode, fromNode)) ) {
-            return doHandlers(blockNode, handlers);
+            return doHandlers(blockNode, blockName, handlers);
         }
     }
 
-    function doHandlers(node, handlers) {
+    function doHandlers(node, blockName, handlers) {
         //  Блок создаем только один раз и только, если мы таки дошли до сюда.
         //  Т.е. если мы нашли подходящее для node событие.
-        block = block || factory.create(blockNode);
+        var block = factory.create(blockNode);
 
         //  В handlers лежит цепочка обработчиков этого события.
         //  Самый последний обработчик -- это обработчик собственно этого блока.
