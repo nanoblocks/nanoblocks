@@ -3,7 +3,13 @@
     "version": "0.0.1",
     "dependencies": {
         "stylus": "0.36.x",
-        "csso": "*"
+        "csso": "*",
+        "expect.js": "*",
+        "grunt": "*",
+        "grunt-cli": "*",
+        "grunt-contrib-jshint": "*",
+        "grunt-mocha": "*",
+        "sinon": "*"
     },
     "scripts": {
         "install": "make all"

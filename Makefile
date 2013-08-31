@@ -13,7 +13,10 @@ SOURCES:=$(strip $(SOURCES))
 nanoblocks.js: $(SOURCES)
 	cat $^ > $@
 
+test:
+	node_modules/.bin/grunt mocha
+
 # TODO: посмотреть на grunt
 #       https://github.com/cowboy/grunt
 
-.PHONY: all
+.PHONY: all test
