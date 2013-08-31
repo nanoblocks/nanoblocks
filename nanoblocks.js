@@ -731,8 +731,8 @@ Factory._onevent = function(e) {
     var node = origNode;
 
     //  Оригинальная нода тоже имеет право на события!
-    nodes = [ node ];
-    $nodes = [ $(node) ];
+    nodes = [];
+    $nodes = [];
     n = nodes.length;
 
     while (1) {

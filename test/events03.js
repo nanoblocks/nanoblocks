@@ -1,7 +1,3 @@
-// describe('events', function() {
-//     it('parent block can listen to events inside a child block (was impossible earlier)');
-// });
-
 describe('nested blocks', function() {
     beforeEach(function() {
         var that = this;
