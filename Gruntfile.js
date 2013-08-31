@@ -2,10 +2,21 @@
 module.exports = function (grunt) {
     'use strict';
 
-    // grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-mocha');
-
+    // mocha task
     var gruntConfig = {};
+    grunt.loadNpmTasks('grunt-mocha');
+    gruntConfig.mocha = {
+        options: {
+            bail: true,
+            log: true
+        },
+        index: [ 'test/index.html' ]
+    };
+
+
+    // jshint tast: not ready for this
+
+    // grunt.loadNpmTasks('grunt-contrib-jshint');
     // gruntConfig.jshint = {
     //     options: {
     //         jshintrc: '.jshintrc'
@@ -15,16 +26,6 @@ module.exports = function (grunt) {
     //     ]
     // };
 
-    gruntConfig.mocha = {
-        options: {
-            bail: true,
-            log: true
-        },
-        index: [ 'test/index.html' ]
-    };
-
     grunt.initConfig(gruntConfig);
-
-    // grunt.registerTask('default', ['mocha', 'jshint']);
     grunt.registerTask('default', [ 'mocha' ]);
 };

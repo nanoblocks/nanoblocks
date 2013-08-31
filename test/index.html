@@ -21,58 +21,22 @@
     <script type="text/javascript" src="../node_modules/sinon/pkg/sinon.js"></script>
 
     <script type="text/javascript" src="../nanoblocks.js"></script>
+
+    <script type="text/javascript">
+        mocha.setup('bdd');
+    </script>
+
+    <!-- tests -->
+    <script type="text/javascript" src="events01.js"></script>
+    <script type="text/javascript" src="events02.js"></script>
+    <script type="text/javascript" src="events03.js"></script>
+    <!-- tests end -->
 </head>
 <body>
-    <!-- Test body -->
-    <div data-nb="block-parent">
-        <div class="inner" data-nb="block1 block2"></div>
-    </div>
-
-    <!-- mocha output -->
     <div id="mocha"></div>
 
     <script type="text/javascript">
         window.onload = function() {
-            mocha.setup('bdd');
-
-            describe('2 blocks on one node: both events trigger', function() {
-                var result = [];
-
-                nb.define('block1', {
-                    events: {
-                        click: function onClickBlock1() {
-                            result.push(this.name);
-                            return false;
-                        }
-                    }
-                });
-
-                nb.define('block2', {
-                    events: {
-                        click: function onClickBlock2() {
-                            result.push(this.name);
-                        }
-                    }
-                });
-
-                nb.define('block-parent', {
-                    events: {
-                        click: function() {
-                            result.push(this.name);
-                        }
-                    }
-                });
-
-                // Run test.
-                $('.inner').trigger('click');
-
-                // Check test result.
-
-                it('click: block1, block2', function() {
-                    expect(result).to.be.eql( [ 'block1', 'block2' ] );
-                });
-            });
-
             mocha.run();
         };
     </script>
