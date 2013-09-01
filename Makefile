@@ -1,12 +1,5 @@
 all: nanoblocks.js
-	$(MAKE) -C blocks/s
-
-test-tools:
-	test -x "$(shell which stylus)"
-	test -x "$(shell which uglifyjs)"
-	test -x "$(shell which csso)"
-
-.PHONY: all test-tools
+	cd blocks/s ; ./build
 
 define SOURCES
 	src/nb.banner.js
@@ -20,5 +13,10 @@ SOURCES:=$(strip $(SOURCES))
 nanoblocks.js: $(SOURCES)
 	cat $^ > $@
 
+test:
+	node_modules/.bin/grunt mocha
+
 # TODO: посмотреть на grunt
 #       https://github.com/cowboy/grunt
+
+.PHONY: all test

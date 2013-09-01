@@ -66,10 +66,22 @@ nb.rect = function(node) {
 
     var $node = $(node);
     var offset = $node.offset();
+    var size;
+
+    if ($node.hasClass('_hidden')) {
+        //  Спрятанный элемент нужно вначале показать и только потом вычислять его размер.
+        $node.toggleClass('_invisible', true);
+        $node.toggleClass('_hidden', false);
+        size = { width: $node.outerWidth(), height: $node.outerHeight() };
+        $node.toggleClass('_hidden', true);
+        $node.toggleClass('_invisible', false);
+    } else {
+        size = { width: $node.outerWidth(), height: $node.outerHeight() };
+    }
 
     return [
         [ offset.left, offset.top ],
-        [ $node.outerWidth(), $node.outerHeight() ]
+        [ size.width, size.height ]
     ];
 };
 

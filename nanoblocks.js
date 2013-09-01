@@ -59,9 +59,11 @@ nb.extend = function(dest) {
 //  nb.node
 //  -------
 
-nb.node = {};
+var nb = nb || {};
 
 (function() {
+
+nb.node = {};
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
@@ -166,6 +168,12 @@ var _domEvents = [
     'keydown',
     'keypress',
     'keyup',
+    'input',
+    'change',
+
+    // local: вешаются напрямую на ноду блока / подноду блока по селектору
+    'blur',
+
     /*
         FIXME: Сейчас эти события называются mouseover и mouseout.
         'mouseenter',
@@ -173,7 +181,8 @@ var _domEvents = [
     */
     'mouseover',
     'mouseout',
-    'focusin'
+    'focusin',
+    'focusout'
 ];
 
 //  Regexp для строк вида 'click', 'click .foo'.
@@ -181,8 +190,21 @@ var _rx_domEvents = new RegExp( '^(' + _domEvents.join('|') + ')\\b\\s*(.*)?$' )
 
 //  Автоинкрементный id для блоков, у которых нет атрибута id.
 var _id = 0;
+
 //  Кэш проинициализированных блоков.
+//  По id ноды хранится хэш с блоками на ноде.
+//  Пример: { 'button-id': { 'popup-toggler': {}, 'counter': {} } }
 var _cache = {};
+
+//  Получает название блока по ноде.
+var _getName = function(node) {
+    var _data_nb = node.getAttribute('data-nb');
+    return _data_nb ? _data_nb.trim().replace(/\s+/g, ' ') : _data_nb;
+};
+
+var _getNames = function(name) {
+    return name.split(/\s+/);
+};
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
@@ -207,7 +229,7 @@ var Block = function() {};
 //  Публичные методы у Block:
 //
 //    * on, off, trigger        -- методы для работы с событиями (кастомными и DOM).
-//    * data                    -- получает/меняет/удаляет data-nb-атрибуты блока.
+//    * nbdata                  -- получает/меняет/удаляет data-nb-атрибуты блока.
 //    * show, hide              -- показывает/прячет блок.
 //    * getMod, setMod, delMod  -- методы для работы с модификаторами.
 
@@ -249,6 +271,7 @@ Block.prototype.__bindEvents = function() {
     //  Вешаем события для каждого миксина отдельно.
     for (var i = 0, l = mixinEvents.length; i < l; i++) {
         var events = mixinEvents[i].custom;
+        var local = mixinEvents[i].local;
 
         for (var event in events) {
             (function(handlers) {
@@ -264,6 +287,20 @@ Block.prototype.__bindEvents = function() {
                     }
                 });
             })( events[event] );
+        }
+
+        //  Навешиваем локальные обработчики (напрямую на ноды).
+        for (var event in local) {
+            for (var selector in local[event]) {
+                var handlers = local[event][selector];
+                for (var i = 0; i < handlers.length; i++) {
+                    (function(handler) {
+                        (selector ? $(that.node).find(selector) : $(that.node)).bind(event, function() {
+                            handler.apply(that, arguments);
+                        });
+                    })(handlers[i]);
+                }
+            }
         }
     }
 };
@@ -365,7 +402,7 @@ Block.prototype.trigger = function(name, params) {
 //
 //  Если вызвать метод без аргументов, то он вернет объект со всеми data-атрибутами.
 //
-Block.prototype.data = function(key, value) {
+Block.prototype.nbdata = function(key, value) {
     return nb.node.data(this.node, key, value);
 };
 
@@ -418,11 +455,7 @@ Block.prototype.children = function() {
     //  Ищем все ноды с атрибутом data-nb. Это потенциальные блоки.
     var $nodes = $(this.node).find('[data-nb]');
     for (var i = 0, l = $nodes.length; i < l; i++) {
-        //  Пробуем создать блок.
-        var block = nb.block( $nodes[i] );
-        if (block) {
-            children.push(block);
-        }
+        children = children.concat( nb.blocks( $nodes[i] ) );
     }
 
     return children;
@@ -444,10 +477,7 @@ var Factory = function(name, ctor, events) {
     ctor.prototype.name = name;
     this.ctor = ctor;
 
-    //  В нормальной ситуации events это объект, который необходимо еще дополнительно
-    //  обработать, вызвав _prepareEvents.
-    //  но при создании микс-класса, в качестве events будет передан массив с уже готовыми объектами.
-    this.events = (events instanceof Array) ? events : this._prepareEvents(events);
+    this.events = this._prepareEvents(events);
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //
@@ -498,6 +528,7 @@ Factory.prototype._prepareEvents = function(events) {
     //  Делим события на DOM и кастомные.
     var dom = {};
     var custom = {};
+    var local = {};
 
     for (var event in events) {
         //  Матчим строки вида 'click' или 'click .foo'.
@@ -507,7 +538,14 @@ Factory.prototype._prepareEvents = function(events) {
             //  Тип DOM-события, например, click.
             var type = r[1];
 
-            handlers = dom[type] || (( dom[type] = {} ));
+            if (type === 'blur') {
+                //  Тут те события, которые нужно слушать на конкретной ноде.
+                handlers = local[type] || (( local[type] = {} ));
+            } else {
+                //  Тут все события, которые можно слушать на документе.
+                handlers = dom[type] || (( dom[type] = {} ));
+            }
+
             //  Селектор.
             key = r[2] || '';
 
@@ -563,11 +601,14 @@ Factory.prototype._prepareEvents = function(events) {
         }
     }
 
+    //  На локальные события блок подписывается только после создания, потому что только в этот момент создаются настоящие ноды.
+
     //  Возвращаем структуру, которая будет сохранена в this.events.
     return [
         {
             dom: dom,
-            custom: custom
+            custom: custom,
+            local: local
         }
     ];
 
@@ -579,29 +620,31 @@ Factory.prototype._prepareEvents = function(events) {
 //  Опциональный параметр events позволяет сразу навесить на экземпляр блока
 //  дополнительных событий (помимо событий, объявленных в nb.define).
 Factory.prototype.create = function(node, events) {
-    var block;
 
     var id = node.getAttribute('id');
-    if (id) {
-        //  Пытаемся достать блок из кэша по id.
-        block = _cache[id];
-    } else {
+    if (!id) {
         //  У блока нет атрибута id. Создаем его, генерим уникальный id.
         //  В следующий раз блок можно будет достать из кэша при по этому id.
         id = 'nb-' + _id++;
         node.setAttribute('id', id);
     }
 
-    if (!block) {
-        //  Блока в кэше нет. Создаем его.
+    //  Инициализируем кэш для блоков ноды, если нужно.
+    if ( !_cache[id] ) {
+        _cache[id] = {};
 
         //  FIXME: Что будет, если node.getAttribute('data-nb') !== this.name ?
+        //  FIXME: для ручных вызовов nb.block() надо будет дописывать имена блоков в атрибут data-nb
         //  У ноды каждого блока должен быть атрибут data-nb.
-        if ( node.getAttribute('data-nb') === null ) {
+        if ( _getName(node) === null ) {
             node.setAttribute('data-nb', this.name);
         }
+    }
 
-        block = new this.ctor(node);
+    //  Создаём блок текущей фабрики для переданной ноды.
+    if ( !_cache[id][this.name] ) {
+
+        var block = new this.ctor(node);
 
         //  Инициализируем блок.
         block.__init(node);
@@ -615,10 +658,10 @@ Factory.prototype.create = function(node, events) {
 
         //  Кэшируем блок. Последующие вызовы nb.block на этой же ноде
         //  достанут блок из кэша.
-        _cache[id] = block;
+        _cache[id][this.name] = block;
     }
 
-    return block;
+    return _cache[id][this.name];
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //
@@ -694,10 +737,6 @@ Factory._onevent = function(e) {
     var name;
     //  Текущая фабрика блоков.
     var factory;
-    //  Текущий блок. Создание блока откладывается как можно дальше.
-    //  До тех пор, пока точно не будет понятно, что найдена нода,
-    //  подходящая для одного из DOM-событий блока.
-    var block;
 
     //  Мы проходим вверх по DOM'у, начиная от e.target до самого верха (<html>).
     //  Пытаемся найти ближайший блок, внутри которого случилось событие и
@@ -705,6 +744,12 @@ Factory._onevent = function(e) {
 
     //  Переменная цикла.
     var node = origNode;
+
+    //  Оригинальная нода тоже имеет право на события!
+    nodes = [];
+    $nodes = [];
+    n = nodes.length;
+
     while (1) {
         //  Цепочку нод от e.target до <html> мы разбиваем на отрезки,
         //  по границам блоков. Например:
@@ -727,17 +772,27 @@ Factory._onevent = function(e) {
             break;
         }
 
-        //  Мы собрали в nodes все ноды внутри блока с именем name.
-        factory = Factory.get(name);
-        //  Берем все события, на которые подписан этот блок.
-        var mixinEvents = factory.events;
-
-        //  Для каждого миксина проверяем все ноды из nodes.
+        var names = _getNames(name);
         var r = true;
-        for (var i = 0, l = mixinEvents.length; i < l; i++) {
-            //  Пытаемся найти подходящее событие для node среди всех событий миксина.
-            if ( checkEvents( mixinEvents[i].dom[type] ) === false ) {
-                r = false;
+
+        for (var j = 0; j < names.length; j++) {
+
+            //  Название текущего проверяемого блока.
+            var blockName = names[j];
+
+            //  Мы собрали в nodes все ноды внутри блока с именем name.
+            factory = Factory.get( blockName );
+            //  Берем все события, на которые подписан этот блок.
+            var mixinEvents = factory.events;
+
+            //  Для каждого миксина проверяем все ноды из nodes.
+            for (var i = 0, l = mixinEvents.length; i < l; i++) {
+                //  Пытаемся найти подходящее событие для node среди всех событий миксина.
+                if ( checkEvents( blockName, mixinEvents[i].dom[type] ) === false ) {
+                    //  Если обработчик вернул false выше текущей ноды обработка события не пойдёт.
+                    //  Но на данной ноде событие послушают все блоки.
+                    r = false;
+                }
             }
         }
 
@@ -753,25 +808,21 @@ Factory._onevent = function(e) {
         //
         //  А вот в случае, когда fromNode === null (возможно, когда мышь передвинули, например,
         //  с другого окна в центр нашего окна), все блоки, содержащие e.target должны обработать ховер.
-        if (fromNode) { break; }
+        if (fromNode) { return; }
 
         //  Идем еще выше, в новый блок.
         node = node.parentNode;
-
     }
 
     function findBlockNodes() {
         //  Сбрасываем значения на каждой итерации.
-        nodes = [];
-        $nodes = [];
-        block = null;
         blockNode = null;
 
         var parent;
         //  Идем по DOM'у вверх, начиная с node и заканчивая первой попавшейся нодой блока (т.е. с атрибутом data-nb).
         //  Условие о наличии parentNode позволяет остановиться на ноде <html>.
         while (( parent = node.parentNode )) {
-            if (( name = node.getAttribute('data-nb') )) {
+            if (( name = _getName(node) )) {
                 blockNode = node;
                 break;
             }
@@ -795,7 +846,8 @@ Factory._onevent = function(e) {
     }
 
     //  Проверяем все ноды из nodes и отдельно blockNode.
-    function checkEvents(events) {
+    //  blockName название блока, для которого выполняется проверка
+    function checkEvents(blockName, events) {
         if (!events) { return; }
 
         var R;
@@ -822,7 +874,7 @@ Factory._onevent = function(e) {
                     )
                 ) {
                     //  Вызываем обработчиков событий.
-                    var r = doHandlers( node, events[selector] );
+                    var r = doHandlers( node, blockName, events[selector] );
                     if (r === false) {
                         R = r;
                     }
@@ -839,14 +891,14 @@ Factory._onevent = function(e) {
         var handlers = events[''];
         //  Опять таки костыль для ховер-событий.
         if ( handlers && !( isHover && fromNode && $.contains(blockNode, fromNode)) ) {
-            return doHandlers(blockNode, handlers);
+            return doHandlers(blockNode, blockName, handlers);
         }
     }
 
-    function doHandlers(node, handlers) {
+    function doHandlers(node, blockName, handlers) {
         //  Блок создаем только один раз и только, если мы таки дошли до сюда.
         //  Т.е. если мы нашли подходящее для node событие.
-        block = block || factory.create(blockNode);
+        var block = factory.create(blockNode);
 
         //  В handlers лежит цепочка обработчиков этого события.
         //  Самый последний обработчик -- это обработчик собственно этого блока.
@@ -866,41 +918,8 @@ Factory._onevent = function(e) {
 //  ---------------------------------------------------------------------------------------------------------------  //
 
 //  Достаем класс по имени.
-//  Имя может быть "простым" -- это классы, которые определены через nb.define.
-//  Или "сложным" -- несколько простых классов через пробел (микс нескольких блоков).
 Factory.get = function(name) {
-    //  Смотрим в кэше.
-    var factory = _factories[name];
-
-    //  В кэше нет, это будет "сложный" класс, т.к. все простые точно в кэше есть.
-    if (!factory) {
-        //  Пустой конструктор.
-        var ctor = function() {};
-
-        var events = [];
-
-        var names = name.split(/\s+/);
-        if (names.length < 2) {
-            throw "Block '" + name + "' is undefined";
-        }
-        for (var i = 0, l = names.length; i < l; i++) {
-            //  Примиксовываем все "простые" классы.
-            var mixin = Factory.get( names[i] );
-            nb.inherit(ctor, mixin.ctor);
-
-            //  Собираем массив из структур с событиями.
-            //  mixin.events[0] -- здесь 0 потому, что у "простых" классов там всегда один элемент.
-            events.push( mixin.events[0] );
-        }
-
-        //  Создаем новую фабрику для миксового класса.
-        factory = new Factory(name, ctor, events);
-
-        //  Запоминаем в кэше.
-        _factories[name] = factory;
-    }
-
-    return factory;
+    return _factories[name];
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //
@@ -908,18 +927,46 @@ Factory.get = function(name) {
 //  Интерфейсная часть
 //  ------------------
 
-//  Метод создает блок на заданной ноде:
+//  Если передано название блока, создаётся блок этого типа на ноде. Возвращается созданный блок.
+//  Если не передано название блока, создаются все блоки на переданной ноде и возвращается первый из созданных блоков.
 //
 //      var popup = nb.block( document.getElementById('popup') );
 //
-nb.block = function(node, events) {
-    var name = node.getAttribute('data-nb');
+nb.block = function(node, events, blockName) {
+    var name = _getName(node);
     if (!name) {
         //  Эта нода не содержит блока. Ничего не делаем.
         return null;
     }
 
-    return Factory.get(name).create(node, events);
+    //  Если указано имя блока - инициализируем и возвращаем только его.
+    if (blockName) {
+        return Factory.get(name).create(node, events);
+    }
+
+    //  Инициализируем все блоки на ноде.
+    //  Возвращаем первый из списка блоков.
+    return nb.blocks(node, events)[0];
+};
+
+//  Метод создает и возвращает все блоки на переданной ноде:
+//
+//      var popup = nb.blocks( document.getElementById('popup') );
+//
+nb.blocks = function(node, events) {
+    var name = _getName(node);
+    if (!name) {
+        return [];
+    }
+
+    //  Инициализируем все блоки на ноде.
+    //  Возвращаем первый из списка блоков.
+    var names = _getNames(name);
+    var blocks = [];
+    for (var i = 0; i < names.length; i++) {
+        blocks.push( Factory.get(names[i]).create(node, events) );
+    }
+    return blocks;
 };
 
 //  Находим ноду по ее id, создаем на ней блок и возвращаем его.
@@ -1000,9 +1047,21 @@ nb.define = function(name, methods, base) {
 nb.init = function(where) {
     where = where || document;
 
-    var nodes = $(where).find('._init');
+    var nodes = $(where).find('._init').addBack().filter('._init'); // XXX
     for (var i = 0, l = nodes.length; i < l; i++) {
         nb.block( nodes[i] );
+    }
+};
+
+//  FIXME отписаться от событий, которые навешаны напрямую на ноды (events.local)
+//  FIXME тест на то, что подписанные обработчики отписались
+nb.destroy = function(where) {
+    where = where || document;
+
+    var nodes = $(where).find('._init').addBack().filter('._init');
+    for (var i = 0, l = nodes.length; i < l; i++) {
+        var id = nodes[i].getAttribute('id');
+        delete _cache[id];
     }
 };
 
@@ -1114,10 +1173,22 @@ nb.rect = function(node) {
 
     var $node = $(node);
     var offset = $node.offset();
+    var size;
+
+    if ($node.hasClass('_hidden')) {
+        //  Спрятанный элемент нужно вначале показать и только потом вычислять его размер.
+        $node.toggleClass('_invisible', true);
+        $node.toggleClass('_hidden', false);
+        size = { width: $node.outerWidth(), height: $node.outerHeight() };
+        $node.toggleClass('_hidden', true);
+        $node.toggleClass('_invisible', false);
+    } else {
+        size = { width: $node.outerWidth(), height: $node.outerHeight() };
+    }
 
     return [
         [ offset.left, offset.top ],
-        [ $node.outerWidth(), $node.outerHeight() ]
+        [ size.width, size.height ]
     ];
 };
 

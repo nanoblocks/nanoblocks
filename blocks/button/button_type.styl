@@ -1,55 +1,10 @@
-//---------------------------------------------------------------------------//
-/* MIXINs */
-
-/**
-    @param {string} $prop_name CSS property to be rendered
-    @param {Array.<Gradient>} $grads Gradients definition.
-
-    Example:
-        $grad1 = (#EEE 0) (#EFEFEF 100%)
-        $grad2 = #FAFAFA #EFEFEF
-
-        bg-gradient(background, $grad1)
-        bg-gradient(background-image, $grad2)
-        bg-gradient(background-image, $grad1, $grad2)
-*/
-bg-gradient($prop_name, $grads...) {
-    $webkit = ()
-    $moz = ()
-    $o = ()
-    $standart = ()
-
-    $comma = unquote(',')
-
-    for $grad, i in $grads {
-        if (i > 0) {
-            push($webkit, $comma) // Мегахак: вставляем разделитель как расквотированную запятую
-            push($moz, $comma)
-            push($o, $comma)
-            push($standart, $comma)
-        }
-
-        $formula = unquote(join(', ', $grad))
-
-        push($webkit, -webkit-linear-gradient(top, $formula))
-        push($moz, -moz-linear-gradient(top, $formula))
-        push($o, -o-linear-gradient(top, $formula))
-        push($standart, linear-gradient(to bottom, $formula))
-    }
-
-    {$prop_name}: $webkit
-    {$prop_name}: $moz
-    {$prop_name}: $o
-    {$prop_name}: $standart
-}
-
-//---------------------------------------------------------------------------//
+_ie ?= false // For smart IE including
 
 /* Default button mixin */
 button_default() {
     text-shadow: 0 1px rgba(255,255,255,.5);
 
-    border-radius: 3px;
+    border-radius: 3px
 
     // Normal and disabled states
     &,
@@ -82,7 +37,7 @@ button_default() {
 
     // Pseudo-elements to better state styling
     &:before {
-        border-radius: 2px;
+        border-radius: 2px
     }
 
     &:hover {
@@ -103,6 +58,13 @@ button_default() {
 
     &:active:before,
     input&:active {
+        box-shadow: inset 0 1px 4px rgba(0,0,0,.4);
+    }
+
+    // Это нужно для нажимающихся кнопок.
+    input&:checked + label {
+        padding-top: 3px;
+        padding-bottom: 1px;
         box-shadow: inset 0 1px 4px rgba(0,0,0,.4);
     }
 
@@ -141,7 +103,6 @@ button_pseudo() {
     &._disabled,
     &._disabled:active {
         opacity: 0.5;
-        box-shadow: none !important;
     }
 
     &:hover {
@@ -149,16 +110,6 @@ button_pseudo() {
         $grad = rgba(#000, 0.08) $bg
         background: $bg
         bg-gradient(background, $grad)
-    }
-
-    &.button_size_xs:active { // XXX это треш, надо выносить паддинг сюда, чтоли из button_syze...
-        padding 1px 6px
-    }
-    &.button_size_s:active { // XXX это треш, надо выносить паддинг сюда, чтоли из button_syze...
-        padding 1px 8px
-    }
-    &.button_size_l:active { // XXX это треш, надо выносить паддинг сюда, чтоли из button_syze...
-        padding 3px 12px
     }
 }
 
@@ -171,9 +122,46 @@ button_pseudo() {
 
 //---------------------------------------------------------------------------//
 
-.pseudo-{button} {
+.{button}_pseudo {
     button_base()
     button_pseudo()
 }
 
 //---------------------------------------------------------------------------//
+
+.button-group .{button} {
+    button_base()
+    button_default()
+
+    border-radius: 0
+    border-right-width: 0 !important
+    &:before {
+        border-radius: 0
+        border-right-width: 0 !important
+    }
+
+    &:first-child {
+        border-top-left-radius: 3px;
+        border-bottom-left-radius: 3px;
+    }
+    &:first-child :before {
+        border-top-left-radius: 2px;
+        border-bottom-left-radius: 2px;
+    }
+
+    &:last-child {
+        border-top-right-radius: 3px;
+        border-bottom-right-radius: 3px;
+        border-right-width: 1px !important
+    }
+    &:last-child :before {
+        border-top-right-radius: 2px;
+        border-bottom-right-radius: 2px;
+        border-right-width: 1px !important
+    }
+
+    // NOTE пока только size=l подогнан
+    &.button_size_l:active {
+        padding 2px 10px
+    }
+}

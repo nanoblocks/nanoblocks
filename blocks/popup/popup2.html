@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Попапы и дропдауны</title>
+    <link rel="stylesheet" href="../s/demo.css">
     <link rel="stylesheet" href="../s/all.css">
     <script type="text/javascript" src="http://yandex.st/jquery/1.7.1/jquery.js"></script>
     <script type="text/javascript" src="../../nanoblocks.js"></script>
@@ -35,7 +36,7 @@
                 var popup = nb.find('popup-1');
 
                 if ( popup.where !== this.node ) {
-                    this.data( 'popup-toggler', JSON.stringify( { id: 'popup-1', how: dirs[this.i] } ) );
+                    this.nbdata( 'popup-toggler', JSON.stringify( { id: 'popup-1', how: dirs[this.i] } ) );
                     this.i = (this.i + 1) % dirs.length;
                 }
             }
