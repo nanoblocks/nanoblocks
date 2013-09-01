@@ -168,9 +168,12 @@ var _domEvents = [
     'keydown',
     'keypress',
     'keyup',
-    'blur',
     'input',
     'change',
+
+    // local: вешаются напрямую на ноду блока / подноду блока по селектору
+    'blur',
+
     /*
         FIXME: Сейчас эти события называются mouseover и mouseout.
         'mouseenter',
