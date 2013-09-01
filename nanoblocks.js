@@ -436,11 +436,7 @@ Block.prototype.children = function() {
     //  Ищем все ноды с атрибутом data-nb. Это потенциальные блоки.
     var $nodes = $(this.node).find('[data-nb]');
     for (var i = 0, l = $nodes.length; i < l; i++) {
-        //  Пробуем создать блок.
-        var block = nb.block( $nodes[i] );
-        if (block) {
-            children.push(block);
-        }
+        children = children.concat( nb.blocks( $nodes[i] ) );
     }
 
     return children;
@@ -912,7 +908,8 @@ Factory.get = function(name) {
 //  Интерфейсная часть
 //  ------------------
 
-//  Метод создает все блоки на заданной ноде:
+//  Если передано название блока, создаётся блок этого типа на ноде. Возвращается созданный блок.
+//  Если не передано название блока, создаются все блоки на переданной ноде и возвращается первый из созданных блоков.
 //
 //      var popup = nb.block( document.getElementById('popup') );
 //
@@ -930,12 +927,27 @@ nb.block = function(node, events, blockName) {
 
     //  Инициализируем все блоки на ноде.
     //  Возвращаем первый из списка блоков.
-    var names = _getNames(name);
-    var block;
-    for (var i = names.length - 1; i >= 0; i--) {
-        block = Factory.get(names[i]).create(node, events);
+    return nb.blocks(node, events)[0];
+};
+
+//  Метод создает и возвращает все блоки на переданной ноде:
+//
+//      var popup = nb.blocks( document.getElementById('popup') );
+//
+nb.blocks = function(node, events) {
+    var name = _getName(node);
+    if (!name) {
+        return [];
     }
-    return block;
+
+    //  Инициализируем все блоки на ноде.
+    //  Возвращаем первый из списка блоков.
+    var names = _getNames(name);
+    var blocks = [];
+    for (var i = 0; i < names.length; i++) {
+        blocks.push( Factory.get(names[i]).create(node, events) );
+    }
+    return blocks;
 };
 
 //  Находим ноду по ее id, создаем на ней блок и возвращаем его.
