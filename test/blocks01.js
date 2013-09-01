@@ -44,7 +44,7 @@ describe('init', function() {
                 '<div data-nb="block2"/>' +
             '</div>'
         );
-        var block = nb.block( $node[0] );
+        nb.block( $node[0] );
         expect(this.events).to.be.eql({ init: [ 'block-parent' ] });
     });
 
@@ -58,7 +58,7 @@ describe('init', function() {
         expect(this.events).to.be.eql({ init: [ 'block-parent' ], click: [ 'block-parent' ] });
     });
 
-    it('nb.init() will init only child blocks with _init class', function() {
+    it('nb.init() will init all blocks including parent block with _init class', function() {
         var $node = this.setHTML(
             '<div data-nb="block-parent" class="_init">' +
                 '<div data-nb="block1"/>' +
@@ -66,7 +66,7 @@ describe('init', function() {
             '</div>'
         );
         nb.init( $node[0] );
-        expect(this.events).to.be.eql({ 'init': [ 'block2' ] });
+        expect(this.events).to.be.eql({ 'init': [ 'block-parent', 'block2' ] });
     });
 
     it('block.children() will init all children blocks', function() {

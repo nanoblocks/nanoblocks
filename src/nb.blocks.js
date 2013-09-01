@@ -19,6 +19,7 @@ var _domEvents = [
     'keyup',
     'blur',
     'input',
+    'change',
     /*
         FIXME: Сейчас эти события называются mouseover и mouseout.
         'mouseenter',
@@ -26,7 +27,8 @@ var _domEvents = [
     */
     'mouseover',
     'mouseout',
-    'focusin'
+    'focusin',
+    'focusout'
 ];
 
 //  Regexp для строк вида 'click', 'click .foo'.
@@ -248,6 +250,20 @@ Block.prototype.trigger = function(name, params) {
 //
 Block.prototype.nbdata = function(key, value) {
     return nb.node.data(this.node, key, value);
+};
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+//  Показываем блок.
+Block.prototype.show = function() {
+    $(this.node).removeClass('_hidden');
+    this.trigger('show');
+};
+
+//  Прячем блок.
+Block.prototype.hide = function() {
+    $(this.node).addClass('_hidden');
+    this.trigger('hide');
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //
@@ -877,9 +893,21 @@ nb.define = function(name, methods, base) {
 nb.init = function(where) {
     where = where || document;
 
-    var nodes = $(where).find('._init');
+    var nodes = $(where).find('._init').addBack().filter('._init'); // XXX
     for (var i = 0, l = nodes.length; i < l; i++) {
         nb.block( nodes[i] );
+    }
+};
+
+//  FIXME отписаться от событий, которые навешаны напрямую на ноды (events.local)
+//  FIXME тест на то, что подписанные обработчики отписались
+nb.destroy = function(where) {
+    where = where || document;
+
+    var nodes = $(where).find('._init').addBack().filter('._init');
+    for (var i = 0, l = nodes.length; i < l; i++) {
+        var id = nodes[i].getAttribute('id');
+        delete _cache[id];
     }
 };
 
