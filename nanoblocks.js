@@ -946,7 +946,7 @@ nb.block = function(node, events, blockName) {
 
     //  Если указано имя блока - инициализируем и возвращаем только его.
     if (blockName) {
-        return Factory.get(name).create(node, events);
+        return Factory.get(blockName).create(node, events);
     }
 
     //  Инициализируем все блоки на ноде.
