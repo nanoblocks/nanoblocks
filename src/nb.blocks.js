@@ -139,19 +139,31 @@ Block.prototype.__bindEvents = function() {
         }
 
         //  Навешиваем локальные обработчики (напрямую на ноды).
+        //  Для этого вначале собираем строки вида `event selector`
         for (var event in local) {
             for (var selector in local[event]) {
+                var suffix = (selector || '').length ? (' ' + selector) : '';
+                var eventDefinition = event + suffix;
                 var handlers = local[event][selector];
                 for (var i = 0; i < handlers.length; i++) {
                     (function(handler) {
-                        (selector ? $(that.node).find(selector) : $(that.node)).bind(event, function() {
+                        that.on(eventDefinition, function() {
                             handler.apply(that, arguments);
                         });
-                    })(handlers[i]);
+                    } (handlers[i]));
                 }
             }
         }
     }
+};
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+//  Удаляем блок.
+Block.prototype.destroy = function() {
+    // unbind custom events
+    // unbind local events
+    // remove block from cache
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //
@@ -185,7 +197,7 @@ Block.prototype.on = function(name, handler) {
     if (r) {
         //  DOM-событие.
 
-        //  В r[1] тип события (например, click), в r[2] необязательный селекторо.
+        //  В r[1] тип события (например, click), в r[2] необязательный селектор.
         $(this.node).on( r[1], r[2] || '', handler );
     } else {
         //  Кастомное событие.
@@ -417,6 +429,7 @@ Factory.prototype._prepareEvents = function(events) {
         }
 
         if (handler === null) {
+            //  @doc
             //  Особый случай, бывает только при наследовании блоков.
             //  null означает, что нужно игнорировать родительские обработчики события.
             handlers[key] = null;

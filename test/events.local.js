@@ -49,6 +49,8 @@ describe('local events', function() {
         expect(this.events).to.be.eql({ 'blur': [ 'block1' ] });
     });
 
+    // @doc
+    // NOTE: blur will be converted to focusout because it can bubble (from jquery by design)
     it('listen local dom events on nested elements', function() {
         var $node = this.setHTML(
             '<div data-nb="block2">' +
@@ -57,7 +59,7 @@ describe('local events', function() {
         );
         nb.block( $node[0] );
         $node.find('.inner').trigger('blur');
-        expect(this.events).to.be.eql({ 'blur': [ 'block2' ] });
+        expect(this.events).to.be.eql({ 'focusout': [ 'block2' ] });
     });
 
 });
