@@ -161,9 +161,22 @@ Block.prototype.__bindEvents = function() {
 
 //  Удаляем блок.
 Block.prototype.destroy = function() {
-    // unbind custom events
-    // unbind local events
-    // remove block from cache
+
+    var mixinEvents = Factory.get(this.name).events;
+
+    for (var i = 0, l = mixinEvents.length; i < l; i++) {
+        //  Снимаем все кастомные события.
+        for (var event in mixinEvents[i].custom) {
+            this.off(event);
+        }
+        //  Снимаем все локальные события.
+        for (var event in mixinEvents[i].local) {
+            this.off(event);
+        }
+    }
+
+    //  Удалем блок из кэша.
+    _cache[this.id] = null;
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //
@@ -506,9 +519,10 @@ Factory.prototype.create = function(node, events) {
     //  Создаём блок текущей фабрики для переданной ноды.
     if ( !_cache[id][this.name] ) {
 
-        var block = new this.ctor(node);
+        var block = new this.ctor();
 
         //  Инициализируем блок.
+        block.id = id;
         block.__init(node);
 
         //  Если переданы events, навешиваем их.
@@ -928,15 +942,21 @@ nb.init = function(where) {
     }
 };
 
-//  FIXME отписаться от событий, которые навешаны напрямую на ноды (events.local)
+//  FIXME метод странный, потому что от него ожидаешь, что он найдёт все блоки внутри ноды и кильнёт их, а он ищет по классу _init только.
 //  FIXME тест на то, что подписанные обработчики отписались
 nb.destroy = function(where) {
     where = where || document;
 
     var nodes = $(where).find('._init').addBack().filter('._init');
     for (var i = 0, l = nodes.length; i < l; i++) {
-        var id = nodes[i].getAttribute('id');
-        delete _cache[id];
+        var node = nodes[i];
+        var id = node.getAttribute('id');
+        var blocks = _cache[id];
+        if (blocks) {
+            for (var name in blocks) {
+                blocks[name].destroy();
+            }
+        }
     }
 };
 

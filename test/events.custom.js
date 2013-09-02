@@ -25,6 +25,12 @@ describe('custom events', function() {
             'nb-test-event': onEvent,
             'test-event': onEvent
         }});
+
+        nb.define('block1', { events: {
+            'init': onEvent
+        }});
+
+        nb.on('inited:block1id', onEvent);
     });
 
     afterEach(function() {
@@ -37,5 +43,12 @@ describe('custom events', function() {
         block.trigger('nb-test-event');
         block.trigger('test-event');
         expect(this.events).to.be.eql({ 'nb-test-event': [ 'block' ], 'test-event': [ 'block' ] });
+    });
+
+    it('block is triggering custom nb event on space', function() {
+        var $node = this.setHTML('<div id="block1id" data-nb="block1"/>');
+        nb.block($node[0]);
+        // nb-0 так у глобального блока nb.space указан name
+        expect(this.events).to.be.eql({ 'inited:block1id': [ 'nb-0' ], 'init': [ 'block1' ] });
     });
 });
