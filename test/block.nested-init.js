@@ -1,4 +1,4 @@
-describe('init', function() {
+describe('nested init', function() {
     beforeEach(function() {
         var that = this;
         this.setHTML = function(html) {
