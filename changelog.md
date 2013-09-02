@@ -1,8 +1,8 @@
 ## changelog
 
 ### latest version
-- `block.destroy()` удаляет блок и описывает его от событий
-- `nb.hasBlock(node, name)` скажет, если блок на ноде (имя блока опционально)
+- `block.destroy()` удаляет блок и отписывает его от событий
+- `nb.hasBlock(node, name)` скажет, есть ли блок на ноде (имя блока опционально)
 - stylus `0.37`
 - разделил зависимости на `dependencies` и `devDependencies`
 
