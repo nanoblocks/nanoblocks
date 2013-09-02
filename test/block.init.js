@@ -33,6 +33,24 @@ describe('block init', function() {
         this.$html.remove();
     });
 
+    it('hasBlock()', function() {
+        var node = this.setHTML(
+            '<div data-nb="block1 block2"/>'
+        )[0];
+
+        expect( nb.hasBlock(node) ).to.be.eql(false);
+
+        nb.block(node, null, 'block1');
+        expect( nb.hasBlock(node) ).to.be.eql(true);
+        expect( nb.hasBlock(node, 'block1') ).to.be.eql(true);
+        expect( nb.hasBlock(node, 'block2') ).to.be.eql(false);
+
+        nb.block(node, null, 'block2');
+        expect( nb.hasBlock(node) ).to.be.eql(true);
+        expect( nb.hasBlock(node, 'block1') ).to.be.eql(true);
+        expect( nb.hasBlock(node, 'block2') ).to.be.eql(true);
+    });
+
     it('init all blocks on one node', function() {
         var $node = this.setHTML(
             '<div data-nb="block1 block2"/>'
