@@ -1,5 +1,9 @@
 ## changelog
 
+### latest version
+- stylus `0.37`
+- разделил зависимости на `dependencies` и `devDependencies`
+
 ### 0.0.3
 Подмёржил доработки, которые делались на стороне
 - поддержка событий `change` и `focusout`
