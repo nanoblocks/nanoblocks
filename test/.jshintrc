@@ -1,0 +1,31 @@
+{
+    "browser": true,
+    "devel": true,
+    "jquery": true,
+    "node": true,
+    "globals": {
+        "nb": false,
+
+        "it": false,
+        "describe": false,
+        "expect": false,
+        "beforeEach": false,
+        "afterEach": false
+    },
+
+    "bitwise": true,
+    "curly": true,
+    "eqnull": true,
+    "latedef": true,
+    "loopfunc": true,
+    "newcap": true,
+    "noarg": true,
+    "noempty": true,
+    "nonew": true,
+    "onevar": false,
+    "shadow": true,
+    "sub": true,
+    "trailing": true,
+    "undef": true,
+    "unused": true
+}
