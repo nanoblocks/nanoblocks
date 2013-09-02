@@ -659,6 +659,11 @@ Factory._onevent = function(e) {
         //  с другого окна в центр нашего окна), все блоки, содержащие e.target должны обработать ховер.
         if (fromNode) { return; }
 
+        //  Догоняем список нод текущей нодой блока.
+        nodes.push(node);
+        $nodes.push( $(node) );
+        n = nodes.length;
+
         //  Идем еще выше, в новый блок.
         node = node.parentNode;
     }

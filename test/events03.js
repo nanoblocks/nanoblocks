@@ -23,7 +23,8 @@ describe('nested blocks', function() {
 
         nb.define('top', { events: {
             'click .top-listen-this': onEvent,
-            'click .both-listen-this': onEvent
+            'click .both-listen-this': onEvent,
+            'keydown .text': onEvent
         }});
         nb.define('nested', { events: {
             'click .nested-listen-this': onEvent,
@@ -84,5 +85,15 @@ describe('nested blocks', function() {
             '</div>'
         ).find('.both-listen-this').trigger('click');
         expect(this.events.click).to.be.eql( [ 'nested' ] );
+    });
+
+    it('top level block can handle events on a nested element that is a block itself', function() {
+        this.returns['click'] = { nested: false };
+        this.setHTML(
+            '<div data-nb="top">' +
+                '<textarea class="text" data-nb="nested"/>' +
+            '</div>'
+        ).find('.text').trigger('keydown');
+        expect(this.events).to.be.eql( { 'keydown': [ 'top' ] } );
     });
 });
