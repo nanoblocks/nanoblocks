@@ -15,7 +15,7 @@ ds.prototype.init = function(options) {
 };
 
 ds.prototype.has = function(key) {
-    return ((key.toLowerCase()) in this.cache);
+    return (key.toLowerCase() in this.cache);
 };
 
 /**
@@ -211,6 +211,7 @@ arrayDS.prototype.get = function(req) {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 nb.suggest = {};
+nb.suggest.ds = ds;
 nb.suggest.ajaxDS = ajaxDS;
 nb.suggest.arrayDS = arrayDS;
 

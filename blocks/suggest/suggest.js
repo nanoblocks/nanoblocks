@@ -269,6 +269,10 @@ suggest.setArrayData = function(options) {
     this._data = new nb.suggest.arrayDS().init(options);
 };
 
+suggest.setDataSource = function(ds) {
+    this._data = ds;
+};
+
 suggest._requestData = function(text) {
     var that = this;
     this._data.get({
