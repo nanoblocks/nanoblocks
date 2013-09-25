@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Саджест</title>
+    <link rel="stylesheet" href="../s/demo.css">
+    <link rel="stylesheet" href="../s/all.css">
+    <script type="text/javascript" src="http://yandex.st/jquery/1.9.1/jquery.js"></script>
+    <script type="text/javascript" src="../../nanoblocks.js"></script>
+    <script type="text/javascript" src="../popup/popup.js"></script>
+    <script type="text/javascript" src="suggest-data.js"></script>
+    <script type="text/javascript" src="suggest.js"></script>
+    <style>
+        .number-suggest {
+            width: 200px;
+        }
+
+        .current {
+            background-color: #FFB32F;
+        }
+    </style>
+</head>
+<body>
+    <input type="text" class="number-suggest" placeholder="Enter number like `one`" data-nb="suggest" data-nb-label-key="name" />
+    <script>
+        $(function() {
+            var suggest = nb.block( $('.number-suggest')[0] );
+            suggest.setArrayData({
+                key: 'name',
+                data: [
+                    { name: 'one' },
+                    { name: 'two' },
+                    { name: 'three' },
+                    { name: 'four' },
+                    { name: 'five' },
+                    { name: 'six' },
+                    { name: 'seven' },
+                    { name: 'eight' },
+                    { name: 'nine' },
+                    { name: 'ten' }
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

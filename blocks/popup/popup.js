@@ -76,8 +76,11 @@ function onclose() {
     }
     this.hide();
 
-    // Возвращаем ноду попапа на старое место
-    this._placeholder.after(this.node);
+    // Возвращаем ноду попапа на старое место (если оно есть).
+    // Его может не быть, если попап сгенерён вручную.
+    if (this._placeholder) {
+        this._placeholder.after(this.node);
+    }
 
     // Сообщаем в космос, что закрылся попап
     nb.trigger('popup-closed', this);

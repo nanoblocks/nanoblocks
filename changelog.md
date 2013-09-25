@@ -1,6 +1,7 @@
 ## changelog
 
 ### latest version
+- приехал `suggest` из спецпроекта 
 - `block.destroy()` удаляет блок и отписывает его от событий
 - `nb.hasBlock(node, name)` скажет, есть ли блок на ноде (имя блока опционально)
 - stylus `0.37`
