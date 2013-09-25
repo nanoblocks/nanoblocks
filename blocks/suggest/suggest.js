@@ -154,21 +154,18 @@ suggest._createPopup = function() {
 
     this.$popup_wrapper = this.$popup.find('.suggest-scrollbox');
 
-    this.popup = nb.block(this.$popup[0]);
-    this.popup.on('close', function() {
-        that._popup_opened = false;
-    });
-
-    // Init mouse events.
-    // TODO вешать через nb.Block?
-    this.$popup_wrapper
-        .delegate('li', 'mouseenter', function(evt) {
+    this.popup = nb.block(this.$popup[0], {
+        'mouseenter .suggest-scrollbox li': function(evt) {
             that.setCurrent(evt.target);
-        })
-        .delegate('li', 'click', function(evt) {
+        },
+        'click .suggest-scrollbox li': function(evt) {
             var $item = $(evt.target).closest('li');
             that.selectItem($item);
-        });
+        },
+        'close': function() {
+            that._popup_opened = false;
+        }
+    });
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
