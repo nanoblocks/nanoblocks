@@ -45,7 +45,8 @@ suggest.events = {
     'keyup': 'onKeyUp',
     'focusout': 'onClose',
     'click': 'onFocusIn',
-    'focusin': 'onFocusIn'
+    'focusin': 'onFocusIn',
+    'input': 'onInput'
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -69,6 +70,7 @@ suggest.onInit = function() {
     this.search_param_name = this.getDataString('search-param-name', 'text');
     this.max_param_name = this.getDataString('max-param-name', 'max');
     this.default_params = this.getDataObject('default_params', {});
+    this.popup_selector = this.getDataString('popup-selector');
 
     this.$input = $(this.node);
 
@@ -109,7 +111,7 @@ suggest.getDataObject = function(key, default_value) {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-suggest.onFocusIn = function(evt) {
+suggest.onFocusIn = function() {
     if (this.focusin_show && !this._popup_opened && (!!this._text || this.min_length === 0)) {
         this.suggest(this._text);
     }
@@ -120,12 +122,20 @@ suggest.onFocusIn = function(evt) {
 suggest._createPopup = function() {
     var that = this;
 
-    this.$popup = $(
-        '<div class="popup popup_theme_blocky popup_to_top _hidden" data-nb="popup">' +
-            '<div class="popup__scrollbox"></div>' +
-        '</div>')
-        .addClass(this.theme_class)
-        .appendTo(doc.body);
+    // Если указан селектор попапа, где будет выводиться suggest то ищем мы его сразу за полем suggest-а.
+    // Вроде бы нет никаких причин его располагать где-то ещё.
+    // А так мы решаем проблему нескольких саджестов на одной странице.
+    if (this.popup_selector) {
+        this.$popup = $(this.node).next(this.popup_selector);
+    }
+    else {
+        this.$popup = $(
+            '<div class="popup popup_theme_blocky popup_to_top" data-nb="popup">' +
+                '<div class="suggest-scrollbox"></div>' +
+            '</div>')
+            .addClass(this.theme_class)
+            .appendTo(doc.body);
+    }
 
     if (this.show_loader) {
         var $input = this.$input;
@@ -142,11 +152,7 @@ suggest._createPopup = function() {
         });
     }
 
-    if (this.expand_to_input) {
-        this.$popup.css('width', this.$input.outerWidth());
-    }
-
-    this.$popup_wrapper = this.$popup.find('.popup__scrollbox');
+    this.$popup_wrapper = this.$popup.find('.suggest-scrollbox');
 
     this.popup = nb.block(this.$popup[0]);
     this.popup.on('close', function() {
@@ -205,6 +211,17 @@ suggest.onKeyUp = function(evt) {
         return;
     }
 
+    this._text = text;
+    this.suggest(text);
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+suggest.onInput = function() {
+    var text = this.$input.val().trim();
+    if (text === this._text) {
+        return;
+    }
     this._text = text;
     this.suggest(text);
 };
@@ -371,6 +388,12 @@ suggest.renderSuggest = function(text, data) {
  */
 suggest.showSuggest = function() {
     if (!this._popup_opened) {
+
+        // Adjust width to input width
+        if (this.expand_to_input) {
+            this.$popup.css('width', this.$input.outerWidth());
+        }
+
         this.popup.trigger('open', {
             where: this.node,
             how: {
