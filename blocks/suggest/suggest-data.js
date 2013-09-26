@@ -45,9 +45,6 @@ var ajaxDS = function() {};
 
 nb.inherit(ajaxDS, ds);
 
-/**
- * @param {{ url: string, retry_count: ?number=3, max_items: ?number=, timeout: number= }} options.
- */
 ajaxDS.prototype.init = function(options) {
     ds.prototype.init.call(this, options);
     this._requests = {};
@@ -56,6 +53,7 @@ ajaxDS.prototype.init = function(options) {
     this.retry_count = (typeof options.retry_count === 'undefined') ? 3 : +options.retry_count;
     this.max_items = options.max_items;
     this.timeout = options.timeout;
+    this.dataType = options.dataType || 'jsonp';
 
     return this;
 };
@@ -105,7 +103,7 @@ ajaxDS.prototype._createRequest = function(req) {
             'url': that.url,
             'type': 'GET',
             'data': params,
-            'dataType': 'json',
+            'dataType': that.dataType,
             'success': function(data) {
                 var parsed_data = that.prepareData(data, !params.q);
                 that.cache[query] = parsed_data;
