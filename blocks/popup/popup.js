@@ -320,6 +320,9 @@ var $paranja = function() {
     return div;
 };
 
+// Возвращает placeholder для popup-ов.
+// Хитрая ленивая функция.
+// Если передан `append` = true placeholder перемещается в конец body (чтобы попап оказался выше всех).
 var $holder = function() {
     var div = $('<div/>').appendTo('body');
     $holder = function(append) {
@@ -338,55 +341,55 @@ nb.define('modal',   { _type: 'modal'   }, base.name);
 nb.on('popup-before-open', function(e, popup) {
     var opened = $holder().children();
     switch (popup._type) {
-    case 'tooltip':
-        for (var i = opened.length; i > 0; i--) {
-            var p = nb.block(opened[i-1]);
-            if (p._type !== 'tooltip') {
-                continue;
+        case 'tooltip':
+            for (var i = opened.length; i > 0; i--) {
+                var p = nb.block(opened[i-1]);
+                if (p._type !== 'tooltip') {
+                    continue;
+                }
+                p.trigger('close');
             }
-            p.trigger('close');
-        }
-        break;
-    case 'modal':
-        for (var i = opened.length; i > 0; i--) {
-            nb.block(opened[i-1]).trigger('close');
-        }
-        break;
-    default:
-        // popup goes here
-        for (var i = opened.length; i > 0; i--) {
-            var p = nb.block(opened[i-1]);
-            if (popup.parent === p) {
-                break; // не закрываем родителей
+            break;
+        case 'modal':
+            for (var i = opened.length; i > 0; i--) {
+                nb.block(opened[i-1]).trigger('close');
             }
-            if (p._type === 'tooltip') {
-                continue; // (?) не закрываем тултипы
+            break;
+        default:
+            // popup goes here
+            for (var i = opened.length; i > 0; i--) {
+                var p = nb.block(opened[i-1]);
+                if (popup.parent === p) {
+                    break; // не закрываем родителей
+                }
+                if (p._type === 'tooltip') {
+                    continue; // (?) не закрываем тултипы
+                }
+                p.trigger('close');
             }
-            p.trigger('close');
-        }
     }
 });
 
 nb.on('popup-before-close', function(e, popup) {
     switch (popup._type) {
-    case 'tooltip':
-        break;
-    case 'modal':
-        var opened = $holder().children();
-        for (var i = opened.length; i > 0; i--) {
-            nb.block(opened[i-1]).trigger('close');
-        }
-        break;
-    default:
-        // popup goes here
-        var nextAll = $(popup.node).nextAll();
-        for (var i = 0; i < nextAll.length; i++) {
-            var p = nb.block(nextAll[i]);
-            if (p && p._type === 'popup') {
-                p.trigger('close');
-                break;
+        case 'tooltip':
+            break;
+        case 'modal':
+            var opened = $holder().children();
+            for (var i = opened.length; i > 0; i--) {
+                nb.block(opened[i-1]).trigger('close');
             }
-        }
+            break;
+        default:
+            // popup goes here
+            var nextAll = $(popup.node).nextAll();
+            for (var i = 0; i < nextAll.length; i++) {
+                var p = nb.block(nextAll[i]);
+                if (p && p._type === 'popup') {
+                    p.trigger('close');
+                    break;
+                }
+            }
     }
 });
 
@@ -409,6 +412,7 @@ nb.on('keydown', function(e) {
     }
 });
 
+// Клик в космосе должен закрывать все попапы.
 nb.on('space:click', function(e, node) {
     var popup;
     popup = $holder().children().has(node).add($holder().children().filter(node));
