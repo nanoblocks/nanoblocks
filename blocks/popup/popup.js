@@ -84,7 +84,7 @@ function onclose() {
 
     // Сообщаем в космос, что закрылся попап
     nb.trigger('popup-closed', this);
-};
+}
 
 function move() {
     //  Модальный попап двигать не нужно.
@@ -200,7 +200,7 @@ function move() {
         top: what[0][1]
     });
 
-};
+}
 
 function normalizeHow(how) {
     //  Дефолтное направление открытия.
@@ -287,13 +287,13 @@ function tailDirs(what, where) {
 function show() {
     $(this.node).removeClass('_hidden');
     this.trigger('show');
-};
+}
 
 //  Прячем блок.
 function hide() {
     $(this.node).addClass('_hidden');
     this.trigger('hide');
-};
+}
 
 
 var base = {
@@ -308,7 +308,7 @@ var base = {
     '_move': move,
     'show': show,
     'hide': hide
-}
+};
 base = nb.define(base);
 
 //}}}
@@ -316,20 +316,20 @@ base = nb.define(base);
 //  FIXME: Паранджа, наверное, должна быть общедоступным компонентом.
 var $paranja = function() {
     var div = $('<div class="paranja paranja_theme_dark"/>').appendTo('body').hide();
-    $paranja = function() { return div; }
+    $paranja = function() { return div; };
     return div;
-}
+};
 
 var $holder = function() {
     var div = $('<div/>').appendTo('body');
     $holder = function(append) {
-        if (append) {
+        if (append && !div.is(':last-child')) {
             div.appendTo('body');
         }
         return div;
-    }
+    };
     return div;
-}
+};
 
 nb.define('tooltip', { _type: 'tooltip' }, base.name);
 nb.define('popup',   { _type: 'popup'   }, base.name);
@@ -341,7 +341,9 @@ nb.on('popup-before-open', function(e, popup) {
     case 'tooltip':
         for (var i = opened.length; i > 0; i--) {
             var p = nb.block(opened[i-1]);
-            if (p._type !== 'tooltip') continue;
+            if (p._type !== 'tooltip') {
+                continue;
+            }
             p.trigger('close');
         }
         break;
@@ -350,12 +352,16 @@ nb.on('popup-before-open', function(e, popup) {
             nb.block(opened[i-1]).trigger('close');
         }
         break;
-    case 'popup':
     default:
+        // popup goes here
         for (var i = opened.length; i > 0; i--) {
             var p = nb.block(opened[i-1]);
-            if (popup.parent === p) break; // не закрываем родителей
-            if (p._type === 'tooltip') continue; // (?) не закрываем тултипы
+            if (popup.parent === p) {
+                break; // не закрываем родителей
+            }
+            if (p._type === 'tooltip') {
+                continue; // (?) не закрываем тултипы
+            }
             p.trigger('close');
         }
     }
@@ -371,8 +377,8 @@ nb.on('popup-before-close', function(e, popup) {
             nb.block(opened[i-1]).trigger('close');
         }
         break;
-    case 'popup':
     default:
+        // popup goes here
         var nextAll = $(popup.node).nextAll();
         for (var i = 0; i < nextAll.length; i++) {
             var p = nb.block(nextAll[i]);
@@ -386,7 +392,9 @@ nb.on('popup-before-close', function(e, popup) {
 
 nb.on('keydown', function(e) {
     // FIXME А если что-то набирается в попапе?
-    if (e.keyCode !== 27) return;
+    if (e.keyCode !== 27) {
+        return;
+    }
     var popup = $holder().children().last()[0];
     if (popup) {
         nb.block(popup).trigger('close');
