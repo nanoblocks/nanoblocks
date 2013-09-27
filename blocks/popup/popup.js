@@ -446,6 +446,16 @@ nb.on('popup-close', function() {
         nb.block($paranja().children().first()[0]).trigger('close');
     }
 });
+
+// Хэлпер функции.
+nb.popup = {
+    // Открыт ли хотя бы один popup.
+    someOpen: function() {
+        return !!$holder().children().length;
+    }
+};
+
+
 }(jQuery, nb));
 
 // ----------------------------------------------------------------------------------------------------------------- //
