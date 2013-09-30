@@ -43,7 +43,6 @@ suggest.events = {
     'init': 'onInit',
     'keydown': 'onKeyDown',
     'keyup': 'onKeyUp',
-    'focusout': 'onClose',
     'click': 'onFocusIn',
     'focusin': 'onFocusIn',
     'input': 'onInput'
@@ -155,7 +154,7 @@ suggest._createPopup = function() {
     this.$popup_wrapper = this.$popup.find('.suggest-scrollbox');
 
     this.popup = nb.block(this.$popup[0], {
-        'mouseenter .suggest-scrollbox li': function(evt) {
+        'mouseover .suggest-scrollbox li': function(evt) {
             that.setCurrent(evt.target);
         },
         'click .suggest-scrollbox li': function(evt) {
@@ -254,12 +253,6 @@ suggest.suggest = function(text) {
 
 suggest._reset = function() {
     this.$input.val(this._text);
-};
-
-// ----------------------------------------------------------------------------------------------------------------- //
-
-suggest.onClose = function() {
-    this.popup.trigger('close');
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
