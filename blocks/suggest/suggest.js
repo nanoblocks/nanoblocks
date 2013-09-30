@@ -329,11 +329,6 @@ suggest._showFor = function(text) {
             'overflow': ''
         });
     }
-
-    var firstItem = this.$suggest_container.find('li:first');
-    if (firstItem.length) {
-        this.setCurrent(firstItem);
-    }
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
