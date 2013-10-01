@@ -159,6 +159,14 @@ suggest.onKeyDown = function(evt) {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 suggest.onKeyUp = function(evt) {
+    // Enter must work even if suggest is not ready.
+    if (evt.keyCode == 13) { // ENTER
+        evt.preventDefault();
+        this.selectItem();
+        return;
+    }
+
+    // If suggest is not ready all next shortcuts does not work.
     if (!this._isReady()) {
         return;
     }
@@ -177,12 +185,6 @@ suggest.onKeyUp = function(evt) {
     if (evt.keyCode == 40) { // DOWN
         evt.preventDefault();
         this.changeCurrent(1);
-        return;
-    }
-
-    if (evt.keyCode == 13) { // ENTER
-        evt.preventDefault();
-        this.selectItem();
         return;
     }
 
