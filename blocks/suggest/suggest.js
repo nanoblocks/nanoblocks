@@ -163,6 +163,7 @@ suggest.onKeyUp = function(evt) {
     if (evt.keyCode == 13) { // ENTER
         evt.preventDefault();
         this.selectItem();
+        // TODO cancel suggest show
         return;
     }
 
@@ -557,9 +558,12 @@ suggest.selectItem = function($item) {
     var text;
     var success = false;
 
+    // Сбрасываем текущий выбор.
+    this._selected = null;
+
     if ($item.length === 0) {
         text = $input.val();
-        this._selected = { label: text };
+        this._selected = this._getInputValue();
     } else {
         var index = $suggest.find('li').index($item);
 
@@ -574,6 +578,15 @@ suggest.selectItem = function($item) {
     this.popup.trigger('close');
     this.trigger('selected', this._selected);
     return success;
+};
+
+suggest.getCurrentValue = function() {
+    return this._selected || this._getInputValue();
+};
+
+suggest._getInputValue = function() {
+    var text = this.$input.val();
+    return this._selected || { label: text };
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
