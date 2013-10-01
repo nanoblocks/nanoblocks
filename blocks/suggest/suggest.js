@@ -1,26 +1,7 @@
 // ----------------------------------------------------------------------------------------------------------------- //
 (function($, doc){
 
-/* TODO
-    []  #36 научиться экономить запросы к серверу: фильтровать данные на клиенте
-*/
-
-/* done
-    [x] static array as source of items...
-    [x] при выделении текущего элемента с клавиатуры + мышкой - появляется два текущих элемента
-    [x] click - show Suggest (option?)
-    [x] по Cmd+Tab (переключение на другой таб) - выполняется запрос и отображается suggest по возврату назад на этот таб.
-    [x] когда нажимаешь вниз - выпадает список, но в нём не выделен текущий выбранный текст + может быть надо сбрасывать
-        подсказки - показывать подсказки для текущего, введённого текста...
-    [x] cache rendered suggest items
-    [x] show found substring
-    [x] on re - we have 2 rows! white-space: nowrap set!
-    [x] popup long items fade
-    [x] up key - cursor is going to the left and then - to the right
-    [x] если есть данные для текущего введённого текста - показывать сразу
-    [x] когда что-то выпало - повторный клик внутри поля ввода не должен закрывать саджест (это делает сам popup из-за кривой проверки contains())
-    [x] scroll selected into view
- */
+// TODO #36 научиться экономить запросы к серверу: фильтровать данные на клиенте
 
 /**
     Usage:
@@ -51,7 +32,6 @@ suggest.events = {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 suggest.onInit = function() {
-    // Get params from data().
     this.delay = this.getDataNumber('delay', 300); // Delay before displaying suggest.
     this.min_length = this.getDataNumber('min_length', 1); // minimal length, before autocomplete starts.
     this.max_items = this.getDataNumber('max_items', -1); // -1 means no max.
@@ -179,6 +159,10 @@ suggest.onKeyDown = function(evt) {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 suggest.onKeyUp = function(evt) {
+    if (!this._isReady()) {
+        return;
+    }
+
     if (evt.keyCode == 27) { // ESC
         this._reset();
         return;
@@ -627,6 +611,10 @@ suggest.scrollCurrentIntoView = function() {
             wrapper.scrollTop = cur_top - dy;
         }
     }
+};
+
+suggest._isReady = function() {
+    return !!this.$suggest_container;
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
