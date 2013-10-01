@@ -238,6 +238,14 @@ suggest.suggest = function(text) {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
+// Reset suggest value.
+suggest.clear = function() {
+    this.$input.val('');
+    this._text = '';
+    this._selected = null;
+};
+
+// Reset input value to user input (cancel suggest item selection).
 suggest._reset = function() {
     this.$input.val(this._text);
 };
