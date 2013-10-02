@@ -86,6 +86,10 @@ function onclose() {
     nb.trigger('popup-closed', this);
 }
 
+function onmove() {
+    this._move();
+}
+
 function move() {
     //  Модальный попап двигать не нужно.
     if (this.modal) {
@@ -302,6 +306,7 @@ var base = {
         'toggle': ontoggle,
         'open': onopen,
         'close': onclose,
+        'move': onmove,
 
         'click .popup__close': onclose
     },
