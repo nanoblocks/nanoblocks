@@ -26,6 +26,7 @@ function onopen(e, params) {
     this.how = params.how;
     this.toggler = params.toggler;
     this.parent = params.parent;
+    this.size = params.size;
 
     if (!this._placeholder) {
         this._placeholder = $('<s class="_hidden"/>').insertBefore(this.node);
@@ -204,6 +205,17 @@ function move() {
         top: what[0][1]
     });
 
+    //  Вычисляем размеры попапа.
+    if (this.size) {
+        var sizeCss = {};
+        if (this.size.width) {
+            sizeCss.width = $(this.size.width).outerWidth();
+        }
+        if (this.size.height) {
+            sizeCss.height = $(this.size.height).outerHeight();
+        }
+        $(this.node).css(sizeCss);
+    }
 }
 
 function normalizeHow(how) {
@@ -491,7 +503,10 @@ nb.define('popup-toggler', {
                 how: data.how,
 
                 //  Кто открыл попап?
-                toggler: this.node
+                toggler: this.node,
+
+                //  Можно задать условия вычисления размера попапа.
+                size: data.size
             });
 
             return false;
