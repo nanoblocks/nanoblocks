@@ -320,6 +320,13 @@ function hide() {
     this.trigger('hide');
 }
 
+function destroy() {
+    if (this._placeholder) {
+        this._placeholder.remove();
+    }
+    nb.Block.prototype.destroy.call(this);
+}
+
 
 var base = {
     events:{
@@ -334,7 +341,8 @@ var base = {
     'getOptions': getOptions,
     '_move': move,
     'show': show,
-    'hide': hide
+    'hide': hide,
+    'destroy': destroy
 };
 base = nb.define(base);
 
