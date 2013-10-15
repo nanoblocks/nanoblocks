@@ -1,8 +1,17 @@
 (function($, nb) {
 //{{{ Базовый блок
+
+function getOptions() {
+    return {
+        tail_selector: '.popup__tail'
+    };
+}
+
 function oninit() {
+    var options = this.getOptions();
+
     //  У попапа есть "хвостик".
-    this.$tail = $(this.node).find('.popup__tail');
+    this.$tail = $(this.node).find(options.tail_selector);
     this.hasTail = !!this.$tail.length;
 }
 
@@ -322,6 +331,7 @@ var base = {
 
         'click .popup__close': onclose
     },
+    'getOptions': getOptions,
     '_move': move,
     'show': show,
     'hide': hide
