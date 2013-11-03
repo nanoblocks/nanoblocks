@@ -486,7 +486,7 @@ nb.on('popup-close', function() {
 nb.popup = {
     // Открыт ли хотя бы один popup.
     someOpen: function() {
-        return !!$holder().children().length;
+        return !!$holder().children().length || !!$paranja().children().length;
     }
 };
 
