@@ -461,7 +461,10 @@ nb.on('space:click', function(e, node) {
         return;
     }
     if ($holder().children().length) {
-        nb.block($holder().children().first()[0]).trigger('close');
+        popup = nb.block($holder().children().first()[0]);
+        if (!popup.ignoreEsc) {
+            popup.trigger('close');
+        }
         return;
     }
     if (!$paranja().has(node).length) {
