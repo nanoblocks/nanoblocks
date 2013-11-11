@@ -44,9 +44,11 @@ function onopen(e, params) {
     // Попробуем сами найти
     if ((this._type === 'popup') && !this.parent && !(this.where instanceof Array)) {
         var parent = $(this.where).parentsUntil($holder(), '[data-nb]').last()[0];
-        parent = nb.block(parent);
-        if (parent._type === 'popup') {
-            this.parent = parent;
+        if (parent) {
+            parent = nb.block(parent);
+            if (parent._type === 'popup') {
+                this.parent = parent;
+            }
         }
     }
 
