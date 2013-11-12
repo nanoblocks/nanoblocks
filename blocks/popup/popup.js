@@ -81,6 +81,8 @@ function onclose() {
     this.toggler = null;
     this.parent = null;
 
+    this.trigger('popup-before-close');
+
     nb.trigger('popup-before-close', this);
     //  Прячем.
     if (this._type === 'modal') {
@@ -96,6 +98,9 @@ function onclose() {
 
     // Сообщаем в космос, что закрылся попап
     nb.trigger('popup-closed', this);
+
+    // Мы поймали событие click, не нужно его больше нигде слушать.
+    return false;
 }
 
 function onmove() {
@@ -374,6 +379,7 @@ var $holder = function() {
 nb.define('tooltip', { _type: 'tooltip' }, base.name);
 nb.define('popup',   { _type: 'popup'   }, base.name);
 nb.define('modal',   { _type: 'modal'   }, base.name);
+nb.define('ballon',  { _type: 'ballon'  }, base.name);
 
 nb.on('popup-before-open', function(e, popup) {
     var opened = $holder().children();
@@ -391,6 +397,10 @@ nb.on('popup-before-open', function(e, popup) {
             for (var i = opened.length; i > 0; i--) {
                 nb.block(opened[i-1]).trigger('close');
             }
+            break;
+        case 'ballon':
+            // Ballons can be opened many at one time.
+            // So do not close anything.
             break;
         default:
             // popup goes here
@@ -435,14 +445,18 @@ nb.on('keydown', function(e) {
     if (e.keyCode !== 27) {
         return;
     }
-    var popup = $holder().children().last()[0];
-    if (popup) {
-        nb.block(popup).trigger('close');
+    var popup;
+    var popupNode = $holder().children().last()[0];
+    if (popupNode) {
+        popup = nb.block(popupNode);
+        if (!popup.ignoreEsc) {
+            nb.block(popupNode).trigger('close');
+        }
         return;
     }
-    popup = $paranja().children().last()[0];
-    if (popup) {
-        popup = nb.block(popup);
+    popupNode = $paranja().children().last()[0];
+    if (popupNode) {
+        popup = nb.block(popupNode);
         if (!popup.ignoreEsc) {
             popup.trigger('close');
         }
