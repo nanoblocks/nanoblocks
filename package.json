@@ -1,6 +1,6 @@
 {
     "name": "nanoblocks",
-    "version": "0.0.3",
+    "version": "0.0.5",
     "dependencies": {
         "stylus": "0.37.x",
         "csso": "*"
