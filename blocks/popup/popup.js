@@ -366,7 +366,7 @@ var $paranja = function() {
 // Хитрая ленивая функция.
 // Если передан `append` = true placeholder перемещается в конец body (чтобы попап оказался выше всех).
 var $holder = function() {
-    var div = $('<div/>').appendTo('body');
+    var div = $('<div class="popup-holder"/>').appendTo('body');
     $holder = function(append) {
         if (append && !div.is(':last-child')) {
             div.appendTo('body');
