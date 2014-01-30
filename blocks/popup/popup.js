@@ -11,7 +11,7 @@ function oninit() {
     var options = this.getOptions();
 
     //  У попапа есть "хвостик".
-    this.$tail = $(this.node).find(options.tail_selector);
+    this.$tail = this.$node.find(options.tail_selector);
     this.hasTail = !!this.$tail.length;
 }
 
@@ -52,7 +52,7 @@ function onopen(e, params) {
         }
     }
 
-    $(this.node).detach();
+    this.$node.detach();
 
     nb.trigger('popup-before-open', this);
 
@@ -216,7 +216,7 @@ function move() {
     }
 
     //  Позиционируем попап.
-    $(this.node).css({
+    this.$node.css({
         left: what[0][0],
         top: what[0][1]
     });
@@ -230,7 +230,7 @@ function move() {
         if (this.size.height) {
             sizeCss.height = $(this.size.height).outerHeight();
         }
-        $(this.node).css(sizeCss);
+        this.$node.css(sizeCss);
     }
 }
 
@@ -317,13 +317,13 @@ function tailDirs(what, where) {
 
 //  Показываем блок.
 function show() {
-    $(this.node).removeClass('_hidden');
+    this.$node.removeClass('_hidden');
     this.trigger('show');
 }
 
 //  Прячем блок.
 function hide() {
-    $(this.node).addClass('_hidden');
+    this.$node.addClass('_hidden');
     this.trigger('hide');
 }
 

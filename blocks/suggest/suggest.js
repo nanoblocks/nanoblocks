@@ -51,7 +51,8 @@ suggest.onInit = function() {
     this.default_params = this.getDataObject('default_params', {});
     this.popup_selector = this.getDataString('popup-selector');
 
-    this.$input = $(this.node);
+    // Для читабельности кода делаем ещё одно свойство.
+    this.$input = this.$node;
 
     // Internal state.
     this._text = null;
@@ -105,7 +106,7 @@ suggest._createPopup = function() {
     // Вроде бы нет никаких причин его располагать где-то ещё.
     // А так мы решаем проблему нескольких саджестов на одной странице.
     if (this.popup_selector) {
-        this.$popup = $(this.node).next(this.popup_selector);
+        this.$popup = this.$node.next(this.popup_selector);
     }
     else {
         this.$popup = $(

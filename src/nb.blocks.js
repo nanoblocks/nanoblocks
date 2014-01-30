@@ -89,6 +89,7 @@ var Block = function() {};
 Block.prototype.__init = function(node) {
     //  Нода блока.
     this.node = node;
+    this.$node = $(node);
 
     //  Обработчики кастомных событий.
     this.__handlers = {};
@@ -211,7 +212,7 @@ Block.prototype.on = function(name, handler) {
         //  DOM-событие.
 
         //  В r[1] тип события (например, click), в r[2] необязательный селектор.
-        $(this.node).on( r[1], r[2] || '', handler );
+        this.$node.on( r[1], r[2] || '', handler );
     } else {
         //  Кастомное событие.
 
@@ -233,7 +234,7 @@ Block.prototype.off = function(name, handler) {
     if (r) {
         //  DOM-событие.
 
-        $(this.node).off( r[1], r[2] || '', handler );
+        this.$node.off( r[1], r[2] || '', handler );
     } else {
         //  Кастомное событие.
 
@@ -284,13 +285,13 @@ Block.prototype.nbdata = function(key, value) {
 
 //  Показываем блок.
 Block.prototype.show = function() {
-    $(this.node).removeClass('_hidden');
+    this.$node.removeClass('_hidden');
     this.trigger('show');
 };
 
 //  Прячем блок.
 Block.prototype.hide = function() {
-    $(this.node).addClass('_hidden');
+    this.$node.addClass('_hidden');
     this.trigger('hide');
 };
 
@@ -327,7 +328,7 @@ Block.prototype.children = function() {
     var children = [];
 
     //  Ищем все ноды с атрибутом data-nb. Это потенциальные блоки.
-    var $nodes = $(this.node).find('[data-nb]');
+    var $nodes = this.$node.find('[data-nb]');
     for (var i = 0, l = $nodes.length; i < l; i++) {
         children = children.concat( nb.blocks( $nodes[i] ) );
     }

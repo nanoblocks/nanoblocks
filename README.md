@@ -47,7 +47,7 @@ nb.define('popup', {
     },
 
     'close': function() {
-        $(this.node).hide();
+        this.$node.hide();
         return false;
     }
 
