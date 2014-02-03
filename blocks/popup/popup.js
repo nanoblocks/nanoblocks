@@ -381,6 +381,21 @@ nb.define('popup',   { _type: 'popup'   }, base.name);
 nb.define('modal',   { _type: 'modal'   }, base.name);
 nb.define('ballon',  { _type: 'ballon'  }, base.name);
 
+var closeAllPopups = function(openingPopup) {
+    var opened = $holder().children();
+
+    for (var i = opened.length; i > 0; i--) {
+        var p = nb.block(opened[i-1]);
+        if (openingPopup && openingPopup.parent === p) {
+            break; // не закрываем родителей
+        }
+        if (p._type === 'tooltip') {
+            continue; // (?) не закрываем тултипы
+        }
+        p.trigger('close');
+    }
+};
+
 nb.on('popup-before-open', function(e, popup) {
     var opened = $holder().children();
     switch (popup._type) {
@@ -403,17 +418,7 @@ nb.on('popup-before-open', function(e, popup) {
             // So do not close anything.
             break;
         default:
-            // popup goes here
-            for (var i = opened.length; i > 0; i--) {
-                var p = nb.block(opened[i-1]);
-                if (popup.parent === p) {
-                    break; // не закрываем родителей
-                }
-                if (p._type === 'tooltip') {
-                    continue; // (?) не закрываем тултипы
-                }
-                p.trigger('close');
-            }
+            closeAllPopups(popup);
     }
 });
 
@@ -463,7 +468,6 @@ nb.on('keydown', function(e) {
     }
 });
 
-// Клик в космосе должен закрывать все попапы.
 nb.on('space:click', function(e, node) {
     var popup;
     popup = $holder().children().has(node).add($holder().children().filter(node));
@@ -506,6 +510,9 @@ nb.popup = {
     // Открыт ли хотя бы один popup.
     someOpen: function() {
         return !!$holder().children().length || !!$paranja().children().length;
+    },
+    closeAll: function() {
+        closeAllPopups();
     }
 };
 
