@@ -328,12 +328,14 @@ function hide() {
 }
 
 function destroy() {
+    this.trigger('close');
+
     if (this._placeholder) {
         this._placeholder.remove();
     }
+
     nb.Block.prototype.destroy.call(this);
 }
-
 
 var base = {
     events:{
