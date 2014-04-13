@@ -1,6 +1,10 @@
 {
     "name": "nanoblocks",
     "version": "0.0.6",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/nanoblocks/nanoblocks.git"
+    },
     "dependencies": {
         "stylus": "0.37.x",
         "csso": "*"
