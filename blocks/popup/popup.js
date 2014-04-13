@@ -452,6 +452,8 @@ nb.on('keydown', function(e) {
         popup = nb.block(popupNode);
         if (!popup.ignoreEsc) {
             nb.block(popupNode).trigger('close');
+            e.stopImmediatePropagation();
+            return false;
         }
         return;
     }
@@ -460,6 +462,8 @@ nb.on('keydown', function(e) {
         popup = nb.block(popupNode);
         if (!popup.ignoreEsc) {
             popup.trigger('close');
+            e.stopImmediatePropagation();
+            return false;
         }
     }
 });
