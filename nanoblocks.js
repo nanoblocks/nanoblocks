@@ -1222,7 +1222,7 @@ nb.rect = function(node) {
     }
 
     var $node = $(node);
-    var offset = $node.offset();
+    var offset = $node.offset() || {};
     var size;
 
     if ($node.hasClass('_hidden')) {
