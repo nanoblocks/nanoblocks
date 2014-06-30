@@ -2,16 +2,14 @@
 //{{{ Базовый блок
 
 function getOptions() {
-    return {
-        tail_selector: '.popup__tail'
-    };
+    return {};
 }
 
 function oninit() {
-    var options = this.getOptions();
+    this.options = this.getOptions();
 
     //  У попапа есть "хвостик".
-    this.$tail = this.$node.find(options.tail_selector);
+    this.$tail = this.$node.find(this.options.tail_selector || '.popup__tail');
     this.hasTail = !!this.$tail.length;
 }
 
@@ -115,6 +113,10 @@ function move() {
 
     var how = normalizeHow(this.how);
 
+    //  Слева положение "хвоста" ограничено некой константой.
+    var MIN_LEFT = this.options.tail_offset  || 27;
+    var TAIL_WIDTH = this.options.tail_width || 10;
+
     //  Изначальные прямоугольники для what и where.
     var orig_what = nb.rect(this.node);
     var where = nb.rect(this.where);
@@ -162,8 +164,6 @@ function move() {
             //  --------------------
             //
 
-            //  Слевы положение "хвоста" ограничено некой константой.
-            var MIN_LEFT = 27;
             //  Справа -- минимумом из середин what и where.
             var r = Math.min( t_what[1][0] / 2, t_where[1][0] / 2);
 
@@ -180,7 +180,7 @@ function move() {
             }
 
             //  Зазор для "хвоста".
-            t_what = nb.rect.move( t_what, [ 0, 10 ] );
+            t_what = nb.rect.move( t_what, [ 0, TAIL_WIDTH ] );
 
             //  Делаем обратное преобразование попапа...
             what = nb.rect.move( nb.rect.trans( nb.rect.trans( nb.rect.trans( t_what, transform ), transform ), transform ), adj_what.point );
@@ -207,7 +207,7 @@ function move() {
             }
         } else {
             //  Зазор для "хвоста".
-            what = nb.rect.move( what, nb.vec.scale( nb.vec.dir2vec(how.where), 10 ) );
+            what = nb.rect.move( what, nb.vec.scale( nb.vec.dir2vec(how.where), TAIL_WIDTH ) );
         }
 
         this.$tail.css(css).show();
@@ -511,6 +511,7 @@ nb.popup = {
     someOpen: function() {
         return !!$holder().children().length || !!$paranja().children().length;
     },
+
     closeAll: function() {
         var opened = $holder().children();
         for (var i = opened.length; i > 0; i--) {
