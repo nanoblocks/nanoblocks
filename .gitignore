@@ -1,6 +1,7 @@
 # Sublime Text Project files
 *.sublime-workspace
 .idea
+.DS_Store
 
 node_modules
 blocks/s/all.css
