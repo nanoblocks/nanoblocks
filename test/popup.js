@@ -3,6 +3,9 @@ describe('popup', function() {
         this.$body = $(document.body);
 
         this.popupOnCloseSpy = sinon.spy();
+        this.parentPopupOnCloseSpy = sinon.spy();
+        this.childPopupOnCloseSpy = sinon.spy();
+        this.ballonOnCloseSpy1 = sinon.spy();
 
         this.popupNode = $('<div class="popup _hidden" data-nb="popup">Hi, I am popup</div>').appendTo(document.body);
         this.popupNode2 = $('<div class="popup _hidden" data-nb="popup">Hi, I am popup 2</div>').appendTo(document.body);
@@ -13,9 +16,9 @@ describe('popup', function() {
 
         this.popup = nb.block(this.popupNode[0], { 'close': this.popupOnCloseSpy });
         this.popup2 = nb.block(this.popupNode2[0]);
-        this.parentPopup = nb.block(this.parentPopupNode[0]);
-        this.childPopup = nb.block(this.childPopupNode[0]);
-        this.ballon1 = nb.block(this.ballonNode1[0]);
+        this.parentPopup = nb.block(this.parentPopupNode[0], { 'close': this.parentPopupOnCloseSpy });
+        this.childPopup = nb.block(this.childPopupNode[0], { 'close': this.childPopupOnCloseSpy });
+        this.ballon1 = nb.block(this.ballonNode1[0], { 'close': this.ballonOnCloseSpy1 });
         this.ballon2 = nb.block(this.ballonNode2[0]);
     });
 
@@ -190,9 +193,102 @@ describe('popup', function() {
 
     describe('closeAll', function() {
 
-        describe('closes all open popups', function() {});
+        it('single popup is closed', function(done) {
+            var that = this;
 
-        describe('if isPopup returns false - ballon / popup will not be closed', function() {});
+            this.popup.trigger('open', { where: document.body });
+
+            setTimeout(function() {
+                expect(that.popupNode.is(':visible')).to.eql(true);
+
+                nb.popup.closeAll();
+
+                setTimeout(function() {
+                    expect(that.popupNode.is(':visible')).to.eql(false);
+                    expect(that.popupOnCloseSpy.callCount).to.eql(1);
+                    done();
+                }, 10);
+
+            }, 10);
+
+        });
+
+        it('parent + child popups are closed', function(done) {
+            var that = this;
+
+            this.parentPopup.trigger('open', { where: document.body });
+            this.childPopup.trigger('open', { where: this.parentPopupNode, parent: this.parentPopup });
+
+            setTimeout(function() {
+                expect(that.parentPopupNode.is(':visible')).to.eql(true);
+                expect(that.childPopupNode.is(':visible')).to.eql(true);
+
+                nb.popup.closeAll();
+
+                setTimeout(function() {
+                    expect(that.parentPopupNode.is(':visible')).to.eql(false);
+                    expect(that.childPopupNode.is(':visible')).to.eql(false);
+
+                    expect(that.parentPopupOnCloseSpy.callCount).to.eql(1);
+                    expect(that.childPopupOnCloseSpy.callCount).to.eql(1);
+
+                    done();
+                }, 10);
+
+            }, 10);
+
+        });
+
+        describe('isPopup', function() {
+
+            beforeEach(function() {
+                sinon.stub(this.ballon1, 'isPopup', function() {
+                    return false;
+                });
+            });
+
+            afterEach(function() {
+                this.ballon1.isPopup.restore();
+            });
+
+            it('isPopup() is closed when nb.popup.closeAll() was called', function(done) {
+                var that = this;
+
+                this.ballon1.trigger('open', { where: document.body });
+
+                setTimeout(function() {
+                    nb.popup.closeAll();
+
+                    setTimeout(function() {
+                        expect(that.ballon1.isPopup.callCount).to.eql(1);
+                        done();
+                    }, 10);
+
+                }, 10);
+
+            });
+
+            it('if isPopup returns false - ballon (same for popup) will not be closed', function(done) {
+                var that = this;
+
+                this.ballon1.trigger('open', { where: document.body });
+
+                setTimeout(function() {
+                    expect(that.ballonNode1.is(':visible')).to.eql(true);
+
+                    nb.popup.closeAll();
+
+                    setTimeout(function() {
+                        expect(that.ballonNode1.is(':visible')).to.eql(true);
+                        expect(that.ballonOnCloseSpy1.callCount).to.eql(0);
+                        done();
+                    }, 10);
+
+                }, 10);
+
+            });
+
+        });
 
     });
 
