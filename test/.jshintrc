@@ -6,6 +6,7 @@
     "globals": {
         "nb": false,
 
+        "sinon": false,
         "it": false,
         "describe": false,
         "expect": false,
