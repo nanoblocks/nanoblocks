@@ -337,6 +337,12 @@ function destroy() {
     nb.Block.prototype.destroy.call(this);
 }
 
+//  Данный метод нужен для того, чтобы работал closeAll для наследников блока popup.
+//  Также этот метод можно переопределить, если не нужно, что блок вёл себя как popup.
+function isPopup() {
+    return true;
+}
+
 var base = {
     events:{
         'init': oninit,
@@ -351,6 +357,7 @@ var base = {
     '_move': move,
     'show': show,
     'hide': hide,
+    'isPopup': isPopup,
     'destroy': destroy
 };
 base = nb.define(base);
@@ -516,7 +523,7 @@ nb.popup = {
         var opened = $holder().children();
         for (var i = opened.length; i > 0; i--) {
             var p = nb.block(opened[i-1]);
-            if (p && p._type === 'popup') {
+            if (p && p.isPopup()) {
                 p.trigger('close');
             }
         }
