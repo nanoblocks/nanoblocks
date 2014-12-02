@@ -24,9 +24,12 @@ describe('block init', function() {
         nb.define('block1', { events: {
             'init': onEvent
         }});
+
         nb.define('block2', { events: {
             'init': onEvent
         }});
+
+        nb.define('block3', {});
     });
 
     afterEach(function() {
@@ -65,6 +68,35 @@ describe('block init', function() {
         );
         nb.block( $node[0], null, 'block2' );
         expect(this.events).to.be.eql({ init: [ 'block2' ] });
+    });
+
+    describe('nbdata()', function() {
+        var good = {
+            '<div data-nb="block3"></div>':              {},
+            '<div data-nb="block3" data-nb-one></div>':              { one: '' },
+            '<div data-nb="block3" data-nb-one=""></div>':           { one: '' },
+            '<div data-nb="block3" data-nb-one="{}"></div>':         { one: {} },
+            '<div data-nb="block3" data-nb-one="[]"></div>':         { one: [] },
+            '<div data-nb="block3" data-nb-one="[ 1, 2 ]"></div>':   { one: [ 1, 2 ] },
+            '<div data-nb="block3" data-nb-one="{ one: 1 }"></div>': { one: { one: 1 } }
+        };
+
+        // var bad = [
+        //     '<div data-nb-one="[["></div>',
+        //     '<div data-nb-one="{{"></div>'
+        // ];
+
+        for (var key in good) {
+            (function(html, result) {
+                it(html + ' => ' + JSON.stringify(result), function() {
+                    var $node = this.setHTML(html);
+                    var block = nb.block( $node[0] );
+                    expect(block.nbdata()).to.be.eql(result);
+
+                });
+            })(key, good[key]);
+        }
+
     });
 
 });
