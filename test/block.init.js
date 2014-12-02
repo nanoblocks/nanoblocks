@@ -72,30 +72,34 @@ describe('block init', function() {
 
     describe('nbdata()', function() {
         var good = {
-            '<div data-nb="block3"></div>':              {},
-            '<div data-nb="block3" data-nb-one></div>':              { one: '' },
-            '<div data-nb="block3" data-nb-one=""></div>':           { one: '' },
-            '<div data-nb="block3" data-nb-one="{}"></div>':         { one: {} },
-            '<div data-nb="block3" data-nb-one="[]"></div>':         { one: [] },
-            '<div data-nb="block3" data-nb-one="[ 1, 2 ]"></div>':   { one: [ 1, 2 ] },
-            '<div data-nb="block3" data-nb-one="{ one: 1 }"></div>': { one: { one: 1 } }
+            '<div data-nb="block3"></div>':                                 {},
+            '<div data-nb="block3" data-nb-one></div>':                     { one: '' },
+            '<div data-nb="block3" data-nb-one=""></div>':                  { one: '' },
+            '<div data-nb="block3" data-nb-one="{}"></div>':                { one: {} },
+            '<div data-nb="block3" data-nb-one="[]"></div>':                { one: [] },
+            '<div data-nb="block3" data-nb-one="[ 1, 2 ]"></div>':          { one: [ 1, 2 ] },
+            '<div data-nb="block3" data-nb-one="{ one: 1 }"></div>':        { one: { one: 1 } },
+            '<div data-nb="block3" data-nb-one="1" data-nb-two="2"></div>': { one: 1, two: 2 }
         };
 
-        // var bad = [
-        //     '<div data-nb-one="[["></div>',
-        //     '<div data-nb-one="{{"></div>'
-        // ];
+        var bad = [
+            '<div data-nb-one="[["></div>',
+            '<div data-nb-one="{{"></div>'
+        ];
 
-        for (var key in good) {
-            (function(html, result) {
-                it(html + ' => ' + JSON.stringify(result), function() {
-                    var $node = this.setHTML(html);
-                    var block = nb.block( $node[0] );
-                    expect(block.nbdata()).to.be.eql(result);
+        var runTests = function(tests) {
+            for (var key in tests) {
+                (function(html, result) {
+                    it(html + ' => ' + JSON.stringify(result), function() {
+                        var $node = this.setHTML(html);
+                        var block = nb.block( $node[0] );
+                        expect(block.nbdata()).to.be.eql(result);
+                    });
+                })(key, tests[key]);
+            }
+        };
 
-                });
-            })(key, good[key]);
-        }
+        runTests(good);
 
     });
 
