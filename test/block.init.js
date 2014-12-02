@@ -83,8 +83,8 @@ describe('block init', function() {
         };
 
         var bad = {
-            '<div data-nb-one="[["></div>': { one: '[[' },
-            '<div data-nb-one="{{"></div>': { one: '{{' }
+            '<div data-nb="block3" data-nb-one="[["></div>': { one: '[[' },
+            '<div data-nb="block3" data-nb-one="{{"></div>': { one: '{{' }
         };
 
         var runTests = function(tests) {

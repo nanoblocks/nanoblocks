@@ -34,8 +34,15 @@ nb.node.data = function(node, key, value) {
     }
 
     function parseValue(value) {
-        var ch = value.charAt(0);
-        return (ch === '[' || ch === '{') ? eval( '(' + value + ')' ) : value;
+        try {
+            //  В атрибуте может быть всё что угодно, в том числе что-то похожее на json.
+            //  Поэтому заворачиваем eval в try / catch.
+            var ch = value.charAt(0);
+            return (ch === '[' || ch === '{') ? eval( '(' + value + ')' ) : value;
+        } catch (er) {
+            //  В случае ошибки возвращаем содержимое атрибута как строку.
+            return value;
+        }
     }
 };
 
